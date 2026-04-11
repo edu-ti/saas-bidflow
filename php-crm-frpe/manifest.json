@@ -1,0 +1,16 @@
+{
+  "name": "CRM FR Produtos Médicos",
+  "short_name": "FR CRM",
+  "start_url": "./index.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "imagens/LOGO-FR.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

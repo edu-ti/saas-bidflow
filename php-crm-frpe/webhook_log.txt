@@ -1,0 +1,1580 @@
+2025-10-22 18:12:28 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:12:28 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761156747, "changes": [{"value": {"created_time": 1761156741, "leadgen_id": "1209581027858910", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:12:28 - Lead ID recebido: 1209581027858910, Form ID: 1446155639775798
+
+2025-10-22 18:12:28 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 18:12:29 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => <test lead: dummy data for poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?>
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => <test lead: dummy data for full_name>
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => test@fb.com
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => <test lead: dummy data for phone_number>
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1446155639775798
+    [id] => 1209581027858910
+)
+
+
+2025-10-22 18:12:29 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => <test lead: dummy data for poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?>
+    [full_name] => <test lead: dummy data for full_name>
+    [email] => test@fb.com
+    [phone_number] => <test lead: dummy data for phone_number>
+)
+
+
+2025-10-22 18:12:29 - SUCESSO: Lead '<test lead: dummy data for full_name>' (Produto/Interesse: 'FR_Sendline') inserido no banco.
+
+2025-10-22 18:16:30 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:16:30 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761156989, "changes": [{"value": {"created_time": 1761156981, "leadgen_id": "1343289167385958", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:16:30 - Lead ID recebido: 1343289167385958, Form ID: 1814290879464646
+
+2025-10-22 18:16:30 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-22 18:16:31 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81988881820
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => educs85.ti@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Eduardo Cabral
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +558188881820
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1343289167385958
+)
+
+
+2025-10-22 18:16:31 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81988881820
+    [email] => educs85.ti@gmail.com
+    [full_name] => Eduardo Cabral
+    [phone_number] => +558188881820
+)
+
+
+2025-10-22 18:16:31 - SUCESSO: Lead 'Eduardo Cabral' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-22 18:17:36 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:17:36 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761157054, "changes": [{"value": {"created_time": 1761157049, "leadgen_id": "1352692493019228", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:17:36 - Lead ID recebido: 1352692493019228, Form ID: 2239635346507878
+
+2025-10-22 18:17:36 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-22 18:17:36 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81988881921
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => teste@teste.com.br
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => João da Silva
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +558188881921
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 1352692493019228
+)
+
+
+2025-10-22 18:17:36 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81988881921
+    [email] => teste@teste.com.br
+    [nome_completo] => João da Silva
+    [telefone] => +558188881921
+)
+
+
+2025-10-22 18:17:36 - SUCESSO: Lead 'João da Silva' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-22 18:22:30 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:22:30 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:22:30 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-22 18:22:30 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 18:22:30 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AopaLfehKsIquyCr9rW7MUm"}}
+
+2025-10-22 18:24:05 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:24:05 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:24:05 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-22 18:24:05 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 18:24:05 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"A7x7rLJhkj4apOjmVyPzbm2"}}
+
+2025-10-22 18:31:52 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 18:31:52 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 18:31:52 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-22 18:31:52 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 18:31:52 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"A4zxDHkh-FEl7y_cIiu1_LQ"}}
+
+2025-10-22 19:22:31 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 19:22:31 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 19:22:31 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-22 19:22:31 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 19:22:31 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"A2snuI8Vp2NN6GsYkSabi19"}}
+
+2025-10-22 19:24:06 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 19:24:06 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 19:24:06 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-22 19:24:06 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 19:24:06 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AXRO2tM_-LDLsffZS62q4Kt"}}
+
+2025-10-22 19:31:53 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 19:31:53 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 19:31:53 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-22 19:31:53 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 19:31:54 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AhWOhv9CjRmVo0U31fTbOdQ"}}
+
+2025-10-22 20:52:31 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 20:52:31 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 20:52:31 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-22 20:52:31 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 20:52:32 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AJK_SBGXKRvG914a4F3iRkz"}}
+
+2025-10-22 20:52:55 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 20:52:55 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761166374, "changes": [{"value": {"created_time": 1761166370, "leadgen_id": "2525648727805267", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 20:52:55 - Lead ID recebido: 2525648727805267, Form ID: 2239635346507878
+
+2025-10-22 20:52:55 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-22 20:52:56 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81988881820
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => educs85.ti@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Eduardo Cabral
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +558188881820
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 2525648727805267
+)
+
+
+2025-10-22 20:52:56 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81988881820
+    [email] => educs85.ti@gmail.com
+    [nome_completo] => Eduardo Cabral
+    [telefone] => +558188881820
+)
+
+
+2025-10-22 20:52:56 - SUCESSO: Lead 'Eduardo Cabral' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-22 20:54:07 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 20:54:07 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 20:54:07 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-22 20:54:07 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 20:54:07 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AEpizoCsYOuiCOqpKRfDKfi"}}
+
+2025-10-22 21:01:55 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 21:01:55 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 21:01:55 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-22 21:01:55 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 21:01:55 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"A0SZ1VM_-YofjVuOAyvSCuc"}}
+
+2025-10-22 23:52:33 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 23:52:33 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 23:52:33 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-22 23:52:33 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 23:52:34 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AWizmG-9J95DNyp2ygL5-8H"}}
+
+2025-10-22 23:54:12 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-22 23:54:12 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-22 23:54:12 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-22 23:54:12 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-22 23:54:12 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AhGKgIqXiqSVoDT2DKC6hQt"}}
+
+2025-10-23 00:01:56 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 00:01:56 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 00:01:56 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-23 00:01:56 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 00:01:56 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AoMUvgVUMMqDbJMguixaVxA"}}
+
+2025-10-23 05:52:35 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 05:52:35 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 05:52:35 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-23 05:52:35 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 05:52:37 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AqfXZ2JPpQVKdfYsnqMvNRz"}}
+
+2025-10-23 05:54:13 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 05:54:13 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 05:54:13 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-23 05:54:13 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 05:54:14 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"Ac28bicF5yYIyPMDqDBthWg"}}
+
+2025-10-23 06:01:57 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 06:01:57 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 06:01:57 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-23 06:01:57 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 06:01:58 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AXadON2XqDbr-LNhBC_m1qo"}}
+
+2025-10-23 15:41:23 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 15:41:23 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761234082, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761234078, "leadgen_id": "1377837637188782", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 15:41:23 - Lead ID recebido: 1377837637188782, Form ID: 1814290879464646
+
+2025-10-23 15:41:23 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-23 15:41:25 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 82996997815
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => elianee.andrade1965@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Alexandre Andrade
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => 82996997815
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1377837637188782
+)
+
+
+2025-10-23 15:41:25 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 82996997815
+    [email] => elianee.andrade1965@gmail.com
+    [full_name] => Alexandre Andrade
+    [phone_number] => 82996997815
+)
+
+
+2025-10-23 15:41:25 - SUCESSO: Lead 'Alexandre Andrade' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-23 16:57:52 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 16:57:52 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761238670, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761238668, "leadgen_id": "1998541987650089", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 16:57:52 - Lead ID recebido: 1998541987650089, Form ID: 1814290879464646
+
+2025-10-23 16:57:52 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-23 16:57:52 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => Oi
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => franklinre13@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Franklin Nascimento
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5584991445986
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1998541987650089
+)
+
+
+2025-10-23 16:57:52 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => Oi
+    [email] => franklinre13@gmail.com
+    [full_name] => Franklin Nascimento
+    [phone_number] => +5584991445986
+)
+
+
+2025-10-23 16:57:52 - SUCESSO: Lead 'Franklin Nascimento' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-23 17:52:38 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 17:52:38 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155454, "changes": [{"value": {"created_time": 1761155448, "leadgen_id": "734010839654534", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 17:52:38 - Lead ID recebido: 734010839654534, Form ID: 1446155639775798
+
+2025-10-23 17:52:38 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 17:52:39 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '734010839654534' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AFLqYdEqIvIfMwXb8poHB8a"}}
+
+2025-10-23 17:54:15 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 17:54:15 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155549, "changes": [{"value": {"created_time": 1761155543, "leadgen_id": "802626405958205", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 17:54:15 - Lead ID recebido: 802626405958205, Form ID: 1446155639775798
+
+2025-10-23 17:54:15 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 17:54:15 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '802626405958205' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"AcrErZbSa3FEUpaSCP7EoB2"}}
+
+2025-10-23 18:01:59 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 18:01:59 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761155988, "changes": [{"value": {"created_time": 1761155982, "leadgen_id": "1936069327248956", "page_id": "613939731801582", "form_id": "1446155639775798"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 18:01:59 - Lead ID recebido: 1936069327248956, Form ID: 1446155639775798
+
+2025-10-23 18:01:59 - Produto/Interesse determinado pelo Form ID: FR_Sendline
+
+2025-10-23 18:01:59 - ERRO ao buscar detalhes do lead na Graph API. Código HTTP: 400. Erro cURL: . Resposta: {"error":{"message":"Unsupported get request. Object with ID '1936069327248956' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https:\/\/developers.facebook.com\/docs\/graph-api","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"A9C6_zNTTIQ-Occnd26g-w0"}}
+
+2025-10-23 20:17:55 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 20:17:55 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761250674, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761250672, "leadgen_id": "1330201108798609", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 20:17:55 - Lead ID recebido: 1330201108798609, Form ID: 2239635346507878
+
+2025-10-23 20:17:55 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-23 20:17:55 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 84996219878
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => isabela.fernandes@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Isabela Fernandes
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +5584996219878
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 1330201108798609
+)
+
+
+2025-10-23 20:17:55 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 84996219878
+    [email] => isabela.fernandes@gmail.com
+    [nome_completo] => Isabela Fernandes
+    [telefone] => +5584996219878
+)
+
+
+2025-10-23 20:17:55 - SUCESSO: Lead 'Isabela Fernandes' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-23 21:54:39 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-23 21:54:39 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761256478, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761256475, "leadgen_id": "25288931894033297", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-23 21:54:39 - Lead ID recebido: 25288931894033297, Form ID: 2239635346507878
+
+2025-10-23 21:54:39 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-23 21:54:41 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81985857999
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => juniormed.jsrj@outlook.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Jose Ramos Junior
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +5581985857999
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 25288931894033297
+)
+
+
+2025-10-23 21:54:41 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81985857999
+    [email] => juniormed.jsrj@outlook.com
+    [nome_completo] => Jose Ramos Junior
+    [telefone] => +5581985857999
+)
+
+
+2025-10-23 21:54:41 - SUCESSO: Lead 'Jose Ramos Junior' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-24 01:06:27 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-24 01:06:27 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761267986, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761267982, "leadgen_id": "1846377679599596", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-24 01:06:27 - Lead ID recebido: 1846377679599596, Form ID: 2239635346507878
+
+2025-10-24 01:06:27 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-24 01:06:28 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => dricaamorim@terra.com.br
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Adriana  Amorim
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +5581997448840
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81997448840
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 1846377679599596
+)
+
+
+2025-10-24 01:06:28 - Detalhes do campo extraídos: Array
+(
+    [email] => dricaamorim@terra.com.br
+    [nome_completo] => Adriana  Amorim
+    [telefone] => +5581997448840
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81997448840
+)
+
+
+2025-10-24 01:06:28 - SUCESSO: Lead 'Adriana  Amorim' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-24 16:48:08 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-24 16:48:08 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761324487, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761324484, "leadgen_id": "1481024166464568", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-24 16:48:08 - Lead ID recebido: 1481024166464568, Form ID: 1814290879464646
+
+2025-10-24 16:48:08 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-24 16:48:09 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => caiqueherbert281@gmail.com
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Brando Kayke
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5584996844405
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 84996844405
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1481024166464568
+)
+
+
+2025-10-24 16:48:09 - Detalhes do campo extraídos: Array
+(
+    [email] => caiqueherbert281@gmail.com
+    [full_name] => Brando Kayke
+    [phone_number] => +5584996844405
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 84996844405
+)
+
+
+2025-10-24 16:48:09 - SUCESSO: Lead 'Brando Kayke' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-24 19:33:01 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-24 19:33:01 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761334379, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761334377, "leadgen_id": "828779252968363", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-24 19:33:01 - Lead ID recebido: 828779252968363, Form ID: 1814290879464646
+
+2025-10-24 19:33:01 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-24 19:33:02 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81995030600
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => erijose2024@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Erivaldo Santos
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5581986802985
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 828779252968363
+)
+
+
+2025-10-24 19:33:02 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81995030600
+    [email] => erijose2024@gmail.com
+    [full_name] => Erivaldo Santos
+    [phone_number] => +5581986802985
+)
+
+
+2025-10-24 19:33:02 - SUCESSO: Lead 'Erivaldo Santos' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-24 19:33:47 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-24 19:33:47 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761334426, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761334423, "leadgen_id": "1168033857989584", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-24 19:33:47 - Lead ID recebido: 1168033857989584, Form ID: 1814290879464646
+
+2025-10-24 19:33:47 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-24 19:33:48 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81 996164363
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => mclb.2021@yahoo.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Conceição Brito
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5581996164363
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1168033857989584
+)
+
+
+2025-10-24 19:33:48 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81 996164363
+    [email] => mclb.2021@yahoo.com
+    [full_name] => Conceição Brito
+    [phone_number] => +5581996164363
+)
+
+
+2025-10-24 19:33:48 - SUCESSO: Lead 'Conceição Brito' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-25 02:24:29 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-25 02:24:29 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761359068, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761359065, "leadgen_id": "1345262357244133", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-25 02:24:29 - Lead ID recebido: 1345262357244133, Form ID: 1814290879464646
+
+2025-10-25 02:24:29 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-25 02:24:30 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81 986821867
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => havanacarla70@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => havana carla
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5581986821867
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1345262357244133
+)
+
+
+2025-10-25 02:24:30 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81 986821867
+    [email] => havanacarla70@gmail.com
+    [full_name] => havana carla
+    [phone_number] => +5581986821867
+)
+
+
+2025-10-25 02:24:30 - SUCESSO: Lead 'havana carla' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-25 10:54:23 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-25 10:54:23 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761389661, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761389658, "leadgen_id": "1110198277770966", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-25 10:54:23 - Lead ID recebido: 1110198277770966, Form ID: 2239635346507878
+
+2025-10-25 10:54:23 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-25 10:54:24 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81995083070
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => herick_guga@hotmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Herickssen Medeiros
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +5581995083070
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 1110198277770966
+)
+
+
+2025-10-25 10:54:24 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81995083070
+    [email] => herick_guga@hotmail.com
+    [nome_completo] => Herickssen Medeiros
+    [telefone] => +5581995083070
+)
+
+
+2025-10-25 10:54:24 - SUCESSO: Lead 'Herickssen Medeiros' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-25 17:17:32 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-25 17:17:32 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761412651, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761412647, "leadgen_id": "3275950685902613", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-25 17:17:32 - Lead ID recebido: 3275950685902613, Form ID: 1814290879464646
+
+2025-10-25 17:17:32 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-25 17:17:33 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => lealclaudenice1@gmail.com
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Claudenice Leal
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5581985285559
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => Não
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 3275950685902613
+)
+
+
+2025-10-25 17:17:33 - Detalhes do campo extraídos: Array
+(
+    [email] => lealclaudenice1@gmail.com
+    [full_name] => Claudenice Leal
+    [phone_number] => +5581985285559
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => Não
+)
+
+
+2025-10-25 17:17:33 - SUCESSO: Lead 'Claudenice Leal' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-25 17:28:34 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-25 17:28:34 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761413313, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761413310, "leadgen_id": "852061077506486", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-25 17:28:34 - Lead ID recebido: 852061077506486, Form ID: 1814290879464646
+
+2025-10-25 17:28:34 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-25 17:28:34 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => Qual valor
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => simoneideferreirasilva95@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Simoneide Ferreira
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5583993249280
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 852061077506486
+)
+
+
+2025-10-25 17:28:34 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => Qual valor
+    [email] => simoneideferreirasilva95@gmail.com
+    [full_name] => Simoneide Ferreira
+    [phone_number] => +5583993249280
+)
+
+
+2025-10-25 17:28:34 - SUCESSO: Lead 'Simoneide Ferreira' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-26 00:23:28 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-26 00:23:28 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761438207, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761438205, "leadgen_id": "4073798886216261", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-26 00:23:28 - Lead ID recebido: 4073798886216261, Form ID: 1814290879464646
+
+2025-10-26 00:23:28 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-26 00:23:29 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 84981237376
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => luan.machado@hotmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Luan Michael
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +84981237376
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 4073798886216261
+)
+
+
+2025-10-26 00:23:29 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 84981237376
+    [email] => luan.machado@hotmail.com
+    [full_name] => Luan Michael
+    [phone_number] => +84981237376
+)
+
+
+2025-10-26 00:23:29 - SUCESSO: Lead 'Luan Michael' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+
+2025-10-26 14:22:18 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-26 14:22:18 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761488537, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761488532, "leadgen_id": "691442687339194", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-26 14:22:18 - Lead ID recebido: 691442687339194, Form ID: 2239635346507878
+
+2025-10-26 14:22:18 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-26 14:22:19 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => mito196070@hotmail.com
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Jaime Sanchez Jurado
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +5592993884379
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 92993884379
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 691442687339194
+)
+
+
+2025-10-26 14:22:19 - Detalhes do campo extraídos: Array
+(
+    [email] => mito196070@hotmail.com
+    [nome_completo] => Jaime Sanchez Jurado
+    [telefone] => +5592993884379
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 92993884379
+)
+
+
+2025-10-26 14:22:19 - SUCESSO: Lead 'Jaime Sanchez Jurado' (Produto/Interesse: 'FR_Ultrasoom') inserido no banco.
+
+2025-10-27 07:44:00 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-27 07:44:00 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761551039, "changes": [{"value": {"adgroup_id": "120229493106840168", "ad_id": "120229493106840168", "created_time": 1761551034, "leadgen_id": "1884557802268663", "page_id": "613939731801582", "form_id": "2239635346507878"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-27 07:44:00 - Lead ID recebido: 1884557802268663, Form ID: 2239635346507878
+
+2025-10-27 07:44:00 - Produto/Interesse determinado pelo Form ID: FR_Ultrasoom
+
+2025-10-27 07:44:01 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 84 99912-8736
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => rutelinemelo1@gmail.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => nome_completo
+                    [values] => Array
+                        (
+                            [0] => Janathan Melo
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => telefone
+                    [values] => Array
+                        (
+                            [0] => +84999128736
+                        )
+
+                )
+
+        )
+
+    [form_id] => 2239635346507878
+    [id] => 1884557802268663
+)
+
+
+2025-10-27 07:44:01 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 84 99912-8736
+    [email] => rutelinemelo1@gmail.com
+    [nome_completo] => Janathan Melo
+    [telefone] => +84999128736
+)
+
+
+2025-10-27 07:44:01 - AVISO: Lead duplicado detectado (email ou telefone já existe). Lead ID existente: 48. Nome recebido: 'Janathan Melo'.
+
+2025-10-27 10:44:35 - Acesso ao webhook (não verificação). Método: POST
+
+2025-10-27 10:44:35 - Dados brutos recebidos: {"entry": [{"id": "613939731801582", "time": 1761561874, "changes": [{"value": {"adgroup_id": "120231001363680168", "ad_id": "120231001363680168", "created_time": 1761561870, "leadgen_id": "1307042894769737", "page_id": "613939731801582", "form_id": "1814290879464646"}, "field": "leadgen"}]}], "object": "page"}
+
+2025-10-27 10:44:35 - Lead ID recebido: 1307042894769737, Form ID: 1814290879464646
+
+2025-10-27 10:44:35 - Produto/Interesse determinado pelo Form ID: FR_Oximetro
+
+2025-10-27 10:44:35 - Dados do Lead da API Graph: Array
+(
+    [field_data] => Array
+        (
+            [0] => Array
+                (
+                    [name] => poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?
+                    [values] => Array
+                        (
+                            [0] => 81 99812-4570
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [name] => email
+                    [values] => Array
+                        (
+                            [0] => centroodontomedico@bol.com.br
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [name] => full_name
+                    [values] => Array
+                        (
+                            [0] => Osglauter Izidio Izidio
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [name] => phone_number
+                    [values] => Array
+                        (
+                            [0] => +5581998124570
+                        )
+
+                )
+
+        )
+
+    [form_id] => 1814290879464646
+    [id] => 1307042894769737
+)
+
+
+2025-10-27 10:44:35 - Detalhes do campo extraídos: Array
+(
+    [poderia_nos_informar_seu_número_de_contato_ou_whatsapp_atualizado,_por_favor?] => 81 99812-4570
+    [email] => centroodontomedico@bol.com.br
+    [full_name] => Osglauter Izidio Izidio
+    [phone_number] => +5581998124570
+)
+
+
+2025-10-27 10:44:35 - SUCESSO: Lead 'Osglauter Izidio Izidio' (Produto/Interesse: 'FR_Oximetro') inserido no banco.
+

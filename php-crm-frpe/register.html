@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BidFlow CRM - Registro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eef2f7;
+        }
+        .register-card {
+            animation: fade-in 0.6s ease-out forwards;
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg register-card">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800">Registro</h2>
+            </div>
+            
+            <form id="register-form" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Nome de Utilizador</label>
+                    <input id="username" name="username" type="text" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input id="password" name="password" type="password" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label for="token" class="block text-sm font-medium text-gray-700">Token de Validação</label>
+                    <input id="token" name="token" type="text" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Código de 6 dígitos">
+                </div>
+                
+                <div>
+                    <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-800 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700">
+                        Registar
+                    </button>
+                </div>
+            </form>
+            
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Já tem uma conta? 
+                <a href="login.html" class="font-medium text-blue-700 hover:text-blue-600">
+                    Faça login aqui
+                </a>
+            </p>
+        </div>
+    </div>
+    
+    <!-- <script src="js/register.js"></script> -->
+</body>
+</html>
