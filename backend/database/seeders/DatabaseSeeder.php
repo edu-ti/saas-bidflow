@@ -7,6 +7,8 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\Funnel;
 use App\Models\FunnelStage;
+use App\Models\Opportunity;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -18,55 +20,123 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create the Tenant Company
+        // ─────────────────────────────────────
+        //  1. Company (Tenant)
+        // ─────────────────────────────────────
         $company = Company::create([
-            'name' => 'Licitações Master',
+            'name'     => 'Licitações Master',
             'document' => '12.345.678/0001-99',
+            'domain'   => 'licitacoesmaster.com.br',
         ]);
 
-        // 2. Create the Admin User (disable TenantScope for seeding)
+        // ─────────────────────────────────────
+        //  2. Admin User
+        // ─────────────────────────────────────
         $user = User::withoutGlobalScopes()->create([
             'company_id' => $company->id,
-            'name' => 'Administrador',
-            'email' => 'admin@bidflow.dev',
-            'password' => Hash::make('password'),
-            'role' => 'Admin',
+            'name'       => 'Administrador',
+            'email'      => 'admin@bidflow.dev',
+            'password'   => Hash::make('password'),
+            'role'       => 'Admin',
+            'status'     => 'Active',
         ]);
 
         $this->command->info("✅ Company '{$company->name}' created.");
-        $this->command->info("✅ Admin user: admin@bidflow.dev / password");
+        $this->command->info("✅ Admin: admin@bidflow.dev / password");
 
-        // 3. Generate an API token for the bot
+        // ─────────────────────────────────────
+        //  3. Bot API Token
+        // ─────────────────────────────────────
         $token = $user->createToken('bot-python')->plainTextToken;
-        $this->command->info("🤖 Bot API Token: {$token}");
-        $this->command->warn("   → Set this as API_TOKEN in test_bidflow_bot.py");
+        $this->command->info("🤖 Bot token: {$token}");
+        $this->command->warn("   → Set this in test_bidflow_bot.py as API_TOKEN");
 
-        // 4. Create the default Funnel (Pipeline)
+        // ─────────────────────────────────────
+        //  4. Default Funnel + Stages
+        // ─────────────────────────────────────
         $funnel = Funnel::withoutGlobalScopes()->create([
-            'company_id' => $company->id,
-            'name' => 'Pipeline Padrão de Licitações',
-            'description' => 'Funil padrão para gerenciamento de pregões.',
-            'is_default' => true,
+            'company_id'  => $company->id,
+            'name'        => 'Licitações',
+            'description' => 'Pipeline padrão de pregões públicos.',
+            'is_default'  => true,
         ]);
 
-        // 5. Create the Funnel Stages
-        $stages = [
-            ['name' => 'Edital Aberto', 'order' => 1, 'color' => '#3b82f6', 'probability' => 10,  'is_final_win' => false, 'is_final_loss' => false],
-            ['name' => 'Análise',       'order' => 2, 'color' => '#a855f7', 'probability' => 25,  'is_final_win' => false, 'is_final_loss' => false],
-            ['name' => 'Proposta',      'order' => 3, 'color' => '#f97316', 'probability' => 60,  'is_final_win' => false, 'is_final_loss' => false],
-            ['name' => 'Homologado',    'order' => 4, 'color' => '#22c55e', 'probability' => 100, 'is_final_win' => true,  'is_final_loss' => false],
-            ['name' => 'Descartado',    'order' => 5, 'color' => '#ef4444', 'probability' => 0,   'is_final_win' => false, 'is_final_loss' => true],
+        $stagesConfig = [
+            ['name' => 'Captado',          'order' => 1, 'color' => '#3b82f6', 'probability' => 10,  'is_final_win' => false, 'is_final_loss' => false],
+            ['name' => 'Análise Técnica',  'order' => 2, 'color' => '#a855f7', 'probability' => 30,  'is_final_win' => false, 'is_final_loss' => false],
+            ['name' => 'Proposta Enviada', 'order' => 3, 'color' => '#f97316', 'probability' => 65,  'is_final_win' => false, 'is_final_loss' => false],
+            ['name' => 'Homologado',       'order' => 4, 'color' => '#22c55e', 'probability' => 100, 'is_final_win' => true,  'is_final_loss' => false],
+            ['name' => 'Descartado',       'order' => 5, 'color' => '#ef4444', 'probability' => 0,   'is_final_win' => false, 'is_final_loss' => true],
         ];
 
-        foreach ($stages as $stageData) {
-            FunnelStage::withoutGlobalScopes()->create([
-                'funnel_id' => $funnel->id,
+        /** @var FunnelStage[] $stages */
+        $stages = [];
+        foreach ($stagesConfig as $cfg) {
+            $stages[$cfg['name']] = FunnelStage::withoutGlobalScopes()->create([
                 'company_id' => $company->id,
-                ...$stageData
+                'funnel_id'  => $funnel->id,
+                ...$cfg,
             ]);
         }
 
-        $this->command->info("✅ Default Funnel '{$funnel->name}' created with " . count($stages) . " stages.");
-        $this->command->info("\n🚀 BidFlow seeded successfully! Run: php artisan serve");
+        $this->command->info("✅ Funnel '{$funnel->name}' with " . count($stages) . " stages created.");
+
+        // ─────────────────────────────────────
+        //  5. Sample Organization
+        // ─────────────────────────────────────
+        $org = Organization::withoutGlobalScopes()->create([
+            'company_id'      => $company->id,
+            'name'            => 'Prefeitura Municipal de Recife',
+            'document_number' => '08.241.754/0001-48',
+            'uasg_code'       => '925332',
+            'sphere'          => 'Municipal',
+            'phone'           => '(81) 3355-0000',
+            'email'           => 'compras@recife.pe.gov.br',
+        ]);
+
+        // ─────────────────────────────────────
+        //  6. Sample Opportunities (one per stage)
+        // ─────────────────────────────────────
+        $opportunities = [
+            [
+                'title'           => 'Pregão 001/2026 – Aquisição de Material de TI',
+                'type'            => 'Bidding',
+                'value'           => 150000.00,
+                'funnel_stage_id' => $stages['Captado']->id,
+            ],
+            [
+                'title'           => 'Pregão 002/2026 – Serviços de Limpeza Hospitalar',
+                'type'            => 'Bidding',
+                'value'           => 480000.00,
+                'funnel_stage_id' => $stages['Análise Técnica']->id,
+            ],
+            [
+                'title'           => 'Pregão 003/2026 – Fornecimento de Medicamentos',
+                'type'            => 'Bidding',
+                'value'           => 95000.00,
+                'funnel_stage_id' => $stages['Proposta Enviada']->id,
+                'bidding_metadata' => ['risco_edital' => 'Baixo', 'resumo' => 'Oportunidade alta margem'],
+            ],
+            [
+                'title'           => 'Pregão 004/2026 – Manutenção de Frota Municipal',
+                'type'            => 'Bidding',
+                'value'           => 320000.00,
+                'funnel_stage_id' => $stages['Homologado']->id,
+            ],
+        ];
+
+        foreach ($opportunities as $opp) {
+            Opportunity::withoutGlobalScopes()->create([
+                'company_id'      => $company->id,
+                'user_id'         => $user->id,
+                'organization_id' => $org->id,
+                ...$opp,
+            ]);
+        }
+
+        $this->command->info("✅ " . count($opportunities) . " sample opportunities created.");
+        $this->command->newLine();
+        $this->command->info("🚀 BidFlow is ready! Run: php artisan serve");
+        $this->command->line("   Frontend: npm run dev");
     }
 }

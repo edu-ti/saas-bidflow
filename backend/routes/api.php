@@ -9,6 +9,7 @@ use App\Http\Controllers\OpportunityAiController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FunnelController;
 
 // Public routes (no auth needed)
 Route::post('/login', [AuthController::class, 'login']);
@@ -20,6 +21,7 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/funnel-stages', [FunnelController::class, 'stages']);
     Route::get('/opportunities', [OpportunityController::class, 'index']);
     Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
     Route::post('/opportunities/{id}/ai-insights', [OpportunityAiController::class, 'updateInsights']);

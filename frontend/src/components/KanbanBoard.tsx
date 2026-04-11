@@ -22,15 +22,17 @@ type FunnelStage = {
 
 export default function KanbanBoard() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [stages, setStages] = useState<FunnelStage[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggingId, setDraggingId] = useState<number | null>(null);
 
-  const stages: FunnelStage[] = [
-    { id: 1, name: 'Prospecção', color: '#3b82f6' },
-    { id: 2, name: 'Proposta Enviada', color: '#eab308' },
-    { id: 3, name: 'Negociação', color: '#f97316' },
-    { id: 4, name: 'Ganho', color: '#22c55e' },
-    { id: 5, name: 'Perda', color: '#ef4444' },
+  // Fallback stages while API loads
+  const defaultStages: FunnelStage[] = [
+    { id: 1, name: 'Captado', color: '#3b82f6' },
+    { id: 2, name: 'Análise Técnica', color: '#a855f7' },
+    { id: 3, name: 'Proposta Enviada', color: '#f97316' },
+    { id: 4, name: 'Homologado', color: '#22c55e' },
+    { id: 5, name: 'Descartado', color: '#ef4444' },
   ];
 
   const fetchOpportunities = async (isPolling = false) => {
@@ -64,10 +66,15 @@ export default function KanbanBoard() {
   };
 
   useEffect(() => {
+    // Load stages from API once
+    api.get('/api/funnel-stages')
+      .then(res => setStages(res.data))
+      .catch(() => setStages(defaultStages)); // fallback to defaults
+
     fetchOpportunities(false);
-    const interval = setInterval(() => fetchOpportunities(true), 15000); // Polling 15s
+    const interval = setInterval(() => fetchOpportunities(true), 15000);
     return () => clearInterval(interval);
-  }, []); // Only run on mount, but note opportunities is a dependency in fetch. 
+  }, []);
 
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -123,7 +130,7 @@ export default function KanbanBoard() {
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex flex-1 gap-6 overflow-x-auto pb-4">
-            {stages.map(stage => (
+            {(stages.length > 0 ? stages : defaultStages).map(stage => (
               <Droppable key={stage.id} droppableId={stage.id.toString()}>
                 {(provided, snapshot) => (
                   <div 
