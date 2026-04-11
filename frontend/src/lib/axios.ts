@@ -1,14 +1,24 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000',
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
     'Accept': 'application/json',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-  withCredentials: true,
-  withXSRFToken: true,
+  // withCredentials only needed for cookie-based Sanctum SPA auth.
+  // Since we're using Bearer tokens, set this to false to avoid CORS wildcard issues.
+  withCredentials: false,
+});
+
+// Interceptor: attach Bearer token from localStorage if present
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('api_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export default api;

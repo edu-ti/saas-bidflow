@@ -4,11 +4,10 @@ import json
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-# The Bearer Token to access the Laravel API. 
-# Generate this using: php artisan api:token {email} {bot_name}
-API_TOKEN = 'YOUR_SANCTUM_BEARER_TOKEN'
+# Token gerado pelo Seeder acima. Troque se recriar o banco (migrate:fresh --seed)
+API_TOKEN = '1|m8nHagiIqkxIxw5frYfFw2TDDO6HFncAFYE94ztc66e90e6e'
 BASE_URL = 'http://localhost:8000/api'
-OPPORTUNITY_ID = 1 # Replace with a valid opportunity ID that belongs to the token's company_id
+OPPORTUNITY_ID = 1 # Crie uma Opportunity primeiro se necessário
 
 headers = {
     'Authorization': f'Bearer {API_TOKEN}',

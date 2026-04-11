@@ -13,6 +13,20 @@ use Illuminate\Support\Facades\Http;
 class AlertController extends Controller
 {
     /**
+     * List alerts, optionally filtering by unread status.
+     */
+    public function index(Request $request)
+    {
+        $query = BiddingAlert::query();
+
+        if ($request->boolean('unread')) {
+            $query->where('is_read', false);
+        }
+
+        return BiddingAlertResource::collection($query->latest()->get());
+    }
+
+    /**
      * Store a newly created bidding alert and notify via Telegram.
      */
     public function store(Request $request)
