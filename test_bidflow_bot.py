@@ -5,7 +5,7 @@ import json
 # CONFIGURATION
 # ==============================================================================
 # Token gerado pelo Seeder acima. Troque se recriar o banco (migrate:fresh --seed)
-API_TOKEN = '1|m8nHagiIqkxIxw5frYfFw2TDDO6HFncAFYE94ztc66e90e6e'
+API_TOKEN = '1|wcTh7UzYz5v4iPNOPAb6iu3U6fVHmqJh8TSMpUTW25257397'
 BASE_URL = 'http://localhost:8000/api'
 OPPORTUNITY_ID = 1 # Crie uma Opportunity primeiro se necessário
 
