@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, KanbanSquare, Building2, FileText, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, KanbanSquare, Building2, FileText, Settings, LogOut, Users, User, Contact, Package, CalendarDays } from 'lucide-react';
 import api from '../lib/axios';
 
-type Page = 'kanban' | 'dashboard';
+export type Page = 'kanban' | 'dashboard' | 'leads' | 'contacts' | 'individual-clients' | 'products' | 'agenda';
 
 interface SidebarProps {
   activePage: Page;
@@ -32,8 +32,13 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   }, []);
 
   const menuItems = [
-    { key: 'dashboard' as Page, name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { key: 'kanban' as Page,    name: 'Kanban', icon: <KanbanSquare size={20} />, badge: unreadAlerts > 0 ? unreadAlerts : null },
+    { key: 'dashboard' as Page, name: 'Dashboard BI', icon: <LayoutDashboard size={20} /> },
+    { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={20} /> },
+    { key: 'kanban' as Page,    name: 'Kanban (Licitações)', icon: <KanbanSquare size={20} />, badge: unreadAlerts > 0 ? unreadAlerts : null },
+    { key: 'leads' as Page, name: 'Leads', icon: <Users size={20} /> },
+    { key: 'contacts' as Page, name: 'Contactos', icon: <Contact size={20} /> },
+    { key: 'individual-clients' as Page, name: 'Clientes PF', icon: <User size={20} /> },
+    { key: 'products' as Page, name: 'Catálogo de Produtos', icon: <Package size={20} /> },
     { key: null, name: 'Organizações', icon: <Building2 size={20} /> },
     { key: null, name: 'Contratos', icon: <FileText size={20} /> },
     { key: null, name: 'Configurações', icon: <Settings size={20} /> },

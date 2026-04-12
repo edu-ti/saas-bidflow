@@ -42,4 +42,29 @@ class Company extends Model
     {
         return $this->hasMany(Organization::class);
     }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function individualClients()
+    {
+        return $this->hasMany(IndividualClient::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

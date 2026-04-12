@@ -30,4 +30,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show']);
     Route::post('/proposals', [ProposalController::class, 'store']);
     Route::post('/proposals/{id}/generate-pdf', [ProposalController::class, 'generatePdf']);
+    
+    // CRM & Agenda migrations
+    Route::apiResource('leads', \App\Http\Controllers\LeadController::class);
+    Route::apiResource('contacts', \App\Http\Controllers\ContactController::class);
+    Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
+    Route::apiResource('products', \App\Http\Controllers\ProductController::class);
+    Route::apiResource('events', \App\Http\Controllers\EventController::class);
 });

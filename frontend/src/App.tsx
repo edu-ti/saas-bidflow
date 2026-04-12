@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
+import Sidebar, { type Page } from './components/Sidebar';
 import KanbanBoard from './components/KanbanBoard';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
-
-type Page = 'kanban' | 'dashboard';
+import Leads from './components/Leads';
+import Contacts from './components/Contacts';
+import IndividualClients from './components/IndividualClients';
+import Products from './components/Products';
+import Agenda from './components/Agenda';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState<Page>('kanban');
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
 
   useEffect(() => {
     const token = localStorage.getItem('api_token');
@@ -33,6 +36,11 @@ function App() {
       <div className="flex-1 overflow-auto h-screen">
         {currentPage === 'kanban' && <KanbanBoard />}
         {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'leads' && <Leads />}
+        {currentPage === 'contacts' && <Contacts />}
+        {currentPage === 'individual-clients' && <IndividualClients />}
+        {currentPage === 'products' && <Products />}
+        {currentPage === 'agenda' && <Agenda />}
       </div>
     </div>
   );
