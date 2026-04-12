@@ -62,7 +62,33 @@ def test_bidding_alerts():
     except Exception as e:
         print(f"❌ Error: {e}")
 
+def test_win_predict():
+    print(f"\n[3] Testing Win Predict Job for Opportunity #{OPPORTUNITY_ID}...")
+    url = f"{BASE_URL}/opportunities/{OPPORTUNITY_ID}/predict"
+    try:
+        response = requests.post(url, headers=headers)
+        if response.status_code == 202:
+            print("✅ Predict Job Dispatched!")
+        else:
+            print(f"❌ Failed: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+def test_parse_notice():
+    print(f"\n[4] Testing Parse Notice Job (RAG) for Opportunity #{OPPORTUNITY_ID}...")
+    url = f"{BASE_URL}/opportunities/{OPPORTUNITY_ID}/parse-notice"
+    try:
+        response = requests.post(url, headers=headers)
+        if response.status_code == 202:
+            print("✅ Parse Notice Job Dispatched!")
+        else:
+            print(f"❌ Failed: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
 if __name__ == '__main__':
     print("🤖 BidFlow Bot Simulator Started...")
     test_ai_insights()
     test_bidding_alerts()
+    test_win_predict()
+    test_parse_notice()

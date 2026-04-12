@@ -67,4 +67,24 @@ class Company extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    public function biddingFilters()
+    {
+        return $this->hasMany(BiddingFilter::class);
+    }
+
+    public function accountsPayables()
+    {
+        return $this->hasMany(AccountsPayable::class);
+    }
+
+    public function accountsReceivables()
+    {
+        return $this->hasMany(AccountsReceivable::class);
+    }
+
+    public function emailCampaigns()
+    {
+        return $this->hasMany(EmailCampaign::class);
+    }
 }

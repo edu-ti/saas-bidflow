@@ -64,4 +64,24 @@ class DashboardController extends Controller
             'top_organizations' => $topOrganizations
         ]);
     }
+
+    public function queueHealth(Request $request) {
+        $pending = \Illuminate\Support\Facades\DB::table('jobs')->count();
+        $failed = \Illuminate\Support\Facades\DB::table('failed_jobs')->count();
+
+        return response()->json([
+            'pending_jobs' => $pending,
+            'failed_jobs' => $failed,
+            'status' => $failed > 0 ? 'warning' : 'healthy'
+        ]);
+    }
+
+    public function auditLogs(Request $request) {
+        $logs = \App\Models\AuditLog::with('user:id,name')
+            ->latest()
+            ->limit(20)
+            ->get();
+            
+        return response()->json($logs);
+    }
 }

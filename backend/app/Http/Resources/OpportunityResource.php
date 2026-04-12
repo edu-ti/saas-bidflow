@@ -27,6 +27,9 @@ class OpportunityResource extends JsonResource
             'pre_proposal_number' => $this->pre_proposal_number,
             'notes' => $this->notes,
             'bidding_metadata' => $this->bidding_metadata,
+            'win_probability' => (string)$this->win_probability,
+            'parsed_items' => $this->parsed_items,
+            'organization' => $this->organization ? $this->organization->name : 'N/A',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

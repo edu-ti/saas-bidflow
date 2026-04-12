@@ -11,6 +11,7 @@ type Opportunity = {
   type: string;
   value: string;
   funnel_stage_id: number | null;
+  win_probability?: string;
   bidding_metadata?: any;
 };
 
@@ -156,14 +157,25 @@ export default function KanbanBoard() {
                               {...provided.dragHandleProps}
                               className={`bg-white p-4 rounded-md shadow-sm border border-slate-200 hover:shadow-md transition-all ${snapshot.isDragging ? 'shadow-lg rotate-2' : ''} ${draggingId === opp.id ? 'opacity-50' : ''}`}
                             >
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-medium text-slate-800 text-sm leading-tight">{opp.title}</p>
-                                {hasNewInsights(opp.bidding_metadata) && (
-                                  <span title="IA analisou este edital" className="flex-shrink-0 ml-2">
-                                    <Sparkles size={16} className="text-yellow-500" />
-                                  </span>
-                                )}
-                              </div>
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="font-medium text-slate-800 text-sm leading-tight flex-1 pr-2">{opp.title}</p>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    {opp.win_probability && (
+                                      <div className="flex items-center" title={`${opp.win_probability}% Probabilidade de Vitória`}>
+                                        <svg className="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                                          <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                                          <path className={parseFloat(opp.win_probability) >= 70 ? "text-emerald-500" : parseFloat(opp.win_probability) >= 40 ? "text-amber-500" : "text-red-500"} strokeDasharray={`${parseFloat(opp.win_probability)}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                                        </svg>
+                                        <span className="text-[9px] font-bold text-slate-600 ml-1">{Math.round(parseFloat(opp.win_probability))}%</span>
+                                      </div>
+                                    )}
+                                    {hasNewInsights(opp.bidding_metadata) && (
+                                      <span title="IA analisou este edital">
+                                        <Sparkles size={16} className="text-yellow-500" />
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
 
                               {/* AI Badges Section */}
                               {opp.bidding_metadata && (

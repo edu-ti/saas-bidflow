@@ -18,13 +18,22 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
+    Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
     Route::get('/funnel-stages', [FunnelController::class, 'stages']);
     Route::get('/opportunities', [OpportunityController::class, 'index']);
     Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
     Route::post('/opportunities/{id}/ai-insights', [OpportunityAiController::class, 'updateInsights']);
+    Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
+    
+    // Phase 10: AI Jobs & Automation
+    Route::post('/opportunities/{id}/predict', [OpportunityAiController::class, 'predict']);
+    Route::post('/opportunities/{id}/parse-notice', [OpportunityAiController::class, 'parseNotice']);
+    Route::get('/opportunities/{id}/proposal-draft/pdf', [OpportunityAiController::class, 'generateDraftPdf']);
+
     Route::get('/alerts', [AlertController::class, 'index']);
     Route::post('/alerts', [AlertController::class, 'store']);
     Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show']);
@@ -37,4 +46,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
     Route::apiResource('products', \App\Http\Controllers\ProductController::class);
     Route::apiResource('events', \App\Http\Controllers\EventController::class);
+    
+    // Phase 9: Financial, Radar, Marketing
+    Route::apiResource('bidding-filters', \App\Http\Controllers\BiddingFilterController::class);
+    Route::apiResource('accounts-payable', \App\Http\Controllers\AccountsPayableController::class);
+    Route::apiResource('accounts-receivable', \App\Http\Controllers\AccountsReceivableController::class);
+    Route::apiResource('email-campaigns', \App\Http\Controllers\EmailCampaignController::class);
+    
+    // Phase 9: Tenant Admin
+    Route::get('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'usersIndex']);
+    Route::post('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'userStore']);
+    Route::put('/tenant/users/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'userUpdate']);
 });

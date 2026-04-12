@@ -45,4 +45,67 @@ class OpportunityAiController extends Controller
             'opportunity' => $opportunity
         ]);
     }
+
+    public function predict($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('update', $opportunity);
+
+        \App\Jobs\PredictWinProbabilityJob::dispatch($opportunity);
+
+        return response()->json([
+            'message' => 'Predição genérica em andamento',
+            'status' => 'processing'
+        ], 202);
+    }
+
+    public function parseNotice($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('update', $opportunity);
+
+        \App\Jobs\ParseNoticeItemsJob::dispatch($opportunity);
+
+        return response()->json([
+            'message' => 'Parsing de edital (RAG) em andamento',
+            'status' => 'processing'
+        ], 202);
+    }
+
+    public function generateDraftPdf($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('view', $opportunity);
+
+        // Simulando a geração de PDF via DomPDF
+        if (!class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
+            return response()->json(['error' => 'DomPDF não configurado, instalar barryvdh/laravel-dompdf'], 501);
+        }
+
+        /* 
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdfs.proposal-draft', [
+            'opportunity' => $opportunity,
+            'items' => $opportunity->parsed_items,
+            'company' => $opportunity->company
+        ]);
+        return $pdf->stream('rascunho_proposta_'.$opportunity->id.'.pdf');
+        */
+
+        // Por agora, vamos retornar uma view HTML básica renderizada como PDF genérico.
+        // Já que a view pdfs.proposal-draft talvez não exista ainda, retornamos um mock se falhar e pedimos para criar depois.
+        
+        $html = '<h1>Rascunho Oficial: ' . e($opportunity->title) . '</h1>
+        <p>Probabilidade de Vitória: ' . e($opportunity->win_probability) . '%</p>
+        <p>Itens Mapeados via IA:</p><ul>';
+
+        $items = $opportunity->parsed_items ?? [];
+        foreach ($items as $item) {
+            $html .= '<li>' . e($item['quantity'] ?? '') . 'x ' . e($item['description'] ?? '') . '</li>';
+        }
+
+        $html .= '</ul><p>Documento gerado eletronicamente por BidFlow GenAI.</p>';
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+        return $pdf->stream('proposal_draft_'.$id.'.pdf');
+    }
 }

@@ -30,11 +30,23 @@ class OpportunityController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $oldStageId = $opportunity->funnel_stage_id;
         $success = $opportunity->move_to_stage($validated['funnel_stage_id']);
 
         if (! $success) {
             return response()->json(['message' => 'Invalid funnel stage or tenant mismatch'], 400);
         }
+
+        // Grave o log de auditoria
+        \App\Models\AuditLog::create([
+            'user_id' => $request->user()->id,
+            'auditable_type' => Opportunity::class,
+            'auditable_id' => $opportunity->id,
+            'action' => 'Moved Stage',
+            'old_value' => "Funnel Stage ID: " . $oldStageId,
+            'new_value' => "Funnel Stage ID: " . $validated['funnel_stage_id'],
+            'ip_address' => $request->ip(),
+        ]);
 
         // Logic for Contract Creation on won
         $stage = FunnelStage::find($validated['funnel_stage_id']);
@@ -79,6 +91,24 @@ class OpportunityController extends Controller
             $query->where('user_id', $user->id);
         }
         
+        // Basically no-op for mock
         return response()->json(['data' => $query->get()]);
+    }
+
+    public function uploadAttachment(Request $request, $id)
+    {
+        $opportunity = Opportunity::find($id);
+        if (! $opportunity) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('attachments', 'public');
+            
+            // Grava na DB (Mock: supondo que tenhamos relacao attachments ou só retorna)
+            return response()->json(['message' => 'Arquivo salvo', 'path' => $path]);
+        }
+        
+        return response()->json(['message' => 'Nenhum arquivo enviado'], 400);
     }
 }

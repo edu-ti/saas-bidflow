@@ -8,6 +8,12 @@ import Contacts from './components/Contacts';
 import IndividualClients from './components/IndividualClients';
 import Products from './components/Products';
 import Agenda from './components/Agenda';
+import BiddingRadar from './components/BiddingRadar';
+import Finance from './components/Finance';
+import EmailMarketing from './components/EmailMarketing';
+import CompanySettings from './components/CompanySettings';
+import UsersManagement from './components/UsersManagement';
+import AIProposalDraft from './components/AIProposalDraft';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,6 +47,12 @@ function App() {
         {currentPage === 'individual-clients' && <IndividualClients />}
         {currentPage === 'products' && <Products />}
         {currentPage === 'agenda' && <Agenda />}
+        {currentPage === 'bidding-radar' && <BiddingRadar />}
+        {currentPage === 'finance' && <Finance />}
+        {currentPage === 'email-marketing' && <EmailMarketing />}
+        {currentPage === 'company-settings' && <CompanySettings />}
+        {currentPage === 'users-management' && <UsersManagement />}
+        {currentPage === 'ai-proposal-draft' && <AIProposalDraft />}
       </div>
     </div>
   );
