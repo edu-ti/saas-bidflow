@@ -4,9 +4,10 @@ import {
   Users, User, Contact, Package, CalendarDays, Radar, Mail,
   BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
   CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
-  Briefcase, FileSignature, Sparkles
+  Briefcase, FileSignature, Sparkles, Sun, Moon
 } from 'lucide-react';
 import api from '../lib/axios';
+import { useTheme } from '../context/ThemeContext';
 
 export type Page =
   // Gestão
@@ -31,6 +32,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
+  const { theme, toggleTheme } = useTheme();
   const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const storedUser = localStorage.getItem('user');
@@ -174,6 +176,13 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         {isExpanded ? (
           <>
             <div className="flex items-center space-x-3 mb-4">
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+                title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
               <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
                 {user.name?.charAt(0).toUpperCase() ?? 'A'}
               </div>
@@ -191,6 +200,13 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
           </>
         ) : (
           <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
               {user.name?.charAt(0).toUpperCase() ?? 'A'}
             </div>

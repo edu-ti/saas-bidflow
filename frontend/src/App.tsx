@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
-import KanbanBoard from './components/KanbanBoard';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Leads from './components/Leads';
@@ -10,12 +8,8 @@ import IndividualClients from './components/IndividualClients';
 import Products from './components/Products';
 import Agenda from './components/Agenda';
 import BiddingRadar from './components/BiddingRadar';
-import Finance from './components/Finance';
 import EmailMarketing from './components/EmailMarketing';
-import CompanySettings from './components/CompanySettings';
 import UsersManagement from './components/UsersManagement';
-import AIProposalDraft from './components/AIProposalDraft';
-// Novos componentes placeholder
 import SalesFunnel from './components/SalesFunnel';
 import Proposals from './components/Proposals';
 import AIGenerator from './components/AIGenerator';
@@ -29,6 +23,7 @@ import Reports from './components/Reports';
 import AccountsPayableReceivable from './components/AccountsPayableReceivable';
 import Admin from './components/Admin';
 import Company from './components/Company';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,6 +40,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem('api_token');
@@ -87,7 +83,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
+    <div className={`min-h-screen flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
       <Sidebar
         activePage={getPageFromPath()}
         onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
@@ -103,6 +99,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 // Layout do Dashboard - com Sidebar (página inicial)
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem('api_token');
@@ -111,7 +108,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
+    <div className={`min-h-screen flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
       <Sidebar
         activePage="dashboard"
         onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
@@ -124,14 +121,14 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function App() {
+function AppContent() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Rota pública - Login */}
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard - Página inicial sem Sidebar */}
+        {/* Dashboard - Página inicial com Sidebar */}
         <Route path="/" element={
           <ProtectedRoute>
             <DashboardLayout>
@@ -326,6 +323,14 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 
