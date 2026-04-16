@@ -32,6 +32,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
   const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
+  const [isExpanded, setIsExpanded] = useState(false);
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : { name: 'Usuário', company_id: 'BidFlow' };
 
@@ -112,36 +113,55 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   ];
 
   return (
-    <div className="w-64 h-screen bg-slate-900 flex flex-col text-slate-300 flex-shrink-0">
-      <div className="p-6 pb-4 border-b border-slate-800">
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center">
-          <span className="text-blue-500 mr-2">●</span> BidFlow
-        </h1>
-        <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">ERP SaaS</p>
+    <div 
+      className={`h-screen bg-slate-900 flex flex-col text-slate-300 flex-shrink-0 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+    >
+      <div className={`p-6 pb-4 border-b border-slate-800 transition-all duration-300 ${isExpanded ? '' : 'px-2 py-4'}`}>
+        {isExpanded && (
+          <>
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center">
+              <span className="text-blue-500 mr-2">●</span> BidFlow
+            </h1>
+            <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">ERP SaaS</p>
+          </>
+        )}
+        {!isExpanded && (
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center">
+            <span className="text-blue-500">●</span>
+          </h1>
+        )}
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-4 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 py-4 px-2 space-y-4 overflow-y-auto custom-scrollbar">
         {menuGroups.map((group, gIndex) => (
           <div key={gIndex}>
-            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-              {group.title}
-            </p>
+            {isExpanded && (
+              <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                {group.title}
+              </p>
+            )}
             <div className="space-y-1">
               {group.items.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => item.key && onNavigate(item.key)}
-                  className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage
+                  className={`w-full flex items-center py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage
                       ? 'bg-blue-600 text-white'
                       : 'hover:bg-slate-800 hover:text-white text-slate-400'
-                    } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${isExpanded ? 'px-3' : 'px-0 justify-center'}`}
                 >
-                  <span className="mr-3 text-slate-400">{item.icon}</span>
-                  <span className="truncate">{item.name}</span>
-                  {item.badge && (
-                    <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
-                      {item.badge}
-                    </span>
+                  <span className="text-slate-400 flex-shrink-0">{item.icon}</span>
+                  {isExpanded && (
+                    <>
+                      <span className="truncate ml-3">{item.name}</span>
+                      {item.badge && (
+                        <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
                   )}
                 </button>
               ))}
@@ -150,22 +170,37 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-800 bg-slate-950/30">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            {user.name?.charAt(0).toUpperCase() ?? 'A'}
+      <div className={`p-4 border-t border-slate-800 bg-slate-950/30 transition-all duration-300 ${isExpanded ? '' : 'p-2'}`}>
+        {isExpanded ? (
+          <>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {user.name?.charAt(0).toUpperCase() ?? 'A'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <p className="text-xs text-slate-400 truncate">Empresa #{user.company_id}</p>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              className="flex items-center w-full px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+              <LogOut size={18} className="mr-3" />
+              Sair do Sistema
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+              {user.name?.charAt(0).toUpperCase() ?? 'A'}
+            </div>
+            <button
+              onClick={onLogout}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+              <LogOut size={18} />
+            </button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user.name}</p>
-            <p className="text-xs text-slate-400 truncate">Empresa #{user.company_id}</p>
-          </div>
-        </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center w-full px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
-          <LogOut size={18} className="mr-3" />
-          Sair do Sistema
-        </button>
+        )}
       </div>
     </div>
   );
