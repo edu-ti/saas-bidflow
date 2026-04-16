@@ -1,16 +1,28 @@
 import { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, KanbanSquare, Building2, FileText, Settings, LogOut, 
-  Users, User, Contact, Package, CalendarDays, Radar, DollarSign, Mail 
+import {
+  LayoutDashboard, KanbanSquare, Building2, FileText, Settings, LogOut,
+  Users, User, Contact, Package, CalendarDays, Radar, Mail,
+  BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
+  CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
+  Briefcase, FileSignature, Sparkles
 } from 'lucide-react';
 import api from '../lib/axios';
 
-export type Page = 
-  | 'kanban' | 'agenda' | 'bidding-radar'
-  | 'leads' | 'contacts' | 'individual-clients' | 'products'
-  | 'finance'
-  | 'dashboard' | 'email-marketing' | 'ai-proposal-draft'
-  | 'company-settings' | 'users-management';
+export type Page =
+  // Gestão
+  | 'dashboard' | 'company' | 'users' | 'reports'
+  // Comercial
+  | 'sales-funnel' | 'leads' | 'contacts' | 'individual-clients' | 'proposals' | 'ai-generator' | 'email-marketing' | 'agenda'
+  // Licitações
+  | 'bidding-radar' | 'bidding-monitoring' | 'bidding-capture' | 'auction-details'
+  // Operacional
+  | 'licenses' | 'consignment' | 'contracts'
+  // Estoque
+  | 'products'
+  // Financeiro
+  | 'accounts-payable-receivable'
+  // Configurações
+  | 'admin';
 
 interface SidebarProps {
   activePage: Page;
@@ -31,7 +43,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
             setUnreadAlerts(res.data.length);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     fetchAlerts();
@@ -41,42 +53,60 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
 
   const menuGroups = [
     {
-      title: 'Operacional',
+      title: '🔹 Gestão',
       items: [
-        { key: 'bidding-radar' as Page, name: 'Radar Licitações', icon: <Radar size={18} /> },
-        { key: 'kanban' as Page, name: 'Kanban', icon: <KanbanSquare size={18} />, badge: unreadAlerts > 0 ? unreadAlerts : null },
+        { key: 'dashboard' as Page, name: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+        { key: 'company' as Page, name: 'Minha Empresa', icon: <Building2 size={18} /> },
+        { key: 'users' as Page, name: 'Equipa / Utilizadores', icon: <Users size={18} /> },
+        { key: 'reports' as Page, name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
+      ]
+    },
+    {
+      title: '🔹 Comercial',
+      items: [
+        { key: 'sales-funnel' as Page, name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
+        { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
+        { key: 'contacts' as Page, name: 'Contactos (Clientes PJ)', icon: <Contact size={18} /> },
+        { key: 'individual-clients' as Page, name: 'Clientes PF', icon: <User size={18} /> },
+        { key: 'proposals' as Page, name: 'Propostas', icon: <FileText size={18} /> },
+        { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
+        { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
         { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
       ]
     },
     {
-      title: 'Comercial',
+      title: '🔹 Licitações',
       items: [
-        { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
-        { key: 'contacts' as Page, name: 'Contactos', icon: <Contact size={18} /> },
-        { key: 'individual-clients' as Page, name: 'Clientes PF', icon: <User size={18} /> },
-        { key: 'products' as Page, name: 'Produtos', icon: <Package size={18} /> },
+        { key: 'bidding-radar' as Page, name: 'Radar Licitações', icon: <Radar size={18} /> },
+        { key: 'bidding-monitoring' as Page, name: 'Monitoramento de Licitações', icon: <FileSearch size={18} /> },
+        { key: 'bidding-capture' as Page, name: 'Captura de Editais', icon: <ClipboardList size={18} /> },
+        { key: 'auction-details' as Page, name: 'Detalhes do Pregão', icon: <ScrollText size={18} /> },
       ]
     },
     {
-      title: 'Financeiro',
+      title: '🔹 Operacional',
       items: [
-        { key: null, name: 'Contratos (Em Breve)', icon: <FileText size={18} /> },
-        { key: 'finance' as Page, name: 'Contas Pagar/Receber', icon: <DollarSign size={18} /> },
+        { key: 'licenses' as Page, name: 'Gestão de Licenças e Certidões', icon: <FileCheck size={18} /> },
+        { key: 'consignment' as Page, name: 'Gestão de Consignado', icon: <Handshake size={18} /> },
+        { key: 'contracts' as Page, name: 'Contratos', icon: <Briefcase size={18} /> },
       ]
     },
     {
-      title: 'Gestão',
+      title: '🔹 Estoque',
       items: [
-        { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
-        { key: 'dashboard' as Page, name: 'Relatórios (BI)', icon: <LayoutDashboard size={18} /> },
-        { key: 'ai-proposal-draft' as Page, name: 'Gerador IA (Propostas)', icon: <FileText size={18} />, badge: 1 },
+        { key: 'products' as Page, name: 'Produtos (Catálogo)', icon: <Package size={18} /> },
       ]
     },
     {
-      title: 'Configurações',
+      title: '🔹 Financeiro',
       items: [
-        { key: 'company-settings' as Page, name: 'Minha Empresa', icon: <Building2 size={18} /> },
-        { key: 'users-management' as Page, name: 'Equipa / Utilizadores', icon: <Settings size={18} /> },
+        { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
+      ]
+    },
+    {
+      title: '🔹 Configurações',
+      items: [
+        { key: 'admin' as Page, name: 'Administrador', icon: <Shield size={18} /> },
       ]
     }
   ];
@@ -101,11 +131,10 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                 <button
                   key={index}
                   onClick={() => item.key && onNavigate(item.key)}
-                  className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${
-                    item.key === activePage
+                  className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage
                       ? 'bg-blue-600 text-white'
                       : 'hover:bg-slate-800 hover:text-white text-slate-400'
-                  } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <span className="mr-3 text-slate-400">{item.icon}</span>
                   <span className="truncate">{item.name}</span>

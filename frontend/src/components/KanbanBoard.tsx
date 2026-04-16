@@ -4,6 +4,7 @@ import type { DropResult } from '@hello-pangea/dnd';
 import { Sparkles, Loader2, FileWarning, Clock, FileText } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../lib/axios';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 type Opportunity = {
   id: number;
@@ -26,6 +27,42 @@ export default function KanbanBoard() {
   const [stages, setStages] = useState<FunnelStage[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [usePollingFallback, setUsePollingFallback] = useState(true);
+
+  // WebSocket hook for real-time updates
+  const { sendMessage } = useWebSocket(
+    import.meta.env.VITE_WS_URL || 'ws://localhost:8080',
+    {
+      onMessage: (data) => {
+        if (data.type === 'opportunity.updated') {
+          setOpportunities(prev => {
+            const exists = prev.find(o => o.id === data.opportunity.id);
+            if (exists) {
+              return prev.map(o => o.id === data.opportunity.id ? { ...o, ...data.opportunity } : o);
+            }
+            return [...prev, data.opportunity];
+          });
+
+          if (data.action === 'insights_generated') {
+            toast.success(`Novos insights de IA: ${data.opportunity.title}`, {
+              icon: '🤖',
+              duration: 5000,
+            });
+          }
+        }
+      },
+      onConnect: () => {
+        console.log('[Kanban] WebSocket connected');
+        setUsePollingFallback(false);
+      },
+      onError: () => {
+        console.warn('[Kanban] WebSocket failed, using polling fallback');
+        setUsePollingFallback(true);
+      },
+      autoReconnect: true,
+      reconnectInterval: 5000,
+    }
+  );
 
   // Fallback stages while API loads
   const defaultStages: FunnelStage[] = [
@@ -40,7 +77,7 @@ export default function KanbanBoard() {
     try {
       const res = await api.get('/api/opportunities');
       const newData = res.data.data || res.data;
-      
+
       setOpportunities(prev => {
         if (isPolling) {
           newData.forEach((newOpp: Opportunity) => {
@@ -55,7 +92,7 @@ export default function KanbanBoard() {
         }
         return newData;
       });
-      
+
     } catch (err) {
       if (!isPolling) {
         console.error("API Error", err);
@@ -73,9 +110,13 @@ export default function KanbanBoard() {
       .catch(() => setStages(defaultStages)); // fallback to defaults
 
     fetchOpportunities(false);
-    const interval = setInterval(() => fetchOpportunities(true), 15000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Polling fallback if WebSocket not available
+    if (usePollingFallback) {
+      const interval = setInterval(() => fetchOpportunities(true), 15000);
+      return () => clearInterval(interval);
+    }
+  }, [usePollingFallback]);
 
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -88,7 +129,7 @@ export default function KanbanBoard() {
 
     // Optimistic UI update
     const previousState = [...opportunities];
-    setOpportunities(prev => prev.map(opp => 
+    setOpportunities(prev => prev.map(opp =>
       opp.id === oppId ? { ...opp, funnel_stage_id: newStageId } : opp
     ));
 
@@ -98,11 +139,11 @@ export default function KanbanBoard() {
         funnel_stage_id: newStageId
       });
       toast.success("Movido com sucesso!");
-      
+
       // If contract auto created
       if (res.data.contract_auto_created) {
         toast.success("Contrato sugerido gerado automaticamente com status Ativo!", {
-            icon: '📄'
+          icon: '📄'
         });
       }
 
@@ -123,7 +164,7 @@ export default function KanbanBoard() {
     <div className="p-8 h-screen w-full flex flex-col bg-slate-50">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-6 text-slate-800">BidFlow Pipeline</h1>
-      
+
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="animate-spin text-blue-500 w-10 h-10" />
@@ -134,8 +175,8 @@ export default function KanbanBoard() {
             {(stages.length > 0 ? stages : defaultStages).map(stage => (
               <Droppable key={stage.id} droppableId={stage.id.toString()}>
                 {(provided, snapshot) => (
-                  <div 
-                    ref={provided.innerRef} 
+                  <div
+                    ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={`min-w-[320px] max-w-[320px] bg-slate-100 rounded-lg p-4 flex flex-col shadow-sm border border-slate-200 transition-colors ${snapshot.isDraggingOver ? 'bg-slate-200' : ''}`}
                   >
@@ -146,36 +187,36 @@ export default function KanbanBoard() {
                         {opportunities.filter(opp => opp.funnel_stage_id === stage.id).length}
                       </span>
                     </div>
-                    
+
                     <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
                       {opportunities.filter(opp => opp.funnel_stage_id === stage.id).map((opp, index) => (
                         <Draggable key={opp.id} draggableId={opp.id.toString()} index={index}>
                           {(provided, snapshot) => (
-                            <div 
+                            <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={`bg-white p-4 rounded-md shadow-sm border border-slate-200 hover:shadow-md transition-all ${snapshot.isDragging ? 'shadow-lg rotate-2' : ''} ${draggingId === opp.id ? 'opacity-50' : ''}`}
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                  <p className="font-medium text-slate-800 text-sm leading-tight flex-1 pr-2">{opp.title}</p>
-                                  <div className="flex items-center gap-2 flex-shrink-0">
-                                    {opp.win_probability && (
-                                      <div className="flex items-center" title={`${opp.win_probability}% Probabilidade de Vitória`}>
-                                        <svg className="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
-                                          <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-                                          <path className={parseFloat(opp.win_probability) >= 70 ? "text-emerald-500" : parseFloat(opp.win_probability) >= 40 ? "text-amber-500" : "text-red-500"} strokeDasharray={`${parseFloat(opp.win_probability)}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-                                        </svg>
-                                        <span className="text-[9px] font-bold text-slate-600 ml-1">{Math.round(parseFloat(opp.win_probability))}%</span>
-                                      </div>
-                                    )}
-                                    {hasNewInsights(opp.bidding_metadata) && (
-                                      <span title="IA analisou este edital">
-                                        <Sparkles size={16} className="text-yellow-500" />
-                                      </span>
-                                    )}
-                                  </div>
+                              <div className="flex justify-between items-start mb-2">
+                                <p className="font-medium text-slate-800 text-sm leading-tight flex-1 pr-2">{opp.title}</p>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  {opp.win_probability && (
+                                    <div className="flex items-center" title={`${opp.win_probability}% Probabilidade de Vitória`}>
+                                      <svg className="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                                        <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                                        <path className={parseFloat(opp.win_probability) >= 70 ? "text-emerald-500" : parseFloat(opp.win_probability) >= 40 ? "text-amber-500" : "text-red-500"} strokeDasharray={`${parseFloat(opp.win_probability)}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                                      </svg>
+                                      <span className="text-[9px] font-bold text-slate-600 ml-1">{Math.round(parseFloat(opp.win_probability))}%</span>
+                                    </div>
+                                  )}
+                                  {hasNewInsights(opp.bidding_metadata) && (
+                                    <span title="IA analisou este edital">
+                                      <Sparkles size={16} className="text-yellow-500" />
+                                    </span>
+                                  )}
                                 </div>
+                              </div>
 
                               {/* AI Badges Section */}
                               {opp.bidding_metadata && (

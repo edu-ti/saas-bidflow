@@ -1,11 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-export default function Login({ onLogin }: LoginProps) {
+export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('admin@bidflow.dev');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
@@ -20,7 +18,7 @@ export default function Login({ onLogin }: LoginProps) {
       const res = await api.post('/api/login', { email, password });
       localStorage.setItem('api_token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      onLogin();
+      navigate('/dashboard');
     } catch {
       setError('E-mail ou senha incorretos.');
     } finally {

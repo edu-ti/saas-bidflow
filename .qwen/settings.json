@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(composer *)",
+      "Bash(php *)",
+      "Bash(move *)",
+      "Bash(npm run *)",
+      "Bash(del *)",
+      "Bash(echo.)",
+      "Bash(echo)",
+      "Bash(echo *)",
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(npx *)"
+    ]
+  },
+  "$version": 3
+}

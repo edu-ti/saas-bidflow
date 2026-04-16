@@ -8,6 +8,7 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Opportunity extends Model
 {
-    use SoftDeletes, BelongsToTenant;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     /**
      * Get the attributes that should be cast.
@@ -47,7 +48,7 @@ class Opportunity extends Model
     protected function uasgCode(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->bidding_metadata['uasg_code'] ?? null,
+            get: fn() => $this->bidding_metadata['uasg_code'] ?? null,
             set: function (?string $value) {
                 $meta = $this->bidding_metadata ?? new \Illuminate\Database\Eloquent\Casts\ArrayObject();
                 $meta['uasg_code'] = $value;
@@ -62,7 +63,7 @@ class Opportunity extends Model
     protected function editalPdfPath(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->bidding_metadata['edital_pdf_path'] ?? null,
+            get: fn() => $this->bidding_metadata['edital_pdf_path'] ?? null,
             set: function (?string $value) {
                 $meta = $this->bidding_metadata ?? new \Illuminate\Database\Eloquent\Casts\ArrayObject();
                 $meta['edital_pdf_path'] = $value;
@@ -105,7 +106,7 @@ class Opportunity extends Model
             ->where('company_id', $this->company_id)
             ->first();
 
-        if (! $stage) {
+        if (!$stage) {
             return false;
         }
 

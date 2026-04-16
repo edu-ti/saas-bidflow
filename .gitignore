@@ -1,1 +1,73 @@
 .opencode/
+
+# Backend Laravel
+/vendor/
+/storage/*.key
+/storage/logs/*
+!storage/logs/.gitignore
+/bootstrap/cache/*
+!bootstrap/cache/.gitignore
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+/public/build/
+/public/hot
+/storage/framework/sessions/*
+/storage/framework/cache/*
+/storage/framework/views/*
+npm-debug.log
+yarn-error.log
+
+# Frontend React
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+/frontend/.vite/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+frontend/tsconfig.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.Python
+*.egg-info/
+.pytest_cache/
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Docker
+*.pid
+*.sock
+
+# Sistemas Legados (se nao forem mais usados)
+/php-crm-frpe/vendor/
+/gestao_licitacao/tmp/
+
+# Scratch files (temporarios)
+scratch/*.sql
+!scratch/README.md
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
