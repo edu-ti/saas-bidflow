@@ -24,6 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'pre_proposal_number',
     'notes',
     'bidding_metadata',
+    'individual_client_id',
+    'contact_id',
+    'forward_to',
 ])]
 class Opportunity extends Model
 {
@@ -112,5 +115,10 @@ class Opportunity extends Model
 
         $this->funnel_stage_id = $stage->id;
         return $this->save();
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OpportunityItem::class);
     }
 }

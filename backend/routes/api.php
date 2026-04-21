@@ -23,8 +23,17 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
+    
     Route::get('/funnel-stages', [FunnelController::class, 'stages']);
+    Route::post('/funnel-stages', [FunnelController::class, 'store']);
+    Route::put('/funnel-stages/{id}', [FunnelController::class, 'update']);
+    Route::delete('/funnel-stages/{id}', [FunnelController::class, 'destroy']);
+    
     Route::get('/opportunities', [OpportunityController::class, 'index']);
+    Route::post('/opportunities', [OpportunityController::class, 'store']);
+    Route::get('/opportunities/{id}', [OpportunityController::class, 'show']);
+    Route::put('/opportunities/{id}', [OpportunityController::class, 'update']);
+    Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy']);
     Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
     Route::post('/opportunities/{id}/ai-insights', [OpportunityAiController::class, 'updateInsights']);
     Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);

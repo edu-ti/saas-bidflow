@@ -108,7 +108,178 @@ class OpportunityController extends Controller
             // Grava na DB (Mock: supondo que tenhamos relacao attachments ou só retorna)
             return response()->json(['message' => 'Arquivo salvo', 'path' => $path]);
         }
-        
         return response()->json(['message' => 'Nenhum arquivo enviado'], 400);
+    }
+
+    /**
+     * Store a newly created opportunity in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'organization_id' => 'nullable|integer|exists:organizations,id',
+            'individual_client_id' => 'nullable|integer|exists:individual_clients,id',
+            'contact_id' => 'nullable|integer|exists:contacts,id',
+            'forward_to' => 'nullable|string|max:255',
+            'funnel_stage_id' => 'nullable|integer|exists:funnel_stages,id',
+            'notes' => 'nullable|string',
+            'value' => 'nullable|numeric',
+            'items' => 'nullable|array',
+            'items.*.description' => 'required_with:items|string|max:255',
+            'items.*.manufacturer' => 'nullable|string|max:255',
+            'items.*.model' => 'nullable|string|max:255',
+            'items.*.status' => 'nullable|string|max:50',
+            'items.*.detailed_description' => 'nullable|string',
+            'items.*.additional_parameters' => 'nullable|array',
+            'items.*.quantity' => 'required_with:items|numeric|min:1',
+            'items.*.unit_price' => 'required_with:items|numeric|min:0',
+            'items.*.unit_measure' => 'nullable|string|max:50',
+            'items.*.subtotal' => 'nullable|numeric',
+            'items.*.product_id' => 'nullable|integer|exists:products,id',
+        ]);
+
+        $user = $request->user();
+
+        // Calcular valor total baseado nos itens se nao informado
+        $totalValue = $validated['value'] ?? 0;
+        if (empty($validated['value']) && !empty($validated['items'])) {
+            $totalValue = collect($validated['items'])->sum(function ($item) {
+                return ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0);
+            });
+        }
+
+        // Se nenhuma etapa foi enviada, tenta pegar a primeira
+        $stageId = $validated['funnel_stage_id'] ?? FunnelStage::orderBy('order')->first()?->id;
+
+        $opportunity = Opportunity::create([
+            'company_id' => $user->company_id, // assume tenant is company_id
+            'user_id' => $user->id,
+            'title' => $validated['title'],
+            'organization_id' => $validated['organization_id'] ?? null,
+            'individual_client_id' => $validated['individual_client_id'] ?? null,
+            'contact_id' => $validated['contact_id'] ?? null,
+            'forward_to' => $validated['forward_to'] ?? null,
+            'funnel_stage_id' => $stageId,
+            'notes' => $validated['notes'] ?? null,
+            'value' => $totalValue,
+            'type' => 'Nova', // default type
+        ]);
+
+        if (!empty($validated['items'])) {
+            foreach ($validated['items'] as $itemData) {
+                $subtotal = ($itemData['quantity'] ?? 1) * ($itemData['unit_price'] ?? 0);
+                
+                $opportunity->items()->create([
+                    'product_id' => $itemData['product_id'] ?? null,
+                    'description' => $itemData['description'],
+                    'manufacturer' => $itemData['manufacturer'] ?? null,
+                    'model' => $itemData['model'] ?? null,
+                    'status' => $itemData['status'] ?? 'Venda',
+                    'detailed_description' => $itemData['detailed_description'] ?? null,
+                    'additional_parameters' => $itemData['additional_parameters'] ?? null,
+                    'quantity' => $itemData['quantity'] ?? 1,
+                    'unit_price' => $itemData['unit_price'] ?? 0,
+                    'unit_measure' => $itemData['unit_measure'] ?? 'Unidade',
+                    'subtotal' => $subtotal,
+                ]);
+            }
+        }
+
+        \App\Models\AuditLog::create([
+            'user_id' => $user->id,
+            'auditable_type' => Opportunity::class,
+            'auditable_id' => $opportunity->id,
+            'action' => 'Created',
+            'new_value' => json_encode($opportunity->toArray()),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return response()->json([
+            'message' => 'Opportunity created successfully',
+            'opportunity' => $opportunity->load('items')
+        ], 201);
+    }
+
+    public function show($id)
+    {
+        $opportunity = Opportunity::with('items')->findOrFail($id);
+        return response()->json($opportunity);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'organization_id' => 'nullable|integer|exists:organizations,id',
+            'contact_id' => 'nullable|integer|exists:contacts,id',
+            'forward_to' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'value' => 'nullable|numeric',
+            'items' => 'nullable|array',
+            'items.*.description' => 'required_with:items|string|max:255',
+            'items.*.manufacturer' => 'nullable|string|max:255',
+            'items.*.model' => 'nullable|string|max:255',
+            'items.*.status' => 'nullable|string|max:50',
+            'items.*.detailed_description' => 'nullable|string',
+            'items.*.additional_parameters' => 'nullable|array',
+            'items.*.quantity' => 'required_with:items|numeric|min:1',
+            'items.*.unit_price' => 'required_with:items|numeric|min:0',
+            'items.*.unit_measure' => 'nullable|string|max:50',
+            'items.*.subtotal' => 'nullable|numeric',
+        ]);
+
+        $totalValue = $validated['value'] ?? 0;
+        if (empty($validated['value']) && !empty($validated['items'])) {
+            $totalValue = collect($validated['items'])->sum(function ($item) {
+                return ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0);
+            });
+        }
+
+        $opportunity->update([
+            'title' => $validated['title'],
+            'organization_id' => $validated['organization_id'] ?? null,
+            'contact_id' => $validated['contact_id'] ?? null,
+            'forward_to' => $validated['forward_to'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'value' => $totalValue,
+        ]);
+
+        // Sync items (recreate for simplicity or sync by ID if needed)
+        // A simple approach is delete all existing and insert new ones
+        $opportunity->items()->delete();
+
+        if (!empty($validated['items'])) {
+            foreach ($validated['items'] as $itemData) {
+                $subtotal = ($itemData['quantity'] ?? 1) * ($itemData['unit_price'] ?? 0);
+                
+                $opportunity->items()->create([
+                    'description' => $itemData['description'],
+                    'manufacturer' => $itemData['manufacturer'] ?? null,
+                    'model' => $itemData['model'] ?? null,
+                    'status' => $itemData['status'] ?? 'Venda',
+                    'detailed_description' => $itemData['detailed_description'] ?? null,
+                    'additional_parameters' => $itemData['additional_parameters'] ?? null,
+                    'quantity' => $itemData['quantity'] ?? 1,
+                    'unit_price' => $itemData['unit_price'] ?? 0,
+                    'unit_measure' => $itemData['unit_measure'] ?? 'Unidade',
+                    'subtotal' => $subtotal,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Opportunity updated successfully',
+            'opportunity' => $opportunity->load('items')
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $opportunity->delete();
+        return response()->json(['message' => 'Opportunity deleted successfully']);
     }
 }
