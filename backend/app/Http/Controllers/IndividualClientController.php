@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\IndividualClient;
 use Illuminate\Http\Request;
-use App\Http\Resources\IndividualClientResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class IndividualClientController extends Controller
@@ -15,7 +14,7 @@ class IndividualClientController extends Controller
     {
         $this->authorize('viewAny', IndividualClient::class);
         $clients = IndividualClient::latest()->get();
-        return IndividualClientResource::collection($clients);
+        return response()->json(['data' => $clients]);
     }
 
     public function store(Request $request)
@@ -29,16 +28,17 @@ class IndividualClientController extends Controller
             'address' => 'nullable|string',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
+            'position' => 'nullable|string|max:100',
         ]);
 
         $client = IndividualClient::create($validated);
-        return new IndividualClientResource($client);
+        return response()->json(['data' => $client], 201);
     }
 
     public function show(IndividualClient $individualClient)
     {
         $this->authorize('view', $individualClient);
-        return new IndividualClientResource($individualClient);
+        return response()->json(['data' => $individualClient]);
     }
 
     public function update(Request $request, IndividualClient $individualClient)
@@ -52,10 +52,11 @@ class IndividualClientController extends Controller
             'address' => 'nullable|string',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
+            'position' => 'nullable|string|max:100',
         ]);
 
         $individualClient->update($validated);
-        return new IndividualClientResource($individualClient);
+        return response()->json(['data' => $individualClient]);
     }
 
     public function destroy(IndividualClient $individualClient)

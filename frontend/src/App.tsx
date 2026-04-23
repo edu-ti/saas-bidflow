@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import type { Page } from './components/Sidebar';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Leads from './components/Leads';
-import Contacts from './components/Contacts';
-import IndividualClients from './components/IndividualClients';
+import Clients from './components/Clients';
 import Products from './components/Products';
 import Agenda from './components/Agenda';
 import BiddingRadar from './components/BiddingRadar';
@@ -15,6 +15,7 @@ import Proposals from './components/Proposals';
 import AIGenerator from './components/AIGenerator';
 import BiddingMonitoring from './components/BiddingMonitoring';
 import BiddingCapture from './components/BiddingCapture';
+import BiddingFunnel from './components/BiddingFunnel';
 import AuctionDetails from './components/AuctionDetails';
 import Licenses from './components/Licenses';
 import Consignment from './components/Consignment';
@@ -49,7 +50,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   };
 
   // Mapear pathname para page do Sidebar
-  const getPageFromPath = (): string => {
+  const getPageFromPath = (): Page => {
     const path = location.pathname;
     // Gestão
     if (path === '/company') return 'company';
@@ -58,8 +59,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     // Comercial
     if (path === '/sales-funnel') return 'sales-funnel';
     if (path === '/leads') return 'leads';
-    if (path === '/contacts') return 'contacts';
-    if (path === '/individual-clients') return 'individual-clients';
+    if (path === '/clients') return 'clients';
     if (path === '/proposals') return 'proposals';
     if (path === '/ai-generator') return 'ai-generator';
     if (path === '/email-marketing') return 'email-marketing';
@@ -67,6 +67,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     // Licitações
     if (path === '/bidding-radar') return 'bidding-radar';
     if (path === '/bidding-monitoring') return 'bidding-monitoring';
+    if (path === '/bidding-funnel') return 'bidding-funnel';
     if (path === '/bidding-capture') return 'bidding-capture';
     if (path === '/auction-details') return 'auction-details';
     // Operacional
@@ -186,18 +187,10 @@ function AppContent() {
           </ProtectedRoute>
         } />
 
-        <Route path="/contacts" element={
+        <Route path="/clients" element={
           <ProtectedRoute>
             <AuthenticatedLayout>
-              <Contacts />
-            </AuthenticatedLayout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/individual-clients" element={
-          <ProtectedRoute>
-            <AuthenticatedLayout>
-              <IndividualClients />
+              <Clients />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />
@@ -247,6 +240,14 @@ function AppContent() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <BiddingMonitoring />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/bidding-funnel" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <BiddingFunnel />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />

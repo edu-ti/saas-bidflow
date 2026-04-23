@@ -14,6 +14,10 @@ use App\Http\Controllers\FunnelController;
 // Public routes (no auth needed)
 Route::post('/login', [AuthController::class, 'login']);
 
+// Rotas públicas para dados externos
+Route::get('/cnpj/{cnpj}', [\App\Http\Controllers\ExternalDataController::class, 'searchCNPJ']);
+Route::get('/cep/{cep}', [\App\Http\Controllers\ExternalDataController::class, 'searchCEP']);
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -53,6 +57,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('leads', \App\Http\Controllers\LeadController::class);
     Route::apiResource('contacts', \App\Http\Controllers\ContactController::class);
     Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
+    Route::apiResource('company-clients', \App\Http\Controllers\CompanyClientController::class);
     Route::apiResource('products', \App\Http\Controllers\ProductController::class);
     Route::apiResource('events', \App\Http\Controllers\EventController::class);
     

@@ -13,9 +13,9 @@ export type Page =
   // Gestão
   | 'dashboard' | 'company' | 'users' | 'reports'
   // Comercial
-  | 'sales-funnel' | 'leads' | 'contacts' | 'individual-clients' | 'proposals' | 'ai-generator' | 'email-marketing' | 'agenda'
+  | 'sales-funnel' | 'leads' | 'clients' | 'proposals' | 'ai-generator' | 'email-marketing' | 'agenda'
   // Licitações
-  | 'bidding-radar' | 'bidding-monitoring' | 'bidding-capture' | 'auction-details'
+  | 'bidding-radar' | 'bidding-monitoring' | 'bidding-capture' | 'auction-details' | 'bidding-funnel'
   // Operacional
   | 'licenses' | 'consignment' | 'contracts'
   // Estoque
@@ -69,8 +69,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       items: [
         { key: 'sales-funnel' as Page, name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
         { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
-        { key: 'contacts' as Page, name: 'Contactos (Clientes PJ)', icon: <Contact size={18} /> },
-        { key: 'individual-clients' as Page, name: 'Clientes PF', icon: <User size={18} /> },
+        { key: 'clients' as Page, name: 'Clientes', icon: <User size={18} /> },
         { key: 'proposals' as Page, name: 'Propostas', icon: <FileText size={18} /> },
         { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
         { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
@@ -80,6 +79,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     {
       title: '🔹 Licitações',
       items: [
+        { key: 'bidding-funnel' as Page, name: 'Funil de Licitações', icon: <KanbanSquare size={18} /> },
         { key: 'bidding-radar' as Page, name: 'Radar Licitações', icon: <Radar size={18} /> },
         { key: 'bidding-monitoring' as Page, name: 'Monitoramento de Licitações', icon: <FileSearch size={18} /> },
         { key: 'bidding-capture' as Page, name: 'Captura de Editais', icon: <ClipboardList size={18} /> },

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['company_id', 'name', 'cpf', 'rg', 'birth_date', 'address', 'email', 'phone'])]
+#[Fillable(['company_id', 'name', 'cpf', 'rg', 'birth_date', 'address', 'email', 'phone', 'position'])]
 class IndividualClient extends Model
 {
     use SoftDeletes, BelongsToTenant;
@@ -22,5 +22,10 @@ class IndividualClient extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function getPosition(): ?string
+    {
+        return $this->position;
     }
 }
