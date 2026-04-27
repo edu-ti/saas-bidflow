@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Search, Filter, Download, RefreshCw, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Search, RefreshCw, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -18,12 +19,6 @@ interface Bidding {
   bidding_metadata?: any;
 }
 
-const defaultSources = [
-  { id: 'comprasnet', name: 'ComprasNet', url: 'https://comprasnet.gov.br' },
-  { id: 'pncp', name: 'PNCP', url: 'https://pncp.gov.br' },
-  { id: 'licitacoes_e', name: 'Licitações-e', url: 'https://licitacoes-e.com.br' },
-];
-
 const defaultModalities = [
   { value: '', label: 'Selecione' },
   { value: 'pregão', label: 'Pregão' },
@@ -35,13 +30,14 @@ const defaultModalities = [
 ];
 
 export default function BiddingCapture() {
+  const navigate = useNavigate();
   const [biddings, setBiddings] = useState<Bidding[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  
+
   const [filters, setFilters] = useState({
     search: '',
     modality: '',
@@ -73,7 +69,7 @@ export default function BiddingCapture() {
       if (filters.search) params.append('search', filters.search);
       if (filters.modality) params.append('modality', filters.modality);
       if (filters.status) params.append('status', filters.status);
-      
+
       const res = await api.get(`/api/opportunities?${params.toString()}`);
       setBiddings(res.data.data || res.data);
     } catch (error) {
@@ -87,7 +83,7 @@ export default function BiddingCapture() {
     setSearching(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       const mockBiddings: Bidding[] = [
         {
           id: Date.now(),
@@ -110,7 +106,7 @@ export default function BiddingCapture() {
           status: 'ativa',
         },
       ];
-      
+
       setBiddings(prev => [...mockBiddings, ...prev]);
       toast.success('Editais capturados com sucesso!');
     } catch (error) {
@@ -307,13 +303,13 @@ export default function BiddingCapture() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <a
-                        href={`/auction-details?id=${bidding.id}`}
+                      <button
+                        onClick={() => navigate(`/auction-details?id=${bidding.id}`)}
                         className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                         title="Ver detalhes"
                       >
                         <ExternalLink className="w-4 h-4" />
-                      </a>
+                      </button>
                       <button
                         onClick={() => handleEdit(bidding)}
                         className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
