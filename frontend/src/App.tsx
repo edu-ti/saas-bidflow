@@ -20,11 +20,17 @@ import AuctionDetails from './components/AuctionDetails';
 import Licenses from './components/Licenses';
 import Consignment from './components/Consignment';
 import Contracts from './components/Contracts';
+import Inventory from './components/Inventory';
+import Campaigns from './components/Campaigns';
+import Tasks from './components/Tasks';
 import Reports from './components/Reports';
 import AccountsPayableReceivable from './components/AccountsPayableReceivable';
 import Finance from './components/Finance';
 import Admin from './components/Admin';
 import Company from './components/Company';
+import ChatbotBuilder from './components/ChatbotBuilder';
+import Conversations from './components/Conversations';
+import Settings from './components/Settings';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
@@ -75,6 +81,9 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/licenses') return 'licenses';
     if (path === '/consignment') return 'consignment';
     if (path === '/contracts') return 'contracts';
+    if (path === '/inventory') return 'inventory';
+    if (path === '/campaigns') return 'campaigns';
+    if (path === '/tasks') return 'tasks';
     // Estoque
     if (path === '/products') return 'products';
     // Financeiro
@@ -304,6 +313,30 @@ function AppContent() {
           </ProtectedRoute>
         } />
 
+        <Route path="/inventory" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Inventory />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/campaigns" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Campaigns />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/tasks" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Tasks />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
         {/* Rotas protegidas - Financeiro */}
         <Route path="/accounts-payable-receivable" element={
           <ProtectedRoute>
@@ -326,6 +359,30 @@ function AppContent() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <Admin />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/chatbot" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <ChatbotBuilder />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/conversations" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Conversations />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Settings />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />

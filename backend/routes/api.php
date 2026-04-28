@@ -108,6 +108,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'usersIndex']);
     Route::post('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'userStore']);
     Route::put('/tenant/users/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'userUpdate']);
+    Route::delete('/tenant/users/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'userDestroy']);
+    
+    // Companies
+    Route::get('/companies/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'companyShow']);
+    Route::put('/companies/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'companyUpdate']);
 
     // CLM - Contract Lifecycle Management
     Route::apiResource('contracts', \App\Http\Controllers\ContractController::class);
@@ -121,4 +126,85 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/contract-templates/placeholders', [\App\Http\Controllers\ContractTemplateController::class, 'getPlaceholders']);
 
     Route::post('/contract-approvals/{approvalId}/process', [\App\Http\Controllers\ContractController::class, 'processApproval']);
+
+    // Inventory / Estoque
+    Route::get('/inventory/dashboard', [\App\Http\Controllers\InventoryController::class, 'dashboard']);
+    Route::get('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'index']);
+    Route::post('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'store']);
+    Route::get('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'show']);
+    Route::put('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'update']);
+    Route::delete('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'destroy']);
+
+    Route::get('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'brands']);
+    Route::post('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'createBrand']);
+    Route::get('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'categories']);
+    Route::post('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'createCategory']);
+    Route::get('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'units']);
+    Route::post('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'createUnit']);
+    Route::get('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'sizes']);
+    Route::post('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'createSize']);
+    Route::get('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'statuses']);
+    Route::post('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'createStatus']);
+    Route::get('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'labels']);
+    Route::post('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'createLabel']);
+    Route::get('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'depots']);
+    Route::post('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'createDepot']);
+    Route::get('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'movements']);
+    Route::post('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'createMovement']);
+
+    // Campanhas
+    Route::get('/campaigns', [\App\Http\Controllers\CampaignController::class, 'index']);
+    Route::post('/campaigns', [\App\Http\Controllers\CampaignController::class, 'store']);
+    Route::get('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'show']);
+    Route::put('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'update']);
+    Route::delete('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'destroy']);
+    Route::get('/campaigns/stats', [\App\Http\Controllers\CampaignController::class, 'stats']);
+
+    // Tarefas
+    Route::get('/tasks', [\App\Http\Controllers\TaskController::class, 'index']);
+    Route::post('/tasks', [\App\Http\Controllers\TaskController::class, 'store']);
+    Route::get('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'show']);
+    Route::put('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'update']);
+    Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
+    Route::patch('/tasks/{id}/toggle', [\App\Http\Controllers\TaskController::class, 'toggleStatus']);
+    Route::get('/tasks/stats', [\App\Http\Controllers\TaskController::class, 'stats']);
+
+    // E-mail Marketing
+    Route::get('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'index']);
+    Route::post('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'store']);
+    Route::get('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'show']);
+    Route::put('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'update']);
+    Route::delete('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'destroy']);
+    Route::post('/email-campaigns/{id}/send', [\App\Http\Controllers\EmailMarketingController::class, 'send']);
+    Route::get('/email-campaigns/leads/search', [\App\Http\Controllers\EmailMarketingController::class, 'searchLeads']);
+
+    // Chatbot Builder
+    Route::get('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'index']);
+    Route::post('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'store']);
+    Route::get('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'show']);
+    Route::put('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'update']);
+    Route::delete('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'destroy']);
+    Route::get('/chatbot/flows/active', [\App\Http\Controllers\ChatbotController::class, 'active']);
+    Route::post('/chatbot/flows/{id}/activate', [\App\Http\Controllers\ChatbotController::class, 'setActive']);
+
+    // Settings / Configurações do Usuário
+    Route::get('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'profile']);
+    Route::put('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'updateProfile']);
+    Route::get('/settings/security', [\App\Http\Controllers\SettingsController::class, 'security']);
+    Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'changePassword']);
+    Route::get('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'notifications']);
+    Route::put('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'updateNotifications']);
+    Route::get('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'whatsapp']);
+    Route::put('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'updateWhatsapp']);
+
+    // Conversas
+    Route::get('/conversations', [\App\Http\Controllers\ConversationController::class, 'index']);
+    Route::post('/conversations', [\App\Http\Controllers\ConversationController::class, 'store']);
+    Route::get('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'show']);
+    Route::put('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'update']);
+    Route::delete('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'destroy']);
+    Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'messages']);
+    Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'sendMessage']);
+    Route::post('/conversations/{conversationId}/read', [\App\Http\Controllers\ConversationController::class, 'markRead']);
+    Route::get('/conversations/stats', [\App\Http\Controllers\ConversationController::class, 'stats']);
 });

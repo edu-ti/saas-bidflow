@@ -4,7 +4,8 @@ import {
   Users, User, Contact, Package, CalendarDays, Radar, Mail,
   BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
   CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
-  Briefcase, FileSignature, Sparkles, Sun, Moon
+  Briefcase, FileSignature, Sparkles, Sun, Moon, Boxes, Send, ListTodo,
+  MessageCircle, Bot
 } from 'lucide-react';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
@@ -19,11 +20,13 @@ export type Page =
   // Operacional
   | 'licenses' | 'consignment' | 'contracts'
   // Estoque
-  | 'products'
+  | 'products' | 'inventory' | 'campaigns' | 'tasks'
   // Financeiro
   | 'accounts-payable-receivable' | 'finance'
+  // Chatbot & Conversas
+  | 'chatbot' | 'conversations'
   // Configurações
-  | 'admin';
+  | 'admin' | 'settings';
 
 interface SidebarProps {
   activePage: Page;
@@ -72,8 +75,6 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'clients' as Page, name: 'Clientes', icon: <User size={18} /> },
         { key: 'proposals' as Page, name: 'Propostas', icon: <FileText size={18} /> },
         { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
-        { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
-        { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
       ]
     },
     {
@@ -98,6 +99,16 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       title: '🔹 Estoque',
       items: [
         { key: 'products' as Page, name: 'Produtos (Catálogo)', icon: <Package size={18} /> },
+        { key: 'inventory' as Page, name: 'Inventário', icon: <Boxes size={18} /> },
+      ]
+    },
+    {
+      title: '🔹 Marketing',
+      items: [
+        { key: 'campaigns' as Page, name: 'Campanhas', icon: <Send size={18} /> },
+        { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
+        { key: 'tasks' as Page, name: 'Tarefas', icon: <ListTodo size={18} /> },
+        { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
       ]
     },
     {
@@ -108,9 +119,17 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       ]
     },
     {
+      title: '🔹 Chatbot & Conversas',
+      items: [
+        { key: 'chatbot' as Page, name: 'Construtor de Chatbot', icon: <Bot size={18} /> },
+        { key: 'conversations' as Page, name: 'Conversas', icon: <MessageCircle size={18} /> },
+      ]
+    },
+    {
       title: '🔹 Configurações',
       items: [
         { key: 'admin' as Page, name: 'Administrador', icon: <Shield size={18} /> },
+        { key: 'settings' as Page, name: 'Minhas Configurações', icon: <Settings size={18} /> },
       ]
     }
   ];
