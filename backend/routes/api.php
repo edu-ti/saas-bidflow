@@ -108,4 +108,17 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'usersIndex']);
     Route::post('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'userStore']);
     Route::put('/tenant/users/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'userUpdate']);
+
+    // CLM - Contract Lifecycle Management
+    Route::apiResource('contracts', \App\Http\Controllers\ContractController::class);
+    Route::patch('/contracts/{id}/status', [\App\Http\Controllers\ContractController::class, 'changeStatus']);
+    Route::post('/contracts/{id}/request-approval', [\App\Http\Controllers\ContractController::class, 'requestApproval']);
+    Route::post('/contracts/{id}/addendum', [\App\Http\Controllers\ContractController::class, 'addAddendum']);
+    Route::get('/contracts/expiring', [\App\Http\Controllers\ContractController::class, 'getExpiring']);
+    Route::get('/contracts/expired', [\App\Http\Controllers\ContractController::class, 'getExpired']);
+
+    Route::apiResource('contract-templates', \App\Http\Controllers\ContractTemplateController::class);
+    Route::get('/contract-templates/placeholders', [\App\Http\Controllers\ContractTemplateController::class, 'getPlaceholders']);
+
+    Route::post('/contract-approvals/{approvalId}/process', [\App\Http\Controllers\ContractController::class, 'processApproval']);
 });

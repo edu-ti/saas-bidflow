@@ -1,4 +1,5 @@
 .opencode/
+.para-analise/
 
 # Backend Laravel
 /vendor/
