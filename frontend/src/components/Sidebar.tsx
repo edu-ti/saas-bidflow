@@ -21,7 +21,7 @@ export type Page =
   // Estoque
   | 'products'
   // Financeiro
-  | 'accounts-payable-receivable'
+  | 'accounts-payable-receivable' | 'finance'
   // Configurações
   | 'admin';
 
@@ -103,6 +103,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     {
       title: '🔹 Financeiro',
       items: [
+        { key: 'finance' as Page, name: 'Motor Financeiro', icon: <Wallet size={18} /> },
         { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
       ]
     },

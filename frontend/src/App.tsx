@@ -22,6 +22,7 @@ import Consignment from './components/Consignment';
 import Contracts from './components/Contracts';
 import Reports from './components/Reports';
 import AccountsPayableReceivable from './components/AccountsPayableReceivable';
+import Finance from './components/Finance';
 import Admin from './components/Admin';
 import Company from './components/Company';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -78,6 +79,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/products') return 'products';
     // Financeiro
     if (path === '/accounts-payable-receivable') return 'accounts-payable-receivable';
+    if (path === '/finance') return 'finance';
     // Configurações
     if (path === '/admin') return 'admin';
     return 'dashboard';
@@ -307,6 +309,14 @@ function AppContent() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <AccountsPayableReceivable />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/finance" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <Finance />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />

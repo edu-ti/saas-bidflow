@@ -67,6 +67,43 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('accounts-receivable', \App\Http\Controllers\AccountsReceivableController::class);
     Route::apiResource('email-campaigns', \App\Http\Controllers\EmailCampaignController::class);
     
+    // Consignatários
+    Route::apiResource('consignees', \App\Http\Controllers\ConsigneeController::class);
+
+    // Consignações
+    Route::get('/consignments/dashboard-stats', [\App\Http\Controllers\ConsignmentController::class, 'dashboardStats']);
+    Route::get('/consignments/products', [\App\Http\Controllers\ConsignmentController::class, 'products']);
+    Route::get('/reports/consignments', [\App\Http\Controllers\ConsignmentController::class, 'report']);
+    Route::post('/consignments/{consignment}/send', [\App\Http\Controllers\ConsignmentController::class, 'send']);
+    Route::post('/consignments/{consignment}/reconcile', [\App\Http\Controllers\ConsignmentController::class, 'reconcile']);
+    Route::post('/consignments/{consignment}/close', [\App\Http\Controllers\ConsignmentController::class, 'close']);
+    Route::apiResource('consignments', \App\Http\Controllers\ConsignmentController::class);
+
+    // Financial Engine
+    Route::prefix('financial')->group(function () {
+        Route::get('/cash-flow', [\App\Http\Controllers\FinancialEngineController::class, 'cashFlowSummary']);
+        Route::get('/statements', [\App\Http\Controllers\FinancialEngineController::class, 'statementsIndex']);
+        Route::post('/statements', [\App\Http\Controllers\FinancialEngineController::class, 'statementsStore']);
+
+        Route::get('/invoices', [\App\Http\Controllers\FinancialEngineController::class, 'invoicesIndex']);
+        Route::post('/invoices', [\App\Http\Controllers\FinancialEngineController::class, 'invoicesStore']);
+        Route::get('/invoices/{invoice}', [\App\Http\Controllers\FinancialEngineController::class, 'invoicesShow']);
+        Route::post('/invoices/{invoice}/transmit', [\App\Http\Controllers\FinancialEngineController::class, 'invoicesTransmit']);
+        Route::post('/invoices/{invoice}/cancel', [\App\Http\Controllers\FinancialEngineController::class, 'invoicesCancel']);
+
+        Route::get('/bank-accounts', [\App\Http\Controllers\FinancialEngineController::class, 'bankAccountsIndex']);
+        Route::post('/bank-accounts', [\App\Http\Controllers\FinancialEngineController::class, 'bankAccountsStore']);
+        Route::put('/bank-accounts/{bankAccount}', [\App\Http\Controllers\FinancialEngineController::class, 'bankAccountsUpdate']);
+
+        Route::post('/ofx-import', [\App\Http\Controllers\FinancialEngineController::class, 'importOfx']);
+        Route::get('/reconciliations', [\App\Http\Controllers\FinancialEngineController::class, 'reconciliationsIndex']);
+        Route::post('/reconciliation-items/{item}/reconcile', [\App\Http\Controllers\FinancialEngineController::class, 'reconcileItem']);
+
+        Route::get('/tax-config', [\App\Http\Controllers\FinancialEngineController::class, 'taxConfigShow']);
+        Route::post('/tax-config', [\App\Http\Controllers\FinancialEngineController::class, 'taxConfigSave']);
+        Route::post('/tax-config/certificate', [\App\Http\Controllers\FinancialEngineController::class, 'taxConfigUploadCert']);
+    });
+
     // Phase 9: Tenant Admin
     Route::get('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'usersIndex']);
     Route::post('/tenant/users', [\App\Http\Controllers\CompanyManagementController::class, 'userStore']);
