@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Models\BankAccount::observe(\App\Observers\BankAccountObserver::class);
+
         RateLimiter::for('api', function (Request $request) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

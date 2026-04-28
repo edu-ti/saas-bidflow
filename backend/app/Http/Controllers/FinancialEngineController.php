@@ -213,15 +213,22 @@ class FinancialEngineController extends Controller
 
     public function taxConfigUploadCert(Request $request)
     {
-        $request->validate(['certificate' => 'required|file|max:2048']);
+        $request->validate([
+            'certificate' => 'required|file|max:2048',
+            'password'    => 'required|string',
+        ]);
 
+        // Stored safely in 'local' disk (storage/app) which is not publicly accessible
         $path = $request->file('certificate')->store('certificates', 'local');
 
         $config = TaxConfiguration::updateOrCreate(
             ['company_id' => Auth::user()->company_id],
-            ['certificado_path' => $path]
+            [
+                'certificado_path'     => $path,
+                'certificado_password' => $request->password,
+            ]
         );
 
-        return response()->json(['data' => $config, 'message' => 'Certificado enviado.']);
+        return response()->json(['data' => $config, 'message' => 'Certificado enviado com segurança.']);
     }
 }

@@ -119,6 +119,7 @@ class ConsignmentService
         }
 
         return DB::transaction(function () use ($consignment, $reconcileData) {
+            $totalReturnedValue = 0;
             foreach ($reconcileData as $itemData) {
                 $item = ConsignmentItem::where('consignment_id', $consignment->id)
                     ->where('id', $itemData['item_id'])
@@ -136,6 +137,26 @@ class ConsignmentService
                 $item->update([
                     'qty_sold'     => $newSold,
                     'qty_returned' => $newReturned,
+                ]);
+
+                if ($newReturned > 0) {
+                    $totalReturnedValue += $newReturned * (float) $item->agreed_unit_price;
+                }
+            }
+
+            if ($totalReturnedValue > 0) {
+                $financialService = app(\App\Services\FinancialEngineService::class);
+                $taxConfig = \App\Models\TaxConfiguration::where('company_id', $consignment->company_id)->first();
+                $cfop = ($taxConfig && $taxConfig->regime_especial === 'Simples Nacional') ? '5.918' : '6.918';
+
+                $financialService->createInvoice([
+                    'company_id'         => $consignment->company_id,
+                    'type'               => 'input',
+                    'number'             => null,
+                    'total_value'        => $totalReturnedValue,
+                    'recipient_name'     => $consignment->consignee->name,
+                    'recipient_document' => $consignment->consignee->document ?? null,
+                    'notes'              => "Devolução de Mercadoria Consignada (Ref. Consignação #{$consignment->id}) - CFOP Sugerido: {$cfop}",
                 ]);
             }
 

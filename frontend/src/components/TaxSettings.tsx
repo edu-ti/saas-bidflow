@@ -9,6 +9,7 @@ interface TaxConfig {
   regime_especial: string;
   aliquota_padrao: string;
   certificado_path: string | null;
+  permite_saldo_negativo: boolean;
 }
 
 const REGIMES = [
@@ -21,7 +22,8 @@ const REGIMES = [
 export default function TaxSettings() {
   const { theme } = useTheme();
   const dark = theme === 'dark';
-  const [config, setConfig] = useState<TaxConfig>({ regime_especial: '', aliquota_padrao: '0', certificado_path: null });
+  const [config, setConfig] = useState<TaxConfig>({ regime_especial: '', aliquota_padrao: '0', certificado_path: null, permite_saldo_negativo: false });
+  const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,6 +42,7 @@ export default function TaxSettings() {
       await api.post('/api/financial/tax-config', {
         regime_especial: config.regime_especial,
         aliquota_padrao: Number(config.aliquota_padrao),
+        permite_saldo_negativo: config.permite_saldo_negativo,
       });
       toast.success('Configurações salvas!');
     } catch { toast.error('Erro ao salvar'); }
@@ -47,13 +50,19 @@ export default function TaxSettings() {
   };
 
   const handleCertUpload = async (file: File) => {
+    if (!password) {
+      toast.error('Informe a senha do certificado primeiro!');
+      return;
+    }
     setUploading(true);
     try {
       const form = new FormData();
       form.append('certificate', file);
+      form.append('password', password);
       const r = await api.post('/api/financial/tax-config/certificate', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Certificado enviado!');
       setConfig(r.data.data);
+      setPassword('');
     } catch { toast.error('Erro no upload'); }
     finally { setUploading(false); }
   };
@@ -87,6 +96,14 @@ export default function TaxSettings() {
               onChange={e => setConfig({...config, aliquota_padrao: e.target.value})}
               className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`} />
           </div>
+          <div className="flex items-center gap-2 mt-2">
+            <input type="checkbox" id="saldo_negativo" checked={config.permite_saldo_negativo} 
+              onChange={e => setConfig({...config, permite_saldo_negativo: e.target.checked})} 
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
+            <label htmlFor="saldo_negativo" className={`text-sm ${label}`}>
+              Permitir saldo bancário negativo ("Crédito Especial")
+            </label>
+          </div>
           <div className="flex justify-end pt-2">
             <button type="submit" disabled={saving}
               className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5 disabled:opacity-60">
@@ -99,16 +116,16 @@ export default function TaxSettings() {
       {/* Certificate Upload */}
       <div className={`rounded-xl border ${card}`}>
         <div className="p-5 border-b border-slate-200 dark:border-slate-700">
-          <h3 className="font-semibold flex items-center gap-2"><Shield className="w-4 h-4" />Certificado Digital</h3>
-          <p className={`text-xs mt-1 ${sub}`}>Upload do certificado A1 (.pfx) para emissão de NF-e</p>
+          <h3 className="font-semibold flex items-center gap-2"><Shield className="w-4 h-4" />Certificado Digital A1</h3>
+          <p className={`text-xs mt-1 ${sub}`}>Upload do certificado (.pfx/.p12) guardado em ambiente privado e seguro.</p>
         </div>
         <div className="p-5">
           {config.certificado_path ? (
             <div className={`rounded-lg border p-4 mb-4 flex items-center gap-3 ${dark ? 'border-emerald-800 bg-emerald-900/10' : 'border-emerald-200 bg-emerald-50'}`}>
               <Shield className="w-5 h-5 text-emerald-500" />
               <div>
-                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Certificado instalado</p>
-                <p className={`text-xs ${sub}`}>Arquivo armazenado de forma segura (criptografado)</p>
+                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Certificado Instalado com Sucesso</p>
+                <p className={`text-xs text-emerald-600/80 dark:text-emerald-400/80`}>Armazenado localmente fora de pastas públicas. Senha salva em modo encriptado.</p>
               </div>
             </div>
           ) : (
@@ -117,13 +134,22 @@ export default function TaxSettings() {
               <p className={`text-sm ${sub}`}>Nenhum certificado instalado</p>
             </div>
           )}
-          <label className="cursor-pointer">
-            <input type="file" accept=".pfx,.p12" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCertUpload(e.target.files[0]); }} />
-            <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium cursor-pointer hover:from-blue-700 hover:to-indigo-700 transition-all">
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              {config.certificado_path ? 'Substituir Certificado' : 'Enviar Certificado'}
-            </span>
-          </label>
+
+          <div className="flex flex-col gap-3">
+            <div>
+              <label className={`block text-sm font-medium mb-1.5 ${label}`}>Senha do Certificado *</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Informe a senha antes de selecionar o arquivo"
+                className={`w-full max-w-sm px-3 py-2.5 rounded-lg border text-sm ${input}`} />
+            </div>
+            
+            <label className="cursor-pointer max-w-max">
+              <input type="file" accept=".pfx,.p12" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCertUpload(e.target.files[0]); }} />
+              <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium cursor-pointer hover:from-blue-700 hover:to-indigo-700 transition-all">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {config.certificado_path ? 'Substituir Certificado' : 'Enviar Certificado'}
+              </span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
