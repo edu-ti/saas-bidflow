@@ -12,10 +12,14 @@ import {
   ChevronRight,
   Check,
   Loader2,
+  Building,
+  Landmark,
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
+import CompanySettings from "./CompanySettings";
+import TaxSettings from "./TaxSettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -39,6 +43,8 @@ const Settings = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
   const [showDevices, setShowDevices] = useState(false);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [loading2FA, setLoading2FA] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
 
   // Confirm Modal State
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -122,17 +128,36 @@ const Settings = () => {
     }
   };
 
-  const handlePasswordReset = () => {
-    setPasswordResetSent(true);
-    setTimeout(() => setPasswordResetSent(false), 3000);
-  };
-
-  const handleDeviceToggle = () => {
+const handleDeviceToggle = () => {
     setShowDevices(!showDevices);
   };
 
-  const handle2FAToggle = () => {
-    setTwoFactorEnabled(!twoFactorEnabled);
+  const handle2FAToggle = async () => {
+    setLoading2FA(true);
+    try {
+      const newValue = !twoFactorEnabled;
+      await api.post('/api/settings/2fa', { enabled: newValue });
+      setTwoFactorEnabled(newValue);
+      toast.success(`2FA ${newValue ? 'ativada' : 'desativada'} com sucesso!`);
+    } catch {
+      toast.error('Erro ao alterar 2FA');
+    } finally {
+      setLoading2FA(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    setLoadingPassword(true);
+    try {
+      await api.post('/api/settings/password-reset');
+      setPasswordResetSent(true);
+      toast.success('Email de recuperação enviado!');
+      setTimeout(() => setPasswordResetSent(false), 5000);
+    } catch {
+      toast.error('Erro ao enviar email de recuperação');
+    } finally {
+      setLoadingPassword(false);
+    }
   };
 
   const handleDisconnect = () => {
@@ -161,6 +186,16 @@ const Settings = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col md:flex-row overflow-hidden min-h-[600px]">
         {/* Sidebar Tabs */}
         <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 space-y-2">
+          <button
+            onClick={() => setActiveTab("company")}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
+              activeTab === "company"
+                ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+            }`}
+          >
+            <Building size={18} /> Empresa
+          </button>
           <button
             onClick={() => setActiveTab("profile")}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
@@ -201,10 +236,22 @@ const Settings = () => {
           >
             <Shield size={18} /> Segurança
           </button>
+          <button
+            onClick={() => setActiveTab("tax")}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
+              activeTab === "tax"
+                ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+            }`}
+          >
+            <Landmark size={18} /> Fiscal e Caixa
+          </button>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 p-6 md:p-8">
+          {activeTab === "company" && <CompanySettings />}
+          {activeTab === "tax" && <TaxSettings />}
           {activeTab === "profile" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
@@ -524,13 +571,14 @@ const Settings = () => {
                 </div>
                 <button
                   onClick={handle2FAToggle}
-                  className={`font-medium text-xs border px-3 py-1.5 rounded shadow-sm transition ${
+                  disabled={loading2FA}
+                  className={`font-medium text-xs border px-3 py-1.5 rounded shadow-2-sm transition disabled:opacity-60 ${
                     twoFactorEnabled
                       ? "text-red-600 border-red-200 bg-white hover:bg-red-50"
                       : "text-green-600 border-green-200 bg-white hover:bg-green-50"
                   }`}
                 >
-                  {twoFactorEnabled ? "Desativar" : "Ativar"}
+                  {loading2FA ? <Loader2 size={14} className="animate-spin" /> : twoFactorEnabled ? "Desativar" : "Ativar"}
                 </button>
               </div>
 

@@ -45,6 +45,7 @@ export default function Admin() {
   const [users, setUsers] = useState<User[]>([]);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
+  const [savingCompany, setSavingCompany] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -154,6 +155,7 @@ export default function Admin() {
   };
 
   const handleSaveCompany = async () => {
+    setSavingCompany(true);
     try {
       await api.put(`/api/companies/${company?.id}`, company);
       toast.success('Empresa atualizada!');
