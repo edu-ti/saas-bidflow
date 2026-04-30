@@ -7,9 +7,16 @@ use App\Models\FunnelStage;
 use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\OpportunityAIService;
 
 class OpportunityController extends Controller
 {
+    protected $aiService;
+
+    public function __construct(OpportunityAIService $aiService)
+    {
+        $this->aiService = $aiService;
+    }
     /**
      * Move an opportunity to a new funnel stage.
      */
@@ -281,5 +288,66 @@ class OpportunityController extends Controller
         $opportunity = Opportunity::findOrFail($id);
         $opportunity->delete();
         return response()->json(['message' => 'Opportunity deleted successfully']);
+    }
+
+    // AI Endpoints migrated from OpportunityAiController
+
+    public function updateInsights(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'insights' => 'required|array',
+        ]);
+
+        $opportunity = Opportunity::findOrFail($id);
+
+        if ($opportunity->company_id !== Auth::user()->company_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $this->aiService->updateInsights($opportunity, $validated['insights'], Auth::id());
+
+        return response()->json([
+            'message' => 'AI insights merged successfully',
+            'opportunity' => $opportunity
+        ]);
+    }
+
+    public function predict($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('update', $opportunity);
+
+        $this->aiService->predict($opportunity);
+
+        return response()->json([
+            'message' => 'Predição genérica em andamento',
+            'status' => 'processing'
+        ], 202);
+    }
+
+    public function parseNotice($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('update', $opportunity);
+
+        $this->aiService->parseNotice($opportunity);
+
+        return response()->json([
+            'message' => 'Parsing de edital (RAG) em andamento',
+            'status' => 'processing'
+        ], 202);
+    }
+
+    public function generateDraftPdf($id)
+    {
+        $opportunity = Opportunity::findOrFail($id);
+        $this->authorize('view', $opportunity);
+
+        try {
+            $pdf = $this->aiService->generateDraftPdf($opportunity);
+            return $pdf->stream('proposal_draft_'.$id.'.pdf');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 501);
+        }
     }
 }

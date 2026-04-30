@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Organization;
+use App\Http\Resources\OrganizationResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -114,5 +116,48 @@ class CompanyManagementController extends Controller
         $company->update($validated);
         
         return response()->json(['data' => $company, 'message' => 'Empresa atualizada com sucesso']);
+    }
+
+    // --- Organization Methods ---
+
+    public function organizationIndex(Request $request)
+    {
+        // Trait BelongsToTenant will scope this to the current tenant if configured,
+        // but we explicitly enforce it here to standardize tenant control
+        $authUser = Auth::user();
+        $organizations = Organization::where('company_id', $authUser->company_id)->get();
+        return OrganizationResource::collection($organizations);
+    }
+
+    public function organizationStore(Request $request)
+    {
+        $authUser = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'document_number' => 'nullable|string|max:255',
+            'uasg_code' => 'nullable|string|max:255',
+            'sphere' => 'nullable|in:Federal,Estadual,Municipal',
+            'address_data' => 'nullable|array',
+            'phone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        $validated['company_id'] = $authUser->company_id;
+        $organization = Organization::create($validated);
+
+        return new OrganizationResource($organization);
+    }
+
+    public function organizationShow(Request $request, $id)
+    {
+        $authUser = Auth::user();
+        $organization = Organization::where('company_id', $authUser->company_id)->find($id);
+
+        if (! $organization) {
+            return response()->json(['message' => 'Organization not found'], 404);
+        }
+
+        return new OrganizationResource($organization);
     }
 }

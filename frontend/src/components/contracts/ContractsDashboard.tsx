@@ -4,7 +4,7 @@ import {
   XCircle, Clock, AlertTriangle, Download, Upload, Calendar, X,
   ChevronRight, Paperclip, User, Building, Truck, Users
 } from 'lucide-react';
-import api from '../lib/axios';
+import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 
 type Contract = {
@@ -98,7 +98,7 @@ const TIMELINE_STEPS = [
   { key: 'active', label: 'Execução', icon: CheckCircle },
 ];
 
-export default function Contracts() {
+export default function ContractsDashboard() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(false);

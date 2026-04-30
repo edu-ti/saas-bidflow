@@ -3,13 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AlertController;
-use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProposalController;
-use App\Http\Controllers\OpportunityAiController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FunnelController;
+use App\Http\Controllers\CompanyManagementController;
 
 // Public routes (no auth needed)
 Route::post('/login', [AuthController::class, 'login']);
@@ -39,17 +38,21 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::put('/opportunities/{id}', [OpportunityController::class, 'update']);
     Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy']);
     Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
-    Route::post('/opportunities/{id}/ai-insights', [OpportunityAiController::class, 'updateInsights']);
+    Route::post('/opportunities/{id}/ai-insights', [OpportunityController::class, 'updateInsights']);
     Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
     
     // Phase 10: AI Jobs & Automation
-    Route::post('/opportunities/{id}/predict', [OpportunityAiController::class, 'predict']);
-    Route::post('/opportunities/{id}/parse-notice', [OpportunityAiController::class, 'parseNotice']);
-    Route::get('/opportunities/{id}/proposal-draft/pdf', [OpportunityAiController::class, 'generateDraftPdf']);
+    Route::post('/opportunities/{id}/predict', [OpportunityController::class, 'predict']);
+    Route::post('/opportunities/{id}/parse-notice', [OpportunityController::class, 'parseNotice']);
+    Route::get('/opportunities/{id}/proposal-draft/pdf', [OpportunityController::class, 'generateDraftPdf']);
 
     Route::get('/alerts', [AlertController::class, 'index']);
     Route::post('/alerts', [AlertController::class, 'store']);
-    Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show']);
+    
+    // Organizations (consolidated under CompanyManagementController)
+    Route::get('/organizations', [CompanyManagementController::class, 'organizationIndex']);
+    Route::post('/organizations', [CompanyManagementController::class, 'organizationStore']);
+    Route::get('/organizations/{id}', [CompanyManagementController::class, 'organizationShow']);
     Route::post('/proposals', [ProposalController::class, 'store']);
     Route::post('/proposals/{id}/generate-pdf', [ProposalController::class, 'generatePdf']);
     

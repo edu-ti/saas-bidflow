@@ -18,8 +18,6 @@ import {
 import api from "../lib/axios";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
-import CompanySettings from "./CompanySettings";
-import TaxSettings from "./TaxSettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -187,16 +185,6 @@ const handleDeviceToggle = () => {
         {/* Sidebar Tabs */}
         <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 space-y-2">
           <button
-            onClick={() => setActiveTab("company")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "company"
-                ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Building size={18} /> Empresa
-          </button>
-          <button
             onClick={() => setActiveTab("profile")}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
               activeTab === "profile"
@@ -236,22 +224,10 @@ const handleDeviceToggle = () => {
           >
             <Shield size={18} /> Segurança
           </button>
-          <button
-            onClick={() => setActiveTab("tax")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "tax"
-                ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            <Landmark size={18} /> Fiscal e Caixa
-          </button>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 p-6 md:p-8">
-          {activeTab === "company" && <CompanySettings />}
-          {activeTab === "tax" && <TaxSettings />}
           {activeTab === "profile" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>

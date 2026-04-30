@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { BarChart3, FileText, Landmark, Settings } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import FinancialDashboard from './financial/FinancialDashboard';
-import InvoiceManager from './InvoiceManager';
-import BankConciliation from './BankConciliation';
-import TaxSettings from './TaxSettings';
+import { useTheme } from '../../context/ThemeContext';
+import FinancialDashboard from './FinancialDashboard';
+import InvoiceManager from '../InvoiceManager';
+import BankConciliation from '../BankConciliation';
+import TaxSettings from '../TaxSettings';
 
 type Tab = 'dashboard' | 'invoices' | 'conciliation' | 'settings';
 
@@ -15,7 +15,7 @@ const TABS: { key: Tab; label: string; icon: typeof BarChart3 }[] = [
   { key: 'settings',      label: 'Configurações Fiscais', icon: Settings },
 ];
 
-export default function Finance() {
+export default function FinanceDashboard() {
   const { theme } = useTheme();
   const dark = theme === 'dark';
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');

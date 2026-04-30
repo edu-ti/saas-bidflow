@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../lib/axios';
-import Modal from './ui/Modal';
+import api from '../../lib/axios';
+import Modal from '../ui/Modal';
 
 interface Lead {
   id: number;
@@ -14,7 +14,7 @@ interface Lead {
   temperature: string;
 }
 
-export default function Leads() {
+export default function LeadsDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
