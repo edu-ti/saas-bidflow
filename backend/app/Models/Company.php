@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'document', 'domain'])]
+#[Fillable(['name', 'document', 'domain', 'plan_id'])]
 class Company extends Model
 {
     use HasFactory;
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
 
     public function users()
     {

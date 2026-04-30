@@ -17,6 +17,7 @@ export default function MasterLayout() {
   const menuItems = [
     { key: '/master/dashboard', name: 'Dashboard Master', icon: <LayoutDashboard size={18} /> },
     { key: '/master/tenants', name: 'Gestão de Empresas', icon: <Building2 size={18} /> },
+    { key: '/master/plans', name: 'Planos de Assinatura', icon: <Building2 size={18} /> },
   ];
 
   return (

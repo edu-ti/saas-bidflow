@@ -215,5 +215,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 // Master SuperAdmin Routes
 Route::middleware(['auth:sanctum', 'throttle:api', \App\Http\Middleware\SuperAdminMiddleware::class])->prefix('master')->group(function () {
     Route::get('/tenants', [\App\Http\Controllers\Master\TenantManagementController::class, 'index']);
+    Route::post('/tenants', [\App\Http\Controllers\Master\TenantManagementController::class, 'store']);
+    Route::put('/tenants/{tenant_id}', [\App\Http\Controllers\Master\TenantManagementController::class, 'update']);
     Route::post('/tenants/{tenant_id}/impersonate', [\App\Http\Controllers\Master\TenantManagementController::class, 'impersonate']);
+    
+    Route::apiResource('plans', \App\Http\Controllers\Master\PlanController::class);
 });

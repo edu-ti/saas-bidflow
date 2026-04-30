@@ -10,11 +10,56 @@ use Illuminate\Http\Request;
 class TenantManagementController extends Controller
 {
     /**
+     * Store a new tenant (Company) and its first admin User.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'document' => 'required|string|max:20|unique:companies,document',
+            'plan_id' => 'required|exists:plans,id',
+            'admin_name' => 'required|string|max:255',
+            'admin_email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $company = \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            // Create the Company
+            $company = Company::create([
+                'name' => $validated['name'],
+                'document' => $validated['document'],
+                'plan_id' => $validated['plan_id'],
+            ]);
+
+            // Create the Admin User for this Company
+            User::create([
+                'company_id' => $company->id,
+                'name' => $validated['admin_name'],
+                'email' => $validated['admin_email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                'role' => 'Admin',
+                'status' => 'Active',
+                'is_superadmin' => false,
+            ]);
+
+            return $company;
+        });
+
+        // Load relations or counts if needed
+        $company->users_count = 1;
+        
+        return response()->json([
+            'message' => 'Empresa cadastrada com sucesso!',
+            'company' => $company
+        ], 201);
+    }
+
+    /**
      * List all tenants (companies) with aggregated data.
      */
     public function index()
     {
-        $companies = Company::withCount('users')
+        $companies = Company::with(['plan'])->withCount('users')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($company) {
@@ -22,6 +67,8 @@ class TenantManagementController extends Controller
                     'id' => $company->id,
                     'name' => $company->name ?? 'Empresa Sem Nome',
                     'cnpj' => $company->document,
+                    'plan_id' => $company->plan_id,
+                    'plan_name' => $company->plan ? $company->plan->name : 'Nenhum',
                     'status' => 'active',
                     'users_count' => $company->users_count,
                     'created_at' => $company->created_at,
@@ -29,6 +76,27 @@ class TenantManagementController extends Controller
             });
 
         return response()->json(['data' => $companies]);
+    }
+
+    /**
+     * Update a tenant (Company) data.
+     */
+    public function update(Request $request, $tenant_id)
+    {
+        $company = Company::findOrFail($tenant_id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'document' => 'required|string|max:20|unique:companies,document,' . $company->id,
+            'plan_id' => 'required|exists:plans,id',
+        ]);
+
+        $company->update($validated);
+
+        return response()->json([
+            'message' => 'Empresa atualizada com sucesso!',
+            'company' => $company
+        ]);
     }
 
     /**
