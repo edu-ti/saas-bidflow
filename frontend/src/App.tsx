@@ -31,6 +31,9 @@ import Company from './components/Company';
 import ChatbotBuilder from './components/ChatbotBuilder';
 import Conversations from './components/Conversations';
 import Settings from './components/Settings';
+import MasterLayout from './layouts/MasterLayout';
+import MasterDashboard from './components/master/MasterDashboard';
+import TenantList from './components/master/TenantList';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
@@ -39,6 +42,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Componente para rotas exclusivas do Super Admin
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = !!localStorage.getItem('api_token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!user.is_superadmin) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -386,6 +405,17 @@ function AppContent() {
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />
+
+        {/* Master Routes (Super Admin) */}
+        <Route path="/master" element={
+          <SuperAdminRoute>
+            <MasterLayout />
+          </SuperAdminRoute>
+        }>
+          <Route path="dashboard" element={<MasterDashboard />} />
+          <Route path="tenants" element={<TenantList />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+        </Route>
 
         {/* Rota fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

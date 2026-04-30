@@ -21,9 +21,7 @@ return new class extends Migration
             $table->foreignId('contract_template_id')->nullable()->constrained('contract_templates')->nullOnDelete();
             $table->text('generated_content')->nullable();
 
-            $table->morphIndex('contractable');
-            $table->unsignedBigInteger('contractable_id')->nullable();
-            $table->string('contractable_type')->nullable();
+            $table->nullableMorphs('contractable');
 
             $table->text('payment_terms')->nullable();
             $table->string('renewal_type')->default('manual');

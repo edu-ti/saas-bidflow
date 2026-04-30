@@ -17,6 +17,11 @@ class TenantScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (! app()->runningInConsole() && Auth::hasUser()) {
+            // Bypass tenant scope for super admins on master routes
+            if (Auth::user()->is_superadmin && request()->is('api/master*')) {
+                return;
+            }
+            
             $builder->where('company_id', Auth::user()->company_id);
         }
     }

@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('email_campaigns');
         Schema::create('email_campaigns', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');

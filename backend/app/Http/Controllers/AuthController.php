@@ -34,6 +34,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'company_id' => $user->company_id,
+                'is_superadmin' => (bool) $user->is_superadmin,
             ]
         ]);
     }
