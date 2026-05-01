@@ -65,6 +65,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'company' as Page, name: 'Minha Empresa', icon: <Building2 size={18} /> },
         { key: 'users' as Page, name: 'Equipa / Utilizadores', icon: <Users size={18} /> },
         { key: 'reports' as Page, name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
+        { key: 'licenses' as Page, name: 'Gestão de Licenças e Certidões', icon: <FileCheck size={18} /> },
       ]
     },
     {
@@ -73,8 +74,9 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'sales-funnel' as Page, name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
         { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
         { key: 'clients' as Page, name: 'Clientes', icon: <User size={18} /> },
+        { key: 'products' as Page, name: 'Produtos (Catálogo)', icon: <Package size={18} /> },
         { key: 'proposals' as Page, name: 'Propostas', icon: <FileText size={18} /> },
-        { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
+        { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
       ]
     },
     {
@@ -85,21 +87,22 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'bidding-monitoring' as Page, name: 'Monitoramento de Licitações', icon: <FileSearch size={18} /> },
         { key: 'bidding-capture' as Page, name: 'Captura de Editais', icon: <ClipboardList size={18} /> },
         { key: 'auction-details' as Page, name: 'Detalhes do Pregão', icon: <ScrollText size={18} /> },
-      ]
-    },
-    {
-      title: '🔹 Operacional',
-      items: [
-        { key: 'licenses' as Page, name: 'Gestão de Licenças e Certidões', icon: <FileCheck size={18} /> },
-        { key: 'consignment' as Page, name: 'Gestão de Consignado', icon: <Handshake size={18} /> },
-        { key: 'contracts' as Page, name: 'Contratos', icon: <Briefcase size={18} /> },
+        { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
       ]
     },
     {
       title: '🔹 Estoque',
       items: [
-        { key: 'products' as Page, name: 'Produtos (Catálogo)', icon: <Package size={18} /> },
         { key: 'inventory' as Page, name: 'Inventário', icon: <Boxes size={18} /> },
+        { key: 'consignment' as Page, name: 'Gestão de Consignado', icon: <Handshake size={18} /> },
+      ]
+    },
+    {
+      title: '🔹 Financeiro',
+      items: [
+        { key: 'finance' as Page, name: 'Motor Financeiro', icon: <Wallet size={18} /> },
+        { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
+        { key: 'contracts' as Page, name: 'Contratos', icon: <Briefcase size={18} /> },
       ]
     },
     {
@@ -108,14 +111,6 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'campaigns' as Page, name: 'Campanhas', icon: <Send size={18} /> },
         { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
         { key: 'tasks' as Page, name: 'Tarefas', icon: <ListTodo size={18} /> },
-        { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
-      ]
-    },
-    {
-      title: '🔹 Financeiro',
-      items: [
-        { key: 'finance' as Page, name: 'Motor Financeiro', icon: <Wallet size={18} /> },
-        { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
       ]
     },
     {
@@ -135,7 +130,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   ];
 
   return (
-    <div 
+    <div
       className={`h-screen bg-slate-900 flex flex-col text-slate-300 flex-shrink-0 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
@@ -170,8 +165,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                   key={index}
                   onClick={() => item.key && onNavigate(item.key)}
                   className={`w-full flex items-center py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-slate-800 hover:text-white text-slate-400'
+                    ? 'bg-blue-600 text-white'
+                    : 'hover:bg-slate-800 hover:text-white text-slate-400'
                     } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${isExpanded ? 'px-3' : 'px-0 justify-center'}`}
                 >
                   <span className="text-slate-400 flex-shrink-0">{item.icon}</span>

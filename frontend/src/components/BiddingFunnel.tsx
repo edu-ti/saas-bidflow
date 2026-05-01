@@ -160,12 +160,12 @@ export default function BiddingFunnel() {
           <h1 className="text-2xl font-bold text-slate-900">Funil de Licitações</h1>
           <p className="text-sm text-slate-500">Gestão de oportunidades de licitações</p>
         </div>
-        <button
+<button
           onClick={openModal}
           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm"
         >
           <Plus className="w-4 h-4" />
-          NovaLicitação
+          Nova Licitação
         </button>
       </div>
 

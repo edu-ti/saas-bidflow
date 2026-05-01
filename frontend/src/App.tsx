@@ -234,14 +234,6 @@ function AppContent() {
           </ProtectedRoute>
         } />
 
-        <Route path="/ai-generator" element={
-          <ProtectedRoute>
-            <AuthenticatedLayout>
-              <AIGenerator />
-            </AuthenticatedLayout>
-          </ProtectedRoute>
-        } />
-
         <Route path="/email-marketing" element={
           <ProtectedRoute>
             <AuthenticatedLayout>
@@ -295,6 +287,14 @@ function AppContent() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <AuctionDetails />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/ai-generator" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <AIGenerator />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />
