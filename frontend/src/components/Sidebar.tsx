@@ -5,7 +5,7 @@ import {
   BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
   CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
   Briefcase, FileSignature, Sparkles, Sun, Moon, Boxes, Send, ListTodo,
-  MessageCircle, Bot
+  MessageCircle, Bot, Lock
 } from 'lucide-react';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
@@ -39,7 +39,14 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : { name: 'Usuário', company_id: 'BidFlow' };
+  const user = storedUser ? JSON.parse(storedUser) : { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, allowed_modules: [] };
+
+  const hasModule = (moduleKey?: string) => {
+    if (!moduleKey) return true;
+    if (user.is_superadmin) return true;
+    if (!user.allowed_modules) return false;
+    return user.allowed_modules.includes(moduleKey);
+  };
 
   useEffect(() => {
     const fetchAlerts = () => {
@@ -70,6 +77,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Comercial',
+      requiredModule: 'commercial',
       items: [
         { key: 'sales-funnel' as Page, name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
         { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
@@ -81,6 +89,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Licitações',
+      requiredModule: 'bidding',
       items: [
         { key: 'bidding-funnel' as Page, name: 'Funil de Licitações', icon: <KanbanSquare size={18} /> },
         { key: 'bidding-radar' as Page, name: 'Radar Licitações', icon: <Radar size={18} /> },
@@ -92,6 +101,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Estoque',
+      requiredModule: 'inventory',
       items: [
         { key: 'inventory' as Page, name: 'Inventário', icon: <Boxes size={18} /> },
         { key: 'consignment' as Page, name: 'Gestão de Consignado', icon: <Handshake size={18} /> },
@@ -99,6 +109,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Financeiro',
+      requiredModule: 'financial',
       items: [
         { key: 'finance' as Page, name: 'Motor Financeiro', icon: <Wallet size={18} /> },
         { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
@@ -107,6 +118,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Marketing',
+      requiredModule: 'marketing',
       items: [
         { key: 'campaigns' as Page, name: 'Campanhas', icon: <Send size={18} /> },
         { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
@@ -115,6 +127,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     },
     {
       title: '🔹 Chatbot & Conversas',
+      requiredModule: 'chatbot',
       items: [
         { key: 'chatbot' as Page, name: 'Construtor de Chatbot', icon: <Bot size={18} /> },
         { key: 'conversations' as Page, name: 'Conversas', icon: <MessageCircle size={18} /> },
@@ -152,19 +165,30 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       </div>
 
       <nav className="flex-1 py-4 px-2 space-y-4 overflow-y-auto custom-scrollbar">
-        {menuGroups.map((group, gIndex) => (
-          <div key={gIndex}>
+        {menuGroups.map((group, gIndex) => {
+          const isLocked = !hasModule(group.requiredModule);
+          return (
+          <div key={gIndex} className={isLocked ? 'opacity-50' : ''}>
             {isExpanded && (
-              <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                {group.title}
-              </p>
+              <div className="flex items-center justify-between px-3 mb-2">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  {group.title}
+                </p>
+                {isLocked && <Lock size={12} className="text-slate-500" />}
+              </div>
             )}
             <div className="space-y-1">
               {group.items.map((item, index) => (
                 <button
                   key={index}
-                  onClick={() => item.key && onNavigate(item.key)}
-                  className={`w-full flex items-center py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage
+                  onClick={() => {
+                    if (isLocked) {
+                      alert(`Módulo Premium: Entre em contato para ativar o ${group.title.replace('🔹 ', '')}`);
+                    } else if (item.key) {
+                      onNavigate(item.key);
+                    }
+                  }}
+                  className={`w-full flex items-center py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage && !isLocked
                     ? 'bg-blue-600 text-white'
                     : 'hover:bg-slate-800 hover:text-white text-slate-400'
                     } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${isExpanded ? 'px-3' : 'px-0 justify-center'}`}
@@ -173,7 +197,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                   {isExpanded && (
                     <>
                       <span className="truncate ml-3">{item.name}</span>
-                      {item.badge && (
+                      {item.badge && !isLocked && (
                         <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
                           {item.badge}
                         </span>
@@ -184,7 +208,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
               ))}
             </div>
           </div>
-        ))}
+        )})}
       </nav>
 
       <div className={`p-4 border-t border-slate-800 bg-slate-950/30 transition-all duration-300 ${isExpanded ? '' : 'p-2'}`}>

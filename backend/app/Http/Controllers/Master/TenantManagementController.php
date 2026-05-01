@@ -97,12 +97,15 @@ class TenantManagementController extends Controller
             'admin_name' => 'nullable|string|max:255',
             'admin_email' => 'nullable|email|max:255',
             'password' => 'nullable|string|min:6',
+            'addons' => 'nullable|array',
+            'addons.*' => 'string',
         ]);
 
         $company->update([
             'name' => $validated['name'],
             'document' => $validated['document'],
-            'plan_id' => $validated['plan_id']
+            'plan_id' => $validated['plan_id'],
+            'addons' => $validated['addons'] ?? []
         ]);
 
         $adminUser = User::where('company_id', $company->id)->where('role', 'Admin')->first() 

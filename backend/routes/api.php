@@ -18,7 +18,16 @@ Route::get('/cnpj/{cnpj}', [\App\Http\Controllers\ExternalDataController::class,
 Route::get('/cep/{cep}', [\App\Http\Controllers\ExternalDataController::class, 'searchCEP']);
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $company = $user->company;
+    $plan = $company ? $company->plan : null;
+    $features = $plan && is_array($plan->features) ? $plan->features : [];
+    $addons = $company && is_array($company->addons) ? $company->addons : [];
+    
+    $userData = $user->toArray();
+    $userData['allowed_modules'] = array_values(array_unique(array_merge($features, $addons)));
+    
+    return $userData;
 })->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
@@ -27,63 +36,77 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
     
-    Route::get('/funnel-stages', [FunnelController::class, 'stages']);
-    Route::post('/funnel-stages', [FunnelController::class, 'store']);
-    Route::put('/funnel-stages/{id}', [FunnelController::class, 'update']);
-    Route::delete('/funnel-stages/{id}', [FunnelController::class, 'destroy']);
-    
-    Route::get('/opportunities', [OpportunityController::class, 'index']);
-    Route::post('/opportunities', [OpportunityController::class, 'store']);
-    Route::get('/opportunities/{id}', [OpportunityController::class, 'show']);
-    Route::put('/opportunities/{id}', [OpportunityController::class, 'update']);
-    Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy']);
-    Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
-    Route::post('/opportunities/{id}/ai-insights', [OpportunityController::class, 'updateInsights']);
-    Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
-    
-    // Phase 10: AI Jobs & Automation
-    Route::post('/opportunities/{id}/predict', [OpportunityController::class, 'predict']);
-    Route::post('/opportunities/{id}/parse-notice', [OpportunityController::class, 'parseNotice']);
-    Route::get('/opportunities/{id}/proposal-draft/pdf', [OpportunityController::class, 'generateDraftPdf']);
+    Route::middleware('feature:commercial')->group(function () {
+        Route::get('/funnel-stages', [FunnelController::class, 'stages']);
+        Route::post('/funnel-stages', [FunnelController::class, 'store']);
+        Route::put('/funnel-stages/{id}', [FunnelController::class, 'update']);
+        Route::delete('/funnel-stages/{id}', [FunnelController::class, 'destroy']);
+        
+        Route::get('/opportunities', [OpportunityController::class, 'index']);
+        Route::post('/opportunities', [OpportunityController::class, 'store']);
+        Route::get('/opportunities/{id}', [OpportunityController::class, 'show']);
+        Route::put('/opportunities/{id}', [OpportunityController::class, 'update']);
+        Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy']);
+        Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
+        Route::post('/opportunities/{id}/ai-insights', [OpportunityController::class, 'updateInsights']);
+        Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
+        
+        // Phase 10: AI Jobs & Automation
+        Route::post('/opportunities/{id}/predict', [OpportunityController::class, 'predict']);
+        Route::post('/opportunities/{id}/parse-notice', [OpportunityController::class, 'parseNotice']);
+        Route::get('/opportunities/{id}/proposal-draft/pdf', [OpportunityController::class, 'generateDraftPdf']);
+    });
 
-    Route::get('/alerts', [AlertController::class, 'index']);
-    Route::post('/alerts', [AlertController::class, 'store']);
+    Route::middleware('feature:bidding')->group(function () {
+        Route::get('/alerts', [AlertController::class, 'index']);
+        Route::post('/alerts', [AlertController::class, 'store']);
+    });
     
     // Organizations (consolidated under CompanyManagementController)
     Route::get('/organizations', [CompanyManagementController::class, 'organizationIndex']);
     Route::post('/organizations', [CompanyManagementController::class, 'organizationStore']);
     Route::get('/organizations/{id}', [CompanyManagementController::class, 'organizationShow']);
-    Route::post('/proposals', [ProposalController::class, 'store']);
-    Route::post('/proposals/{id}/generate-pdf', [ProposalController::class, 'generatePdf']);
-    
-    // CRM & Agenda migrations
-    Route::apiResource('leads', \App\Http\Controllers\LeadController::class);
-    Route::apiResource('contacts', \App\Http\Controllers\ContactController::class);
-    Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
-    Route::apiResource('company-clients', \App\Http\Controllers\CompanyClientController::class);
-    Route::apiResource('products', \App\Http\Controllers\ProductController::class);
-    Route::apiResource('events', \App\Http\Controllers\EventController::class);
+    Route::middleware('feature:commercial')->group(function () {
+        Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::post('/proposals/{id}/generate-pdf', [ProposalController::class, 'generatePdf']);
+        
+        // CRM & Agenda migrations
+        Route::apiResource('leads', \App\Http\Controllers\LeadController::class);
+        Route::apiResource('contacts', \App\Http\Controllers\ContactController::class);
+        Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
+        Route::apiResource('company-clients', \App\Http\Controllers\CompanyClientController::class);
+        Route::apiResource('products', \App\Http\Controllers\ProductController::class);
+        Route::apiResource('events', \App\Http\Controllers\EventController::class);
+    });
     
     // Phase 9: Financial, Radar, Marketing
-    Route::apiResource('bidding-filters', \App\Http\Controllers\BiddingFilterController::class);
-    Route::apiResource('accounts-payable', \App\Http\Controllers\AccountsPayableController::class);
-    Route::apiResource('accounts-receivable', \App\Http\Controllers\AccountsReceivableController::class);
-    Route::apiResource('email-campaigns', \App\Http\Controllers\EmailCampaignController::class);
+    Route::middleware('feature:bidding')->group(function () {
+        Route::apiResource('bidding-filters', \App\Http\Controllers\BiddingFilterController::class);
+    });
+    Route::middleware('feature:financial')->group(function () {
+        Route::apiResource('accounts-payable', \App\Http\Controllers\AccountsPayableController::class);
+        Route::apiResource('accounts-receivable', \App\Http\Controllers\AccountsReceivableController::class);
+    });
+    Route::middleware('feature:marketing')->group(function () {
+        Route::apiResource('email-campaigns', \App\Http\Controllers\EmailCampaignController::class);
+    });
     
-    // Consignatários
-    Route::apiResource('consignees', \App\Http\Controllers\ConsigneeController::class);
+    Route::middleware('feature:inventory')->group(function () {
+        // Consignatários
+        Route::apiResource('consignees', \App\Http\Controllers\ConsigneeController::class);
 
-    // Consignações
-    Route::get('/consignments/dashboard-stats', [\App\Http\Controllers\ConsignmentController::class, 'dashboardStats']);
-    Route::get('/consignments/products', [\App\Http\Controllers\ConsignmentController::class, 'products']);
-    Route::get('/reports/consignments', [\App\Http\Controllers\ConsignmentController::class, 'report']);
-    Route::post('/consignments/{consignment}/send', [\App\Http\Controllers\ConsignmentController::class, 'send']);
-    Route::post('/consignments/{consignment}/reconcile', [\App\Http\Controllers\ConsignmentController::class, 'reconcile']);
-    Route::post('/consignments/{consignment}/close', [\App\Http\Controllers\ConsignmentController::class, 'close']);
-    Route::apiResource('consignments', \App\Http\Controllers\ConsignmentController::class);
+        // Consignações
+        Route::get('/consignments/dashboard-stats', [\App\Http\Controllers\ConsignmentController::class, 'dashboardStats']);
+        Route::get('/consignments/products', [\App\Http\Controllers\ConsignmentController::class, 'products']);
+        Route::get('/reports/consignments', [\App\Http\Controllers\ConsignmentController::class, 'report']);
+        Route::post('/consignments/{consignment}/send', [\App\Http\Controllers\ConsignmentController::class, 'send']);
+        Route::post('/consignments/{consignment}/reconcile', [\App\Http\Controllers\ConsignmentController::class, 'reconcile']);
+        Route::post('/consignments/{consignment}/close', [\App\Http\Controllers\ConsignmentController::class, 'close']);
+        Route::apiResource('consignments', \App\Http\Controllers\ConsignmentController::class);
+    });
 
     // Financial Engine
-    Route::prefix('financial')->group(function () {
+    Route::middleware('feature:financial')->prefix('financial')->group(function () {
         Route::get('/cash-flow', [\App\Http\Controllers\FinancialEngineController::class, 'cashFlowSummary']);
         Route::get('/statements', [\App\Http\Controllers\FinancialEngineController::class, 'statementsIndex']);
         Route::post('/statements', [\App\Http\Controllers\FinancialEngineController::class, 'statementsStore']);
@@ -155,40 +178,44 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'movements']);
     Route::post('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'createMovement']);
 
-    // Campanhas
-    Route::get('/campaigns', [\App\Http\Controllers\CampaignController::class, 'index']);
-    Route::post('/campaigns', [\App\Http\Controllers\CampaignController::class, 'store']);
-    Route::get('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'show']);
-    Route::put('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'update']);
-    Route::delete('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'destroy']);
-    Route::get('/campaigns/stats', [\App\Http\Controllers\CampaignController::class, 'stats']);
+    Route::middleware('feature:marketing')->group(function () {
+        // Campanhas
+        Route::get('/campaigns', [\App\Http\Controllers\CampaignController::class, 'index']);
+        Route::post('/campaigns', [\App\Http\Controllers\CampaignController::class, 'store']);
+        Route::get('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'show']);
+        Route::put('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'update']);
+        Route::delete('/campaigns/{id}', [\App\Http\Controllers\CampaignController::class, 'destroy']);
+        Route::get('/campaigns/stats', [\App\Http\Controllers\CampaignController::class, 'stats']);
 
-    // Tarefas
-    Route::get('/tasks', [\App\Http\Controllers\TaskController::class, 'index']);
-    Route::post('/tasks', [\App\Http\Controllers\TaskController::class, 'store']);
-    Route::get('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'show']);
-    Route::put('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'update']);
-    Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
-    Route::patch('/tasks/{id}/toggle', [\App\Http\Controllers\TaskController::class, 'toggleStatus']);
-    Route::get('/tasks/stats', [\App\Http\Controllers\TaskController::class, 'stats']);
+        // Tarefas
+        Route::get('/tasks', [\App\Http\Controllers\TaskController::class, 'index']);
+        Route::post('/tasks', [\App\Http\Controllers\TaskController::class, 'store']);
+        Route::get('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'show']);
+        Route::put('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'update']);
+        Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
+        Route::patch('/tasks/{id}/toggle', [\App\Http\Controllers\TaskController::class, 'toggleStatus']);
+        Route::get('/tasks/stats', [\App\Http\Controllers\TaskController::class, 'stats']);
 
-    // E-mail Marketing
-    Route::get('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'index']);
-    Route::post('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'store']);
-    Route::get('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'show']);
-    Route::put('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'update']);
-    Route::delete('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'destroy']);
-    Route::post('/email-campaigns/{id}/send', [\App\Http\Controllers\EmailMarketingController::class, 'send']);
-    Route::get('/email-campaigns/leads/search', [\App\Http\Controllers\EmailMarketingController::class, 'searchLeads']);
+        // E-mail Marketing
+        Route::get('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'index']);
+        Route::post('/email-campaigns', [\App\Http\Controllers\EmailMarketingController::class, 'store']);
+        Route::get('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'show']);
+        Route::put('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'update']);
+        Route::delete('/email-campaigns/{id}', [\App\Http\Controllers\EmailMarketingController::class, 'destroy']);
+        Route::post('/email-campaigns/{id}/send', [\App\Http\Controllers\EmailMarketingController::class, 'send']);
+        Route::get('/email-campaigns/leads/search', [\App\Http\Controllers\EmailMarketingController::class, 'searchLeads']);
+    });
 
-    // Chatbot Builder
-    Route::get('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'index']);
-    Route::post('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'store']);
-    Route::get('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'show']);
-    Route::put('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'update']);
-    Route::delete('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'destroy']);
-    Route::get('/chatbot/flows/active', [\App\Http\Controllers\ChatbotController::class, 'active']);
-    Route::post('/chatbot/flows/{id}/activate', [\App\Http\Controllers\ChatbotController::class, 'setActive']);
+    Route::middleware('feature:chatbot')->group(function () {
+        // Chatbot Builder
+        Route::get('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'index']);
+        Route::post('/chatbot/flows', [\App\Http\Controllers\ChatbotController::class, 'store']);
+        Route::get('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'show']);
+        Route::put('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'update']);
+        Route::delete('/chatbot/flows/{id}', [\App\Http\Controllers\ChatbotController::class, 'destroy']);
+        Route::get('/chatbot/flows/active', [\App\Http\Controllers\ChatbotController::class, 'active']);
+        Route::post('/chatbot/flows/{id}/activate', [\App\Http\Controllers\ChatbotController::class, 'setActive']);
+    });
 
     // Settings / Configurações do Usuário
     Route::get('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'profile']);
@@ -200,16 +227,18 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'whatsapp']);
     Route::put('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'updateWhatsapp']);
 
-    // Conversas
-    Route::get('/conversations', [\App\Http\Controllers\ConversationController::class, 'index']);
-    Route::post('/conversations', [\App\Http\Controllers\ConversationController::class, 'store']);
-    Route::get('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'show']);
-    Route::put('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'update']);
-    Route::delete('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'destroy']);
-    Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'messages']);
-    Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'sendMessage']);
-    Route::post('/conversations/{conversationId}/read', [\App\Http\Controllers\ConversationController::class, 'markRead']);
-    Route::get('/conversations/stats', [\App\Http\Controllers\ConversationController::class, 'stats']);
+    Route::middleware('feature:chatbot')->group(function () {
+        // Conversas
+        Route::get('/conversations', [\App\Http\Controllers\ConversationController::class, 'index']);
+        Route::post('/conversations', [\App\Http\Controllers\ConversationController::class, 'store']);
+        Route::get('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'show']);
+        Route::put('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'update']);
+        Route::delete('/conversations/{id}', [\App\Http\Controllers\ConversationController::class, 'destroy']);
+        Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'messages']);
+        Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\ConversationController::class, 'sendMessage']);
+        Route::post('/conversations/{conversationId}/read', [\App\Http\Controllers\ConversationController::class, 'markRead']);
+        Route::get('/conversations/stats', [\App\Http\Controllers\ConversationController::class, 'stats']);
+    });
 });
 
 // Master SuperAdmin Routes

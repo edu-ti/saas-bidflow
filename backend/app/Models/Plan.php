@@ -16,12 +16,14 @@ class Plan extends Model
         'monthly_price',
         'max_users',
         'active',
+        'features',
     ];
 
     protected $casts = [
         'monthly_price' => 'decimal:2',
         'max_users' => 'integer',
         'active' => 'boolean',
+        'features' => 'array',
     ];
 
     public function companies()

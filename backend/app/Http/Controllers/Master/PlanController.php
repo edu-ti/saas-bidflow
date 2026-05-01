@@ -22,6 +22,8 @@ class PlanController extends Controller
             'monthly_price' => 'required|numeric|min:0',
             'max_users' => 'required|integer|min:1',
             'active' => 'boolean',
+            'features' => 'nullable|array',
+            'features.*' => 'string',
         ]);
 
         $plan = Plan::create($validated);
@@ -41,6 +43,8 @@ class PlanController extends Controller
             'monthly_price' => 'numeric|min:0',
             'max_users' => 'integer|min:1',
             'active' => 'boolean',
+            'features' => 'nullable|array',
+            'features.*' => 'string',
         ]);
 
         $plan->update($validated);

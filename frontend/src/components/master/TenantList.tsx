@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Building2, Search, ArrowRight, UserCircle, Plus, Edit } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
@@ -15,12 +15,24 @@ interface Tenant {
   created_at: string;
   admin_name?: string;
   admin_email?: string;
+  addons?: string[];
 }
+
+const AVAILABLE_MODULES = [
+  { key: 'management', label: '1. Gestão (Dash, Config, Equipe, BI, Licenças)' },
+  { key: 'commercial', label: '2. Comercial (Clientes, Leads, Propostas, Funil, Catálogo, Agenda)' },
+  { key: 'bidding', label: '3. Licitações (Radar, Editais, Monitoramento, Funil, Pregão, IA)' },
+  { key: 'financial', label: '4. Financeiro (Motor, Contas, Contratos CLM)' },
+  { key: 'inventory', label: '5. Estoque (Inventário, Consignado)' },
+  { key: 'marketing', label: '6. Add-on: Marketing (Campanhas, E-mail)' },
+  { key: 'chatbot', label: '7. Add-on: Chatbot & Conversas' },
+];
 
 interface Plan {
   id: number;
   name: string;
   monthly_price: number;
+  features?: string[];
 }
 
 export default function TenantList() {
@@ -41,6 +53,22 @@ export default function TenantList() {
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [addons, setAddons] = useState<string[]>([]);
+
+  const selectedPlanFeatures = useMemo(() => {
+    if (!planId) return [];
+    const plan = plans.find(p => p.id.toString() === planId);
+    return plan?.features || [];
+  }, [planId, plans]);
+
+  useEffect(() => {
+    if (selectedPlanFeatures.length > 0) {
+      setAddons(prev => {
+        const filtered = prev.filter(addon => !selectedPlanFeatures.includes(addon));
+        return filtered.length !== prev.length ? filtered : prev;
+      });
+    }
+  }, [selectedPlanFeatures]);
 
   useEffect(() => {
     fetchTenants();
@@ -91,6 +119,7 @@ export default function TenantList() {
       setAdminName(tenant.admin_name || '');
       setAdminEmail(tenant.admin_email || '');
       setAdminPassword('');
+      setAddons(tenant.addons || []);
     } else {
       setEditingTenant(null);
       setCompanyName('');
@@ -99,6 +128,7 @@ export default function TenantList() {
       setAdminName('');
       setAdminEmail('');
       setAdminPassword('');
+      setAddons([]);
     }
     setIsModalOpen(true);
   };
@@ -121,6 +151,7 @@ export default function TenantList() {
           admin_name: adminName,
           admin_email: adminEmail,
           password: adminPassword || undefined,
+          addons,
         });
         toast.success('Empresa atualizada com sucesso!');
       } else {
@@ -366,6 +397,57 @@ export default function TenantList() {
               </div>
             </div>
           </div>
+
+          {editingTenant && (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
+                Módulos Adicionais (Add-ons)
+              </h3>
+              <p className="text-xs text-slate-500 mb-2">
+                Ligue ou desligue módulos avulsos para esta empresa. O plano principal já inclui módulos base.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {AVAILABLE_MODULES.map((mod) => {
+                  const isIncludedInPlan = selectedPlanFeatures.includes(mod.key);
+                  const isChecked = isIncludedInPlan || addons.includes(mod.key);
+
+                  return (
+                    <label 
+                      key={mod.key} 
+                      className={`flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors ${
+                        isIncludedInPlan 
+                          ? 'opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-800/50' 
+                          : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        disabled={isIncludedInPlan}
+                        onChange={(e) => {
+                          if (isIncludedInPlan) return;
+                          if (e.target.checked) {
+                            setAddons([...addons, mod.key]);
+                          } else {
+                            setAddons(addons.filter(k => k !== mod.key));
+                          }
+                        }}
+                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900 disabled:opacity-50"
+                      />
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        {mod.label}
+                        {isIncludedInPlan && (
+                          <span className="ml-2 text-[10px] font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Incluso no plano
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
             <button

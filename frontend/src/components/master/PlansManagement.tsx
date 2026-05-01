@@ -11,7 +11,18 @@ interface Plan {
   monthly_price: number;
   max_users: number;
   active: boolean;
+  features: string[];
 }
+
+const AVAILABLE_MODULES = [
+  { key: 'management', label: '1. Gestão (Dash, Config, Equipe, BI, Licenças)' },
+  { key: 'commercial', label: '2. Comercial (Clientes, Leads, Propostas, Funil, Catálogo, Agenda)' },
+  { key: 'bidding', label: '3. Licitações (Radar, Editais, Monitoramento, Funil, Pregão, IA)' },
+  { key: 'financial', label: '4. Financeiro (Motor, Contas, Contratos CLM)' },
+  { key: 'inventory', label: '5. Estoque (Inventário, Consignado)' },
+  { key: 'marketing', label: '6. Add-on: Marketing (Campanhas, E-mail)' },
+  { key: 'chatbot', label: '7. Add-on: Chatbot & Conversas' },
+];
 
 export default function PlansManagement() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -25,6 +36,7 @@ export default function PlansManagement() {
   const [price, setPrice] = useState('');
   const [maxUsers, setMaxUsers] = useState('1');
   const [active, setActive] = useState(true);
+  const [features, setFeatures] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPlans();
@@ -49,6 +61,7 @@ export default function PlansManagement() {
       setPrice(plan.monthly_price.toString());
       setMaxUsers(plan.max_users.toString());
       setActive(plan.active);
+      setFeatures(plan.features || []);
     } else {
       setEditingPlan(null);
       setName('');
@@ -56,6 +69,7 @@ export default function PlansManagement() {
       setPrice('');
       setMaxUsers('1');
       setActive(true);
+      setFeatures([]);
     }
     setIsModalOpen(true);
   };
@@ -73,6 +87,7 @@ export default function PlansManagement() {
       monthly_price: parseFloat(price),
       max_users: parseInt(maxUsers),
       active,
+      features,
     };
 
     try {
@@ -225,6 +240,30 @@ export default function PlansManagement() {
             <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">
               Plano Ativo
             </label>
+          </div>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2 mt-4">
+              Módulos Inclusos neste Plano
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {AVAILABLE_MODULES.map((mod) => (
+                <label key={mod.key} className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={features.includes(mod.key)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setFeatures([...features, mod.key]);
+                      } else {
+                        setFeatures(features.filter(k => k !== mod.key));
+                      }
+                    }}
+                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900"
+                  />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{mod.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <button
