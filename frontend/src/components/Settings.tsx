@@ -14,12 +14,20 @@ import {
   Loader2,
   Building,
   Landmark,
+  Users,
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
+import CompanySettings from "./CompanySettings";
+import UsersManagement from "./UsersManagement";
+import TaxSettings from "./TaxSettings";
 
 const Settings = () => {
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : { role: 'Admin' };
+  const isAdmin = user?.role === 'Admin';
+
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -224,6 +232,44 @@ const handleDeviceToggle = () => {
           >
             <Shield size={18} /> Segurança
           </button>
+          
+          {isAdmin && (
+            <>
+              <div className="pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-4">Administração</p>
+              </div>
+              <button
+                onClick={() => setActiveTab("company")}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
+                  activeTab === "company"
+                    ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Building size={18} /> Dados da Empresa
+              </button>
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
+                  activeTab === "users"
+                    ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Users size={18} /> Gestão de Equipe
+              </button>
+              <button
+                onClick={() => setActiveTab("tax")}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
+                  activeTab === "tax"
+                    ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Landmark size={18} /> Fiscal e Caixa
+              </button>
+            </>
+          )}
         </div>
 
         {/* Content Area */}
@@ -672,6 +718,10 @@ const handleDeviceToggle = () => {
               </div>
             </div>
           )}
+
+          {activeTab === "company" && isAdmin && <CompanySettings />}
+          {activeTab === "users" && isAdmin && <UsersManagement />}
+          {activeTab === "tax" && isAdmin && <TaxSettings />}
         </div>
       </div>
 

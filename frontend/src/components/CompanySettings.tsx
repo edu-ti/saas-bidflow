@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/axios';
-import { Loader2, Save, Building, Users, Landmark } from 'lucide-react';
+import { Loader2, Save, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
-import UsersManagement from './UsersManagement';
-import TaxSettings from './TaxSettings';
 
 interface AuditLog {
   id: number;
@@ -18,8 +16,6 @@ interface AuditLog {
 export default function CompanySettings() {
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : { company_id: 'BidFlow', role: 'Admin' };
-  
-  const [activeTab, setActiveTab] = useState('general');
 
   const [companyInfo, setCompanyInfo] = useState({
     name: 'GC Representações & Serviços',
@@ -71,41 +67,7 @@ export default function CompanySettings() {
         <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie os dados cadastrais do seu Tenant (ID: {user.company_id})</p>
       </div>
 
-      <div className="flex gap-1 p-1 rounded-xl bg-gray-200/60 dark:bg-gray-800 w-fit">
-        <button
-          onClick={() => setActiveTab('general')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'general'
-              ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/50'
-          }`}
-        >
-          <Building size={16} /> Dados Gerais
-        </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'users'
-              ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/50'
-          }`}
-        >
-          <Users size={16} /> Gestão de Equipe
-        </button>
-        <button
-          onClick={() => setActiveTab('tax')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'tax'
-              ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/50'
-          }`}
-        >
-          <Landmark size={16} /> Fiscal e Caixa
-        </button>
-      </div>
-
-      {activeTab === 'general' && (
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Dados Cadastrais</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -227,10 +189,6 @@ export default function CompanySettings() {
             </div>
           </div>
         </div>
-      )}
-
-      {activeTab === 'users' && <UsersManagement />}
-      {activeTab === 'tax' && <TaxSettings />}
     </div>
   );
 }

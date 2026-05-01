@@ -13,6 +13,8 @@ interface Tenant {
   plan_name?: string;
   users_count: number;
   created_at: string;
+  admin_name?: string;
+  admin_email?: string;
 }
 
 interface Plan {
@@ -86,6 +88,9 @@ export default function TenantList() {
       setCompanyName(tenant.name);
       setCompanyCnpj(tenant.cnpj || '');
       setPlanId(tenant.plan_id ? tenant.plan_id.toString() : '');
+      setAdminName(tenant.admin_name || '');
+      setAdminEmail(tenant.admin_email || '');
+      setAdminPassword('');
     } else {
       setEditingTenant(null);
       setCompanyName('');
@@ -113,6 +118,9 @@ export default function TenantList() {
           name: companyName,
           document: companyCnpj,
           plan_id: planId,
+          admin_name: adminName,
+          admin_email: adminEmail,
+          password: adminPassword || undefined,
         });
         toast.success('Empresa atualizada com sucesso!');
       } else {
@@ -314,49 +322,50 @@ export default function TenantList() {
             </div>
           </div>
 
-          {!editingTenant && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
-                Dados do Administrador
-              </h3>
-              
+          <div className="space-y-4">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
+              Dados do Administrador
+            </h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nome Completo</label>
+              <input
+                type="text"
+                required
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nome Completo</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">E-mail de Login</label>
                 <input
-                  type="text"
+                  type="email"
                   required
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">E-mail de Login</label>
-                  <input
-                    type="email"
-                    required
-                    value={adminEmail}
-                    onChange={(e) => setAdminEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Senha Provisória</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  />
-                </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  {editingTenant ? 'Nova Senha (Opcional)' : 'Senha Provisória'}
+                </label>
+                <input
+                  type="password"
+                  required={!editingTenant}
+                  minLength={6}
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder={editingTenant ? 'Deixe em branco para não alterar' : ''}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
               </div>
             </div>
-          )}
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
             <button
