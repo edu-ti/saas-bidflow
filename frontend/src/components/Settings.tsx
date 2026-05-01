@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
-import ConfirmModal from "./ConfirmModal";
+import ConfirmModal, { type ConfirmModalType } from "./ConfirmModal";
 import CompanySettings from "./CompanySettings";
 import UsersManagement from "./UsersManagement";
 import TaxSettings from "./TaxSettings";
@@ -134,7 +134,7 @@ const Settings = () => {
     }
   };
 
-const handleDeviceToggle = () => {
+  const handleDeviceToggle = () => {
     setShowDevices(!showDevices);
   };
 
@@ -194,45 +194,41 @@ const handleDeviceToggle = () => {
         <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 space-y-2">
           <button
             onClick={() => setActiveTab("profile")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "profile"
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "profile"
                 ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             <User size={18} /> Perfil
           </button>
           <button
             onClick={() => setActiveTab("notifications")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "notifications"
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "notifications"
                 ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             <Bell size={18} /> Notificações
           </button>
           <button
             onClick={() => setActiveTab("whatsapp")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "whatsapp"
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "whatsapp"
                 ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             <Smartphone size={18} /> Conexão WhatsApp
           </button>
           <button
             onClick={() => setActiveTab("security")}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-              activeTab === "security"
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "security"
                 ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             <Shield size={18} /> Segurança
           </button>
-          
+
           {isAdmin && (
             <>
               <div className="pt-4 pb-2">
@@ -240,31 +236,28 @@ const handleDeviceToggle = () => {
               </div>
               <button
                 onClick={() => setActiveTab("company")}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-                  activeTab === "company"
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "company"
                     ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 <Building size={18} /> Dados da Empresa
               </button>
               <button
                 onClick={() => setActiveTab("users")}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-                  activeTab === "users"
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "users"
                     ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 <Users size={18} /> Gestão de Equipe
               </button>
               <button
                 onClick={() => setActiveTab("tax")}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${
-                  activeTab === "tax"
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition ${activeTab === "tax"
                     ? "bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 <Landmark size={18} /> Fiscal e Caixa
               </button>
@@ -384,11 +377,10 @@ const handleDeviceToggle = () => {
                   id="save-profile-btn"
                   onClick={handleSaveProfile}
                   disabled={loading}
-                  className={`px-6 py-2 rounded-lg flex items-center gap-2 transition font-medium shadow-sm disabled:opacity-70 ${
-                    saveSuccess
+                  className={`px-6 py-2 rounded-lg flex items-center gap-2 transition font-medium shadow-sm disabled:opacity-70 ${saveSuccess
                       ? "bg-green-600 hover:bg-green-700 text-white"
                       : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  }`}
+                    }`}
                 >
                   {loading ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -570,11 +562,10 @@ const handleDeviceToggle = () => {
               </div>
 
               <div
-                className={`p-4 border rounded-lg flex items-center justify-between dark:bg-blue-700/20 dark:border-gray-700 dark:text-blue-200 ${
-                  twoFactorEnabled
+                className={`p-4 border rounded-lg flex items-center justify-between dark:bg-blue-700/20 dark:border-gray-700 dark:text-blue-200 ${twoFactorEnabled
                     ? "bg-indigo-50 border-indigo-100 text-indigo-800"
                     : "bg-gray-50 border-gray-200 text-gray-700"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Shield
@@ -594,11 +585,10 @@ const handleDeviceToggle = () => {
                 <button
                   onClick={handle2FAToggle}
                   disabled={loading2FA}
-                  className={`font-medium text-xs border px-3 py-1.5 rounded shadow-2-sm transition disabled:opacity-60 ${
-                    twoFactorEnabled
+                  className={`font-medium text-xs border px-3 py-1.5 rounded shadow-2-sm transition disabled:opacity-60 ${twoFactorEnabled
                       ? "text-red-600 border-red-200 bg-white hover:bg-red-50"
                       : "text-green-600 border-green-200 bg-white hover:bg-green-50"
-                  }`}
+                    }`}
                 >
                   {loading2FA ? <Loader2 size={14} className="animate-spin" /> : twoFactorEnabled ? "Desativar" : "Ativar"}
                 </button>
@@ -611,11 +601,10 @@ const handleDeviceToggle = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`p-2 rounded-lg transition-colors ${
-                        passwordResetSent
+                      className={`p-2 rounded-lg transition-colors ${passwordResetSent
                           ? "bg-green-100 text-green-600"
                           : "bg-gray-100 text-gray-600 group-hover:text-indigo-600 group-hover:bg-indigo-50"
-                      }`}
+                        }`}
                     >
                       {passwordResetSent ? (
                         <Check size={20} />
@@ -625,11 +614,10 @@ const handleDeviceToggle = () => {
                     </div>
                     <div className="text-left dark:text-white">
                       <h4
-                        className={`font-medium ${
-                          passwordResetSent
+                        className={`font-medium ${passwordResetSent
                             ? "text-green-600"
                             : "text-indigo-600"
-                        }`}
+                          }`}
                       >
                         {passwordResetSent
                           ? "Email de recuperação enviado!"
@@ -653,9 +641,8 @@ const handleDeviceToggle = () => {
                 <div>
                   <button
                     onClick={handleDeviceToggle}
-                    className={`flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-blue-700/20 dark:border-gray-700 dark:text-white transition group ${
-                      showDevices ? "rounded-b-none border-b-0" : ""
-                    }`}
+                    className={`flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-blue-700/20 dark:border-gray-700 dark:text-white transition group ${showDevices ? "rounded-b-none border-b-0" : ""
+                      }`}
                   >
                     <div className="flex items-center  gap-3">
                       <div className="p-2 bg-gray-100 rounded-lg text-gray-600 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
@@ -672,9 +659,8 @@ const handleDeviceToggle = () => {
                     </div>
                     <ChevronRight
                       size={18}
-                      className={`text-gray-400 group-hover:text-indigo-600 transition-transform ${
-                        showDevices ? "rotate-90" : ""
-                      }`}
+                      className={`text-gray-400 group-hover:text-indigo-600 transition-transform ${showDevices ? "rotate-90" : ""
+                        }`}
                     />
                   </button>
 
