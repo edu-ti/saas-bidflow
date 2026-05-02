@@ -84,8 +84,8 @@ export default function PlansManagement() {
     const payload = {
       name,
       description,
-      monthly_price: parseFloat(price),
-      max_users: parseInt(maxUsers),
+      monthly_price: parseFloat(price) || 0,
+      max_users: parseInt(maxUsers) || 1,
       active,
       features,
     };
@@ -98,10 +98,13 @@ export default function PlansManagement() {
         await api.post('/api/master/plans', payload);
         toast.success('Plano criado com sucesso!');
       }
-      fetchPlans();
+      await fetchPlans();
       closeModal();
     } catch (err) {
-      toast.error('Erro ao salvar o plano');
+      const error = err as any;
+      const msg = error.response?.data?.message || 'Erro ao salvar o plano';
+      toast.error(msg);
+      console.error('Plan save error:', error.response?.data);
     }
   };
 

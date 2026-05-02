@@ -155,36 +155,63 @@ class FinancialEngineController extends Controller
     }
 
     // ── OFX IMPORT ──────────────────────────────
-    public function importOfx(Request $request)
+    public function ofxUpload(Request $request)
     {
         $request->validate([
             'bank_account_id' => 'required|exists:bank_accounts,id',
-            'file'            => 'required|file|max:5120',
+            'file'            => 'required|file|mimes:ofx,xml|max:5120',
         ]);
 
-        $content = file_get_contents($request->file('file')->getRealPath());
-        $reconciliation = $this->service->parseOfxContent($content, $request->bank_account_id);
+        $reconciliation = $this->service->processOfxFile(
+            $request->file('file'),
+            Auth::user()->company_id,
+            $request->bank_account_id
+        );
 
         return response()->json([
-            'data'    => $reconciliation->load('items'),
+            'data'    => $reconciliation,
             'message' => "Importado: {$reconciliation->total_transactions} transações, {$reconciliation->matched_transactions} conciliadas automaticamente.",
         ]);
     }
 
     // ── RECONCILIATION ──────────────────────────
-    public function reconciliationsIndex()
+    public function reconciliationItems($account_id)
     {
-        $data = BankReconciliation::with(['bankAccount', 'items'])->latest()->get();
-        return response()->json(['data' => $data]);
+        $reconciliation = BankReconciliation::with(['items.payable', 'items.receivable'])
+            ->where('company_id', Auth::user()->company_id)
+            ->where('bank_account_id', $account_id)
+            ->whereIn('status', ['imported', 'reconciling'])
+            ->latest()
+            ->first();
+
+        if (!$reconciliation) {
+            return response()->json(['data' => []]);
+        }
+
+        return response()->json(['data' => $reconciliation->items]);
     }
 
-    public function reconcileItem(Request $request, BankReconciliationItem $item)
+    public function reconcile(Request $request)
     {
         $validated = $request->validate([
-            'statement_id' => 'nullable|exists:financial_statements,id',
+            'item_id' => 'required|exists:bank_reconciliation_items,id',
+            'payable_id' => 'nullable|exists:accounts_payables,id',
+            'receivable_id' => 'nullable|exists:accounts_receivables,id',
         ]);
 
-        $item = $this->service->reconcileItem($item, $validated['statement_id'] ?? null);
+        $item = BankReconciliationItem::findOrFail($validated['item_id']);
+
+        // Must be same company
+        if ($item->reconciliation->company_id !== Auth::user()->company_id) {
+            abort(403);
+        }
+
+        $item = $this->service->reconcileItem(
+            $item, 
+            $validated['payable_id'] ?? null, 
+            $validated['receivable_id'] ?? null
+        );
+        
         return response()->json(['data' => $item]);
     }
 

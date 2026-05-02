@@ -8,7 +8,7 @@ class BankReconciliationItem extends Model
 {
     protected $fillable = [
         'reconciliation_id', 'transaction_date', 'amount', 'description',
-        'fitid', 'type', 'matched_statement_id', 'match_status',
+        'fitid', 'type', 'payable_id', 'receivable_id', 'match_status',
     ];
 
     protected function casts(): array
@@ -24,8 +24,13 @@ class BankReconciliationItem extends Model
         return $this->belongsTo(BankReconciliation::class, 'reconciliation_id');
     }
 
-    public function matchedStatement()
+    public function payable()
     {
-        return $this->belongsTo(FinancialStatement::class, 'matched_statement_id');
+        return $this->belongsTo(AccountsPayable::class, 'payable_id');
+    }
+
+    public function receivable()
+    {
+        return $this->belongsTo(AccountsReceivable::class, 'receivable_id');
     }
 }

@@ -121,9 +121,9 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
         Route::post('/bank-accounts', [\App\Http\Controllers\FinancialEngineController::class, 'bankAccountsStore']);
         Route::put('/bank-accounts/{bankAccount}', [\App\Http\Controllers\FinancialEngineController::class, 'bankAccountsUpdate']);
 
-        Route::post('/ofx-import', [\App\Http\Controllers\FinancialEngineController::class, 'importOfx']);
-        Route::get('/reconciliations', [\App\Http\Controllers\FinancialEngineController::class, 'reconciliationsIndex']);
-        Route::post('/reconciliation-items/{item}/reconcile', [\App\Http\Controllers\FinancialEngineController::class, 'reconcileItem']);
+        Route::post('/ofx-upload', [\App\Http\Controllers\FinancialEngineController::class, 'ofxUpload']);
+        Route::get('/reconciliation/{account_id}', [\App\Http\Controllers\FinancialEngineController::class, 'reconciliationItems']);
+        Route::post('/reconcile', [\App\Http\Controllers\FinancialEngineController::class, 'reconcile']);
 
         Route::get('/tax-config', [\App\Http\Controllers\FinancialEngineController::class, 'taxConfigShow']);
         Route::post('/tax-config', [\App\Http\Controllers\FinancialEngineController::class, 'taxConfigSave']);

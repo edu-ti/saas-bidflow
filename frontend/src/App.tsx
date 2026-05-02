@@ -51,14 +51,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // Componente para rotas exclusivas do Super Admin
 function SuperAdminRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = !!localStorage.getItem('api_token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const apiToken = localStorage.getItem('api_token');
+  const isAuthenticated = !!apiToken;
+  const storedUser = localStorage.getItem('user');
+  const user = JSON.parse(storedUser || '{}');
+
+  console.log('[SuperAdminRoute] Auth state:', { 
+    isAuthenticated, 
+    hasToken: !!apiToken,
+    userEmail: user?.email,
+    isSuperAdmin: user?.is_superadmin 
+  });
 
   if (!isAuthenticated) {
+    console.warn('[SuperAdminRoute] Not authenticated, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 
   if (!user.is_superadmin) {
+    console.warn('[SuperAdminRoute] Not a superadmin, redirecting to /');
     return <Navigate to="/" replace />;
   }
 

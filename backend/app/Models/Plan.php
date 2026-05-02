@@ -19,12 +19,15 @@ class Plan extends Model
         'features',
     ];
 
-    protected $casts = [
-        'monthly_price' => 'decimal:2',
-        'max_users' => 'integer',
-        'active' => 'boolean',
-        'features' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'monthly_price' => 'decimal:2',
+            'max_users' => 'integer',
+            'active' => 'boolean',
+            'features' => 'array',
+        ];
+    }
 
     public function companies()
     {

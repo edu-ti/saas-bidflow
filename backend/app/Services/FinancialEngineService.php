@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AccountsPayable;
 use App\Models\AccountsReceivable;
 use App\Models\AuditLog;
 use App\Models\BankAccount;
@@ -26,24 +27,7 @@ class FinancialEngineService
 
             // Auto-provision: output invoice → AccountReceivable + FinancialStatement
             if ($invoice->type === 'output' && $invoice->total_value > 0) {
-                AccountsReceivable::create([
-                    'company_id'      => $invoice->company_id,
-                    'reference_title' => "NF-e #{$invoice->number} – {$invoice->recipient_name}",
-                    'amount'          => $invoice->total_value,
-                    'due_date'        => now()->addDays(30),
-                    'status'          => 'Pending',
-                ]);
-
-                FinancialStatement::create([
-                    'company_id' => $invoice->company_id,
-                    'invoice_id' => $invoice->id,
-                    'type'       => 'entry',
-                    'category'   => 'Vendas / NF-e',
-                    'description'=> "NF-e #{$invoice->number}",
-                    'amount'     => $invoice->total_value,
-                    'status'     => 'pending',
-                    'due_date'   => now()->addDays(30),
-                ]);
+                $this->provisionReceivableFromInvoice($invoice);
             }
 
             $this->audit($invoice, 'invoice_created', null, $invoice->status);
@@ -68,16 +52,39 @@ class FinancialEngineService
         });
     }
 
+    public function provisionReceivableFromInvoice(Invoice $invoice): void
+    {
+        AccountsReceivable::create([
+            'company_id'      => $invoice->company_id,
+            'reference_title' => "NF-e #{$invoice->number} – {$invoice->recipient_name}",
+            'amount'          => $invoice->total_value,
+            'due_date'        => now()->addDays(30),
+            'status'          => 'Pending',
+        ]);
+
+        FinancialStatement::create([
+            'company_id' => $invoice->company_id,
+            'invoice_id' => $invoice->id,
+            'type'       => 'entry',
+            'category'   => 'Vendas / NF-e',
+            'description'=> "NF-e #{$invoice->number}",
+            'amount'     => $invoice->total_value,
+            'status'     => 'pending',
+            'due_date'   => now()->addDays(30),
+        ]);
+    }
+
     // ─────────────────────────────────────────────
     //  OFX PARSER
     // ─────────────────────────────────────────────
-    public function parseOfxContent(string $content, int $bankAccountId): BankReconciliation
+    public function processOfxFile($file, $tenant_id, $bank_account_id): BankReconciliation
     {
-        $bankAccount = BankAccount::findOrFail($bankAccountId);
+        $content = file_get_contents($file->getRealPath());
+        $bankAccount = BankAccount::where('company_id', $tenant_id)->findOrFail($bank_account_id);
 
-        return DB::transaction(function () use ($content, $bankAccount) {
+        return DB::transaction(function () use ($content, $bankAccount, $tenant_id) {
             $reconciliation = BankReconciliation::create([
-                'company_id'      => $bankAccount->company_id,
+                'company_id'      => $tenant_id,
                 'bank_account_id' => $bankAccount->id,
                 'file_name'       => 'ofx_import_' . now()->format('Ymd_His') . '.ofx',
                 'status'          => 'imported',
@@ -90,18 +97,40 @@ class FinancialEngineService
                 $type = $tx['amount'] >= 0 ? 'credit' : 'debit';
                 $absAmount = abs($tx['amount']);
 
-                // Try to match with existing financial statements
-                $matchedStatement = FinancialStatement::where('company_id', $bankAccount->company_id)
-                    ->where('status', 'pending')
-                    ->whereBetween('amount', [$absAmount - 0.01, $absAmount + 0.01])
-                    ->whereBetween('due_date', [
-                        $tx['date']->copy()->subDays(5),
-                        $tx['date']->copy()->addDays(5),
-                    ])
-                    ->first();
+                $payableId = null;
+                $receivableId = null;
+                $matchStatus = 'unmatched';
 
-                $matchStatus = $matchedStatement ? 'matched' : 'unmatched';
-                if ($matchedStatement) $matched++;
+                // Try to match with pending AccountsReceivable or AccountsPayable
+                if ($type === 'credit') {
+                    $match = AccountsReceivable::where('company_id', $tenant_id)
+                        ->where('status', 'Pending')
+                        ->whereBetween('amount', [$absAmount - 0.01, $absAmount + 0.01])
+                        ->whereBetween('due_date', [
+                            $tx['date']->copy()->subDays(3),
+                            $tx['date']->copy()->addDays(3),
+                        ])
+                        ->first();
+                    if ($match) {
+                        $receivableId = $match->id;
+                        $matchStatus = 'suggested_match';
+                        $matched++;
+                    }
+                } else {
+                    $match = AccountsPayable::where('company_id', $tenant_id)
+                        ->where('status', 'Pending')
+                        ->whereBetween('amount', [$absAmount - 0.01, $absAmount + 0.01])
+                        ->whereBetween('due_date', [
+                            $tx['date']->copy()->subDays(3),
+                            $tx['date']->copy()->addDays(3),
+                        ])
+                        ->first();
+                    if ($match) {
+                        $payableId = $match->id;
+                        $matchStatus = 'suggested_match';
+                        $matched++;
+                    }
+                }
 
                 BankReconciliationItem::create([
                     'reconciliation_id'    => $reconciliation->id,
@@ -110,7 +139,8 @@ class FinancialEngineService
                     'description'          => $tx['description'] ?? '',
                     'fitid'                => $tx['fitid'] ?? null,
                     'type'                 => $type,
-                    'matched_statement_id' => $matchedStatement?->id,
+                    'payable_id'           => $payableId,
+                    'receivable_id'        => $receivableId,
                     'match_status'         => $matchStatus,
                 ]);
             }
@@ -158,29 +188,38 @@ class FinancialEngineService
     // ─────────────────────────────────────────────
     //  RECONCILE a single OFX item
     // ─────────────────────────────────────────────
-    public function reconcileItem(BankReconciliationItem $item, ?int $statementId): BankReconciliationItem
+    public function reconcileItem(BankReconciliationItem $item, ?int $payableId, ?int $receivableId): BankReconciliationItem
     {
-        return DB::transaction(function () use ($item, $statementId) {
-            if ($statementId) {
-                $statement = FinancialStatement::findOrFail($statementId);
-                $statement->update([
-                    'status'       => 'paid',
+        return DB::transaction(function () use ($item, $payableId, $receivableId) {
+            $reconciliation = $item->reconciliation;
+            $bankAccount = BankAccount::lockForUpdate()->find($reconciliation->bank_account_id);
+
+            if ($payableId) {
+                $payable = AccountsPayable::findOrFail($payableId);
+                $payable->update([
+                    'status'       => 'Paid',
                     'payment_date' => $item->transaction_date,
                 ]);
-
-                // Update bank balance
-                $reconciliation = $item->reconciliation;
-                $bankAccount = BankAccount::lockForUpdate()->find($reconciliation->bank_account_id);
+                
                 if ($bankAccount) {
                     $this->logBalanceChange($bankAccount, $item->amount, "Conciliação: {$item->description}");
                 }
+            } elseif ($receivableId) {
+                $receivable = AccountsReceivable::findOrFail($receivableId);
+                $receivable->update([
+                    'status'       => 'Paid',
+                    'payment_date' => $item->transaction_date,
+                ]);
 
-                $this->auditPaymentChange($statement, 'pending', 'paid');
+                if ($bankAccount) {
+                    $this->logBalanceChange($bankAccount, $item->amount, "Conciliação: {$item->description}");
+                }
             }
 
             $item->update([
-                'matched_statement_id' => $statementId,
-                'match_status'         => $statementId ? 'matched' : 'ignored',
+                'payable_id'           => $payableId,
+                'receivable_id'        => $receivableId,
+                'match_status'         => ($payableId || $receivableId) ? 'matched' : 'ignored',
             ]);
 
             // Update reconciliation counters
@@ -194,7 +233,7 @@ class FinancialEngineService
                 $recon->update(['status' => 'completed']);
             }
 
-            return $item->load('matchedStatement');
+            return $item->load(['payable', 'receivable']);
         });
     }
 
