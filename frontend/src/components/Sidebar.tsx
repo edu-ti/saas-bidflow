@@ -5,7 +5,7 @@ import {
   BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
   CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
   Briefcase, FileSignature, Sparkles, Sun, Moon, Boxes, Send, ListTodo,
-  MessageCircle, Bot, Lock
+  MessageCircle, Bot, Lock, Activity
 } from 'lucide-react';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
@@ -26,7 +26,7 @@ export type Page =
   // Chatbot & Conversas
   | 'chatbot' | 'conversations'
   // Configurações
-  | 'admin' | 'settings';
+  | 'admin' | 'system-health' | 'settings';
 
 interface SidebarProps {
   activePage: Page;
@@ -137,6 +137,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       title: '🔹 Configurações',
       items: [
         { key: 'admin' as Page, name: 'Administrador', icon: <Shield size={18} /> },
+        ...(user.is_superadmin ? [{ key: 'system-health' as Page, name: 'Saúde do Sistema', icon: <Activity size={18} /> }] : []),
         { key: 'settings' as Page, name: 'Minhas Configurações', icon: <Settings size={18} /> },
       ]
     }

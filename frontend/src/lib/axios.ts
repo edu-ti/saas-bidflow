@@ -21,4 +21,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Interceptor: handle 403 TENANT_SUSPENDED
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403 && error.response?.data?.code === 'TENANT_SUSPENDED') {
+      window.location.href = '/suspended';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

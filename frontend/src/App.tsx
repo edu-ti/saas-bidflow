@@ -35,6 +35,7 @@ import MasterLayout from './layouts/MasterLayout';
 import MasterDashboard from './components/master/MasterDashboard';
 import TenantList from './components/master/TenantList';
 import PlansManagement from './components/master/PlansManagement';
+import SystemHealth from './components/master/SystemHealth';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
@@ -416,6 +417,7 @@ function AppContent() {
           <Route path="dashboard" element={<MasterDashboard />} />
           <Route path="tenants" element={<TenantList />} />
           <Route path="plans" element={<PlansManagement />} />
+          <Route path="system-health" element={<SystemHealth />} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
 

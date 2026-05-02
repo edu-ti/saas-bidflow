@@ -12,6 +12,7 @@ interface Tenant {
   plan_id?: number;
   plan_name?: string;
   users_count: number;
+  max_users?: number;
   created_at: string;
   admin_name?: string;
   admin_email?: string;
@@ -53,6 +54,7 @@ export default function TenantList() {
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [status, setStatus] = useState('active');
   const [addons, setAddons] = useState<string[]>([]);
 
   const selectedPlanFeatures = useMemo(() => {
@@ -119,6 +121,7 @@ export default function TenantList() {
       setAdminName(tenant.admin_name || '');
       setAdminEmail(tenant.admin_email || '');
       setAdminPassword('');
+      setStatus(tenant.status || 'active');
       setAddons(tenant.addons || []);
     } else {
       setEditingTenant(null);
@@ -128,6 +131,7 @@ export default function TenantList() {
       setAdminName('');
       setAdminEmail('');
       setAdminPassword('');
+      setStatus('active');
       setAddons([]);
     }
     setIsModalOpen(true);
@@ -151,6 +155,7 @@ export default function TenantList() {
           admin_name: adminName,
           admin_email: adminEmail,
           password: adminPassword || undefined,
+          status,
           addons,
         });
         toast.success('Empresa atualizada com sucesso!');
@@ -163,6 +168,7 @@ export default function TenantList() {
           admin_name: adminName,
           admin_email: adminEmail,
           password: adminPassword,
+          status,
         });
         toast.success('Empresa cadastrada com sucesso!');
       }
@@ -265,17 +271,25 @@ export default function TenantList() {
                     <td className="px-6 py-4 text-center">
                       <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
                         <UserCircle className="w-3.5 h-3.5" />
-                        {tenant.users_count}
+                        {tenant.users_count} / {tenant.max_users || '∞'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                         tenant.status === 'active' 
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' 
-                          : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                          : tenant.status === 'past_due'
+                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                          : tenant.status === 'suspended'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400'
+                          : 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${tenant.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                        {tenant.status === 'active' ? 'Ativo' : 'Inativo'}
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          tenant.status === 'active' ? 'bg-emerald-500' : 
+                          tenant.status === 'past_due' ? 'bg-amber-500' : 
+                          tenant.status === 'suspended' ? 'bg-red-500' : 'bg-slate-500'
+                        }`}></span>
+                        {tenant.status === 'active' ? 'Ativo' : tenant.status === 'past_due' ? 'Atrasado' : tenant.status === 'suspended' ? 'Suspenso' : 'Cancelado'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
@@ -348,6 +362,21 @@ export default function TenantList() {
                   {plans.map(plan => (
                     <option key={plan.id} value={plan.id}>{plan.name} - R$ {Number(plan.monthly_price).toFixed(2)}</option>
                   ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status da Assinatura</label>
+                <select
+                  required
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                >
+                  <option value="active">Ativo (Em Dia)</option>
+                  <option value="past_due">Atrasado (Past Due)</option>
+                  <option value="suspended">Suspenso (Bloqueado)</option>
+                  <option value="cancelled">Cancelado</option>
                 </select>
               </div>
             </div>

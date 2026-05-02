@@ -30,6 +30,17 @@ class CompanyManagementController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $company = $authUser->company;
+        $plan = $company->plan;
+        if ($plan) {
+            $currentUsersCount = User::where('company_id', $company->id)->count();
+            if ($currentUsersCount >= $plan->max_users) {
+                return response()->json([
+                    'message' => 'Limite de usuários atingido. Por favor, faça um upgrade de plano.',
+                ], 403);
+            }
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',

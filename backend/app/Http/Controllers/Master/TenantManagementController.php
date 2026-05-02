@@ -72,8 +72,9 @@ class TenantManagementController extends Controller
                     'cnpj' => $company->document,
                     'plan_id' => $company->plan_id,
                     'plan_name' => $company->plan ? $company->plan->name : 'Nenhum',
-                    'status' => 'active',
+                    'status' => $company->status ?? 'active',
                     'users_count' => $company->users_count,
+                    'max_users' => $company->plan ? $company->plan->max_users : 0,
                     'created_at' => $company->created_at,
                     'admin_name' => $admin ? $admin->name : null,
                     'admin_email' => $admin ? $admin->email : null,
@@ -97,6 +98,7 @@ class TenantManagementController extends Controller
             'admin_name' => 'nullable|string|max:255',
             'admin_email' => 'nullable|email|max:255',
             'password' => 'nullable|string|min:6',
+            'status' => 'nullable|in:active,past_due,suspended,cancelled',
             'addons' => 'nullable|array',
             'addons.*' => 'string',
         ]);
@@ -105,6 +107,7 @@ class TenantManagementController extends Controller
             'name' => $validated['name'],
             'document' => $validated['document'],
             'plan_id' => $validated['plan_id'],
+            'status' => $validated['status'] ?? $company->status,
             'addons' => $validated['addons'] ?? []
         ]);
 
@@ -160,6 +163,17 @@ class TenantManagementController extends Controller
 
         // Generate a temporary token
         $token = $adminUser->createToken('impersonation_token')->plainTextToken;
+
+        \App\Models\AuditLog::create([
+            'company_id' => $company->id,
+            'user_id' => $request->user()->id ?? null,
+            'auditable_type' => \App\Models\Company::class,
+            'auditable_id' => $company->id,
+            'action' => 'impersonate',
+            'old_value' => null,
+            'new_value' => "O Super Admin acessou a empresa {$company->name}.",
+            'ip_address' => $request->ip(),
+        ]);
 
         return response()->json([
             'message' => 'Impersonation successful',

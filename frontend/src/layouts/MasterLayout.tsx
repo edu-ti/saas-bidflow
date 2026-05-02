@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { LayoutDashboard, Building2, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Shield, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MasterLayout() {
@@ -18,6 +18,7 @@ export default function MasterLayout() {
     { key: '/master/dashboard', name: 'Dashboard Master', icon: <LayoutDashboard size={18} /> },
     { key: '/master/tenants', name: 'Gestão de Empresas', icon: <Building2 size={18} /> },
     { key: '/master/plans', name: 'Planos de Assinatura', icon: <Building2 size={18} /> },
+    { key: '/master/system-health', name: 'Saúde do Sistema', icon: <Activity size={18} /> },
   ];
 
   return (

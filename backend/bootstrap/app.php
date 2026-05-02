@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+            'tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
