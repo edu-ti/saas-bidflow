@@ -350,4 +350,52 @@ class OpportunityController extends Controller
             return response()->json(['error' => $e->getMessage()], 501);
         }
     }
+
+    /**
+     * Qualificar um alerta de licitação (Radar) para o Funil.
+     */
+    public function qualify(Request $request, $id)
+    {
+        $alert = \App\Models\BiddingAlert::findOrFail($id);
+        
+        // Autorização básica
+        if ($alert->company_id !== Auth::user()->company_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $rawData = $alert->raw_data;
+        
+        // Busca a primeira etapa do funil (ou cria se nao existir)
+        $stageId = FunnelStage::where('company_id', $alert->company_id)->orderBy('order')->first()?->id;
+
+        $opportunity = Opportunity::create([
+            'company_id' => $alert->company_id,
+            'user_id' => Auth::id(),
+            'title' => ($rawData['agency'] ?? 'Órgão') . ' - ' . ($rawData['object'] ?? 'Sem Título'),
+            'value' => $rawData['estimated_value'] ?? 0,
+            'funnel_stage_id' => $stageId,
+            'type' => 'bidding', // Origem licitação
+            'bidding_metadata' => [
+                'agency' => $rawData['agency'] ?? null,
+                'opening_date' => $rawData['opening_date'] ?? null,
+                'notice_link' => $rawData['notice_link'] ?? null,
+                'uf' => $rawData['uf'] ?? null,
+            ],
+            'notes' => $alert->content,
+        ]);
+
+        // Associa o alerta à oportunidade para histórico
+        $alert->update([
+            'opportunity_id' => $opportunity->id, 
+            'is_read' => true
+        ]);
+
+        // Chama a IA para análise inicial e preenchimento dos campos AI
+        $this->aiService->analyzeBiddingNotice($opportunity->id);
+
+        return response()->json([
+            'message' => 'Licitação qualificada com sucesso! IA analisando o edital.',
+            'opportunity' => $opportunity->fresh()
+        ], 201);
+    }
 }

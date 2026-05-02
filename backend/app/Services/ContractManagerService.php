@@ -17,10 +17,12 @@ use Illuminate\Support\Facades\DB;
 
 class ContractManagerService
 {
+    protected FinancialEngineService $financialService;
     protected FinanceService $financeService;
 
-    public function __construct(FinanceService $financeService)
+    public function __construct(FinancialEngineService $financialService, FinanceService $financeService)
     {
+        $this->financialService = $financialService;
         $this->financeService = $financeService;
     }
 
@@ -107,6 +109,8 @@ class ContractManagerService
         $replacements['contract_year'] = now()->format('Y');
         $replacements['contract_month'] = now()->format('m');
         $replacements['contract_day'] = now()->format('d');
+        $replacements['contract_value'] = isset($data['value']) ? 'R$ ' . number_format((float)$data['value'], 2, ',', '.') : '';
+        $replacements['cnpj'] = $replacements['client_document'] ?? '';
 
         return array_merge($replacements, $data);
     }
@@ -279,6 +283,8 @@ class ContractManagerService
 
         foreach ($parsedTerms as $term) {
             $data = [
+                'company_id'      => $contract->company_id,
+                'contract_id'     => $contract->id,
                 'reference_title' => sprintf(
                     '%s - Parcela %d/%d',
                     $contract->contract_number,
@@ -292,9 +298,9 @@ class ContractManagerService
             ];
 
             if ($isReceivable) {
-                $this->financeService->createReceivable($data);
+                $this->financialService->createReceivable($data);
             } else {
-                $this->financeService->createPayable($data);
+                $this->financialService->createPayable($data);
             }
         }
     }

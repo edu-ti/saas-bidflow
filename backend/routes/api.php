@@ -17,6 +17,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/cnpj/{cnpj}', [\App\Http\Controllers\ExternalDataController::class, 'searchCNPJ']);
 Route::get('/cep/{cep}', [\App\Http\Controllers\ExternalDataController::class, 'searchCEP']);
 
+// RPA Webhook (External Robot)
+Route::post('/webhook/rpa/bids', [\App\Http\Controllers\RpaController::class, 'handleBids']);
+
 Route::get('/user', function (Request $request) {
     $user = $request->user();
     $company = $user->company;
@@ -60,6 +63,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::middleware('feature:bidding')->group(function () {
         Route::get('/alerts', [AlertController::class, 'index']);
         Route::post('/alerts', [AlertController::class, 'store']);
+        Route::post('/alerts/{id}/qualify', [\App\Http\Controllers\OpportunityController::class, 'qualify']);
     });
     
     // Organizations (consolidated under CompanyManagementController)

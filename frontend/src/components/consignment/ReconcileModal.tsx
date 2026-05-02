@@ -32,8 +32,18 @@ export default function ReconcileModal({ isOpen, consignment, onClose, onSuccess
     if (!consignment) return;
     setSaving(true);
     try {
-      await api.post(`/api/consignments/${consignment.id}/reconcile`, { items: rows });
-      toast.success('Prestação de contas salva!');
+      const payload = {
+        sold_items: rows.map((r, i) => ({ 
+          product_id: consignment.items[i].product_id, 
+          quantity: r.qty_sold 
+        })),
+        returned_items: rows.map((r, i) => ({ 
+          product_id: consignment.items[i].product_id, 
+          quantity: r.qty_returned 
+        }))
+      };
+      await api.post(`/api/consignments/${consignment.id}/reconcile`, payload);
+      toast.success('Acerto realizado! Faturamento gerado.');
       onSuccess();
       onClose();
     } catch (e: any) {

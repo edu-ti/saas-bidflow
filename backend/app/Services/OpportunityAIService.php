@@ -34,6 +34,31 @@ class OpportunityAIService
         return true;
     }
 
+    public function analyzeBiddingNotice(int $opportunityId)
+    {
+        $opportunity = Opportunity::findOrFail($opportunityId);
+        
+        // Em um cenário real, aqui chamaríamos a API do Gemini ou OpenAI.
+        // Simulando resposta da IA conforme solicitado:
+        $aiResponse = [
+            'resumo_objeto' => 'Aquisição de solução tecnológica para gestão de dados corporativos.',
+            'documentacao'  => 'Certidões Negativas, Atestado de Capacidade Técnica, Balanço Patrimonial.',
+            'penalidades'   => 'Multa de 10% por descumprimento, Suspensão temporária de licitar.',
+            'win_rate'      => 68.5
+        ];
+
+        $opportunity->win_probability = $aiResponse['win_rate'];
+        $opportunity->parsed_items = [
+            'resumo' => $aiResponse['resumo_objeto'],
+            'documentacao' => $aiResponse['documentacao'],
+            'penalidades' => $aiResponse['penalidades'],
+        ];
+        
+        $opportunity->save();
+
+        return $opportunity;
+    }
+
     public function generateDraftPdf(Opportunity $opportunity)
     {
         if (!class_exists('Barryvdh\DomPDF\Facade\Pdf')) {

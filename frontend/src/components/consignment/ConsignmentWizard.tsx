@@ -71,10 +71,10 @@ export default function ConsignmentWizard({ isOpen, onClose, onSuccess }: Props)
         consignee_id: selectedConsignee.id,
         due_date: dueDate || null,
         notes: notes || null,
-        status: 'draft',
+        status: 'active',
         items: items.map(i => ({ product_id: i.product_id, qty_sent: i.qty_sent, agreed_unit_price: i.agreed_unit_price })),
       });
-      toast.success('Remessa criada com sucesso!');
+      toast.success('Remessa criada e estoque reservado!');
       onSuccess();
       onClose();
     } catch (e: any) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Filter, Sparkles, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -17,6 +17,12 @@ interface Bidding {
   status: string;
   funnel_stage_id: number;
   description?: string;
+  win_probability?: number;
+  parsed_items?: {
+    resumo?: string;
+    documentacao?: string;
+    penalidades?: string;
+  };
 }
 
 interface FunnelStage {
@@ -204,10 +210,33 @@ export default function BiddingFunnel() {
                                 <div>{bidding.agency}</div>
                               </div>
                               <div className="flex justify-between items-center mt-2">
-                                <span className="text-xs font-medium text-slate-600">
-                                  R$ {parseFloat(bidding.value || '0').toLocaleString('pt-BR')}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-medium text-slate-600">
+                                    R$ {parseFloat(bidding.value || '0').toLocaleString('pt-BR')}
+                                  </span>
+                                  {bidding.win_probability !== undefined && (
+                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-emerald-100">
+                                      <Sparkles className="w-2.5 h-2.5" />
+                                      {bidding.win_probability}%
+                                    </div>
+                                  )}
+                                </div>
                                 <div className="flex gap-1">
+                                  {bidding.parsed_items?.resumo && (
+                                    <div className="group relative">
+                                      <button className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors">
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                      </button>
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                                        <p className="font-bold border-b border-slate-700 pb-1 mb-1 text-blue-400">Análise de IA</p>
+                                        <p className="mb-2 italic text-slate-300">"{bidding.parsed_items.resumo}"</p>
+                                        <p className="font-bold text-amber-400 mt-1">Documentação:</p>
+                                        <p className="text-slate-300">{bidding.parsed_items.documentacao}</p>
+                                        <p className="font-bold text-red-400 mt-1">Penalidades:</p>
+                                        <p className="text-slate-300">{bidding.parsed_items.penalidades}</p>
+                                      </div>
+                                    </div>
+                                  )}
                                   <button onClick={() => handleEdit(bidding)} className="p-1 text-slate-400 hover:text-blue-600">
                                     <Pencil className="w-3 h-3" />
                                   </button>

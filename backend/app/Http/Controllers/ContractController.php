@@ -114,6 +114,8 @@ class ContractController extends Controller
             'addendums',
             'attachments',
             'approvedBy',
+            'receivables',
+            'payables',
         ])->findOrFail($id);
 
         return response()->json($contract);

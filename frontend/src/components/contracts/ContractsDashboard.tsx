@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Plus, FileText, Edit, Trash2, Eye, Send, CheckCircle,
   XCircle, Clock, AlertTriangle, Download, Upload, Calendar, X,
-  ChevronRight, Paperclip, User, Building, Truck, Users
+  ChevronRight, Paperclip, User, Building, Truck, Users, DollarSign
 } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
@@ -29,6 +29,8 @@ type Contract = {
   approved_at?: string;
   signed_at?: string;
   created_at: string;
+  receivables?: any[];
+  payables?: any[];
 };
 
 type ContractApproval = {
@@ -75,7 +77,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   draft: { label: 'Rascunho', color: 'text-slate-600', bg: 'bg-slate-100' },
   under_review: { label: 'Em Revisão', color: 'text-amber-600', bg: 'bg-amber-100' },
   approved: { label: 'Aprovado', color: 'text-blue-600', bg: 'bg-blue-100' },
-  sent_for_signature: { label: 'Enviado p/ Assinatura', color: 'text-indigo-600', bg: 'bg-indigo-100' },
+  sent_for_signature: { label: 'Enviado para Assinatura', color: 'text-indigo-600', bg: 'bg-indigo-100' },
   active: { label: 'Ativo', color: 'text-emerald-600', bg: 'bg-emerald-100' },
   finished: { label: 'Finalizado', color: 'text-slate-500', bg: 'bg-slate-100' },
   cancelled: { label: 'Cancelado', color: 'text-red-600', bg: 'bg-red-100' },
@@ -113,6 +115,7 @@ export default function ContractsDashboard() {
   const [companyClients, setCompanyClients] = useState<CompanyClient[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [detailTab, setDetailTab] = useState<'doc' | 'approvals' | 'finance'>('doc');
 
   const [formData, setFormData] = useState({
     contract_template_id: '',
@@ -311,6 +314,24 @@ export default function ContractsDashboard() {
           </div>
         </div>
 
+        <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 overflow-x-auto">
+          {[
+            { key: '', label: 'Todos' },
+            { key: 'draft', label: 'Rascunhos' },
+            { key: 'under_review', label: 'Pendentes' },
+            { key: 'active', label: 'Ativos' },
+            { key: 'finished', label: 'Finalizados/Expirados' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${statusFilter === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
@@ -385,10 +406,10 @@ export default function ContractsDashboard() {
                         {contract.template?.name || '—'}
                       </td>
                       <td className="px-4 py-3 text-slate-700 dark:text-slate-200 font-medium">
-                        R$ {Number(contract.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {Number(contract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {contract.end_date ? new Date(contract.end_date).toLocaleDateString('pt-BR') : '—'}
+                        {contract.end_date ? new Date(contract.end_date).toLocaleDateString() : '—'}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_CONFIG[contract.status]?.bg || 'bg-slate-100'} ${STATUS_CONFIG[contract.status]?.color || 'text-slate-600'}`}>
@@ -537,7 +558,7 @@ export default function ContractsDashboard() {
                   rows={3}
                   value={formData.payment_terms}
                   onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-                  placeholder="Ex: 12x de R$ 1.000,00&#10;ou 10/10/2024: R$ 5.000,00&#10;20/11/2024: R$ 5.000,00"
+                  placeholder="Ex: 12x de R$ 1.000,00 - ou 10-10-2024: R$ 5.000,00"
                   className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
                 />
               </div>
@@ -575,118 +596,205 @@ export default function ContractsDashboard() {
                   {STATUS_CONFIG[selectedContract.status]?.label || selectedContract.status}
                 </span>
                 <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                  R$ {Number(selectedContract.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {Number(selectedContract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  {TIMELINE_STEPS.map((step, index) => {
-                    const currentIndex = getCurrentStepIndex(selectedContract.status);
-                    const isActive = index <= currentIndex;
-                    const isCurrent = step.key === selectedContract.status;
-                    const Icon = step.icon;
-                    return (
-                      <div key={step.key} className="flex flex-col items-center flex-1 relative z-10">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} ${isCurrent ? 'ring-4 ring-blue-600/20' : ''}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <span className={`text-xs mt-2 text-center ${isActive ? 'text-slate-800 dark:text-slate-100 font-medium' : 'text-slate-400'}`}>
-                          {step.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200 dark:bg-slate-700 -z-0 transform -translate-y-1/2" />
+              {/* Detail Tabs */}
+              <div className="flex border-b border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setDetailTab('doc')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'doc' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  Documento
+                </button>
+                <button
+                  onClick={() => setDetailTab('approvals')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'approvals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  Aprovações & Aditivos
+                </button>
+                <button
+                  onClick={() => setDetailTab('finance')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'finance' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  Financeiro
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3">Dados do Contrato</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-slate-500">Template:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.template?.name || '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Início:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.start_date ? new Date(selectedContract.start_date).toLocaleDateString('pt-BR') : '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Término:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.end_date ? new Date(selectedContract.end_date).toLocaleDateString('pt-BR') : '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Renovação:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.renewal_type === 'automatic' ? 'Automática' : 'Manual'}</span></div>
-                    {selectedContract.approved_at && (
-                      <div className="flex justify-between"><span className="text-slate-500">Aprovado em:</span><span className="text-slate-700 dark:text-slate-200">{new Date(selectedContract.approved_at).toLocaleDateString('pt-BR')}</span></div>
+              {/* Tab Content */}
+              <div className="mt-6">
+                {detailTab === 'doc' && (
+                  <div className="space-y-6">
+                    <div className="relative mb-12">
+                      <div className="flex items-center justify-between">
+                        {TIMELINE_STEPS.map((step, index) => {
+                          const currentIndex = getCurrentStepIndex(selectedContract.status);
+                          const isActive = index <= currentIndex;
+                          const isCurrent = step.key === selectedContract.status;
+                          const Icon = step.icon;
+                          return (
+                            <div key={step.key} className="flex flex-col items-center flex-1 relative z-10">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} ${isCurrent ? 'ring-4 ring-blue-600 opacity-80' : ''}`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <span className={`text-xs mt-2 text-center ${isActive ? 'text-slate-800 dark:text-slate-100 font-medium' : 'text-slate-400'}`}>
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200 dark:bg-slate-700 -z-0 transform -translate-y-1/2" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Dados do Contrato</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-slate-500">Template:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.template?.name || '—'}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">Início:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.start_date ? new Date(selectedContract.start_date).toLocaleDateString() : '—'}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">Término:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.end_date ? new Date(selectedContract.end_date).toLocaleDateString() : '—'}</span></div>
+                          <div className="flex justify-between"><span className="text-slate-500">Renovação:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.renewal_type === 'automatic' ? 'Automática' : 'Manual'}</span></div>
+                          {selectedContract.approved_at && (
+                            <div className="flex justify-between"><span className="text-slate-500">Aprovado em:</span><span className="text-slate-700 dark:text-slate-200">{new Date(selectedContract.approved_at).toLocaleDateString()}</span></div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 flex flex-col justify-center text-center">
+                        <p className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Valor Total</p>
+                        <p className="text-3xl font-black text-slate-800 dark:text-slate-100">
+                          R$ {Number(selectedContract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedContract.generated_content && (
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Conteúdo do Contrato</h3>
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 whitespace-pre-wrap p-4 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 font-serif">
+                          {selectedContract.generated_content}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
+                )}
 
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3">Aprovações</h3>
-                  {selectedContract.approvals && selectedContract.approvals.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedContract.approvals.map((approval) => (
-                        <div key={approval.id} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-slate-400" />
-                            <span className="text-slate-700 dark:text-slate-200">{approval.role}</span>
+                {detailTab === 'approvals' && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Aprovações</h3>
+                        {selectedContract.approvals && selectedContract.approvals.length > 0 ? (
+                          <div className="space-y-3">
+                            {selectedContract.approvals.map((approval) => (
+                              <div key={approval.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${approval.status === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                    <User className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 uppercase tracking-wider text-[10px]">{approval.role}</p>
+                                    <p className="text-xs text-slate-500">{approval.user?.name || 'Aguardando...'}</p>
+                                  </div>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${approval.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : approval.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                  {approval.status === 'approved' ? 'Aprovado' : approval.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                          <span className={`px-2 py-0.5 rounded text-xs ${approval.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : approval.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {approval.status === 'approved' ? 'Aprovado' : approval.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
-                          </span>
-                        </div>
-                      ))}
+                        ) : (
+                          <p className="text-sm text-slate-400">Nenhuma aprovação requerida</p>
+                        )}
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Histórico de Aditivos</h3>
+                        {selectedContract.addendums && selectedContract.addendums.length > 0 ? (
+                          <div className="space-y-2">
+                            {selectedContract.addendums.map((add) => (
+                              <div key={add.id} className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div className="flex justify-between items-start mb-1">
+                                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{add.title}</p>
+                                  <span className="text-[10px] text-slate-400">{new Date(add.effective_date).toLocaleDateString()}</span>
+                                </div>
+                                <div className="text-xs text-slate-500">
+                                  {add.new_value && <p>Novo valor: R$ {Number(add.new_value).toLocaleString('pt')}</p>}
+                                  {add.new_end_date && <p>Nova data fim: {new Date(add.new_end_date).toLocaleDateString()}</p>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-400">Sem aditivos registrados</p>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-sm text-slate-400">Nenhuma aprovação requerida</p>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {detailTab === 'finance' && (
+                  <div className="space-y-6">
+                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                      <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm">
+                        <DollarSign className="w-4 h-4 text-emerald-500" />
+                        Parcelas Vinculadas (Contas a Receber)
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedContract.receivables && selectedContract.receivables.length > 0 ? (
+                          <div className="grid grid-cols-1 gap-2">
+                            {selectedContract.receivables.map((r: any) => (
+                              <div key={r.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+                                <div>
+                                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{r.reference_title}</p>
+                                  <p className="text-xs text-slate-400">Vencimento: {new Date(r.due_date).toLocaleDateString()}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {Number(r.amount).toLocaleString('pt', { minimumFractionDigits: 2 })}</p>
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${r.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                    {r.status === 'Paid' ? 'Pago' : 'Pendente'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-sm text-slate-500">As parcelas serão geradas automaticamente quando o contrato for ativado.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {selectedContract.addendums && selectedContract.addendums.length > 0 && (
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3">Aditivos</h3>
-                  <div className="space-y-2">
-                    {selectedContract.addendums.map((add) => (
-                      <div key={add.id} className="flex items-center justify-between text-sm border-b border-slate-200 dark:border-slate-600 pb-2">
-                        <span className="text-slate-700 dark:text-slate-200">{add.title}</span>
-                        <span className="text-slate-500">
-                          {add.old_value && add.new_value && (
-                            <>R$ {Number(add.old_value).toLocaleString('pt-BR')} → R$ {Number(add.new_value).toLocaleString('pt-BR')}</>
-                          )}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedContract.generated_content && (
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3">Conteúdo do Contrato</h3>
-                  <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
-                    {selectedContract.generated_content}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex gap-2 pt-6 border-t border-slate-200 dark:border-slate-700">
                 {selectedContract.status === 'draft' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'under_review')} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+                  <button onClick={() => handleStatusChange(selectedContract.id, 'under_review')} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm">
                     <Send className="w-4 h-4" /> Enviar para Revisão
                   </button>
                 )}
                 {selectedContract.status === 'under_review' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'approved')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                  <button onClick={() => handleStatusChange(selectedContract.id, 'approved')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
                     <CheckCircle className="w-4 h-4" /> Aprovar
                   </button>
                 )}
                 {selectedContract.status === 'approved' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'sent_for_signature')} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button onClick={() => handleStatusChange(selectedContract.id, 'sent_for_signature')} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
                     <Send className="w-4 h-4" /> Enviar para Assinatura
                   </button>
                 )}
                 {selectedContract.status === 'sent_for_signature' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'active')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                  <button onClick={() => handleStatusChange(selectedContract.id, 'active')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
                     <CheckCircle className="w-4 h-4" /> Ativar Contrato
                   </button>
                 )}
                 {selectedContract.status === 'active' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'finished')} className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
+                  <button onClick={() => handleStatusChange(selectedContract.id, 'finished')} className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm">
                     <FileText className="w-4 h-4" /> Finalizar
                   </button>
                 )}
@@ -731,16 +839,46 @@ export default function ContractsDashboard() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Conteúdo (HTML/Template) *</label>
-                <textarea
-                  rows={10}
-                  required
-                  value={templateFormData.content}
-                  onChange={(e) => setTemplateFormData({ ...templateFormData, content: e.target.value })}
-                  placeholder="Use placeholders como {{client_name}}, {{client_document}}, {{contract_date}}, etc."
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono text-sm"
-                />
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-3">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Conteúdo (HTML/Template) *</label>
+                  <textarea
+                    rows={12}
+                    required
+                    value={templateFormData.content}
+                    onChange={(e) => setTemplateFormData({ ...templateFormData, content: e.target.value })}
+                    placeholder="Use placeholders como {{client_name}}, {{client_document}}, {{contract_date}}, etc."
+                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono text-sm"
+                  />
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Variáveis Dinâmicas</h4>
+                  <div className="space-y-2">
+                    {[
+                      { key: 'client_name', label: 'Nome Cliente' },
+                      { key: 'client_document', label: 'Documento' },
+                      { key: 'cnpj', label: 'CNPJ (Alias)' },
+                      { key: 'client_email', label: 'E-mail' },
+                      { key: 'client_phone', label: 'Telefone' },
+                      { key: 'contract_value', label: 'Valor Extenso' },
+                      { key: 'value', label: 'Valor Bruto' },
+                      { key: 'contract_date', label: 'Data Atual' },
+                    ].map(v => (
+                      <button
+                        key={v.key}
+                        type="button"
+                        onClick={() => {
+                          const tag = `{{${v.key}}}`;
+                          setTemplateFormData(prev => ({ ...prev, content: prev.content + tag }));
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-[11px] bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded hover:border-blue-400 hover:text-blue-500 transition-colors"
+                      >
+                        {v.label} <code className="float-right text-slate-400">{v.key}</code>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-[10px] text-slate-400">Clique para inserir no final do texto.</p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <input
@@ -752,15 +890,15 @@ export default function ContractsDashboard() {
                 />
                 <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">Template ativo</label>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Placeholders disponíveis:</h4>
                 <div className="text-xs text-blue-700 dark:text-blue-300 grid grid-cols-2 gap-1">
-                  <span>{`{{client_name}}`} - Nome do cliente</span>
-                  <span>{`{{client_document}}`} - CPF/CNPJ</span>
-                  <span>{`{{client_email}}`} - E-mail</span>
-                  <span>{`{{client_phone}}`} - Telefone</span>
-                  <span>{`{{client_address}}`} - Endereço</span>
-                  <span>{`{{contract_date}}`} - Data atual</span>
+                  <span>{'{{client_name}}'} - Nome do cliente</span>
+                  <span>{'{{client_document}}'} - CPF-CNPJ</span>
+                  <span>{'{{client_email}}'} - E-mail</span>
+                  <span>{'{{client_phone}}'} - Telefone</span>
+                  <span>{'{{client_address}}'} - Endereço</span>
+                  <span>{'{{contract_date}}'} - Data atual</span>
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">

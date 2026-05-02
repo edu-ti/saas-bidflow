@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Consignment;
-use App\Models\Product;
+use App\Models\InventoryProduct;
 use App\Services\ConsignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -14,7 +14,9 @@ class ConsignmentController extends Controller
 
     public function __construct(private ConsignmentService $service) {}
 
-    // ── LIST ────────────────────────────────────
+    /**
+     * Listar consignações
+     */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Consignment::class);
@@ -31,7 +33,9 @@ class ConsignmentController extends Controller
         return response()->json(['data' => $query->get()]);
     }
 
-    // ── CREATE (draft) ──────────────────────────
+    /**
+     * Criar Consignação (Wizard)
+     */
     public function store(Request $request)
     {
         $this->authorize('create', Consignment::class);
@@ -46,13 +50,14 @@ class ConsignmentController extends Controller
             'items.*.agreed_unit_price' => 'required|numeric|min:0',
         ]);
 
-        $validated['status'] = 'draft';
-        $consignment = $this->service->create($validated);
+        $consignment = $this->service->createConsignment($validated);
 
         return response()->json(['data' => $consignment], 201);
     }
 
-    // ── SHOW ─────────────────────────────────────
+    /**
+     * Detalhes
+     */
     public function show(Consignment $consignment)
     {
         $this->authorize('view', $consignment);
@@ -61,102 +66,70 @@ class ConsignmentController extends Controller
         return response()->json(['data' => $consignment]);
     }
 
-    // ── UPDATE ───────────────────────────────────
-    public function update(Request $request, Consignment $consignment)
-    {
-        $this->authorize('update', $consignment);
-
-        $validated = $request->validate([
-            'consignee_id'              => 'sometimes|exists:consignees,id',
-            'due_date'                  => 'nullable|date',
-            'notes'                     => 'nullable|string',
-            'items'                     => 'sometimes|array|min:1',
-            'items.*.product_id'        => 'required_with:items|exists:products,id',
-            'items.*.qty_sent'          => 'required_with:items|integer|min:1',
-            'items.*.agreed_unit_price' => 'required_with:items|numeric|min:0',
-        ]);
-
-        $consignment = $this->service->update($consignment, $validated);
-        return response()->json(['data' => $consignment]);
-    }
-
-    // ── DELETE ───────────────────────────────────
-    public function destroy(Consignment $consignment)
-    {
-        $this->authorize('delete', $consignment);
-
-        if ($consignment->status !== 'draft') {
-            return response()->json(['message' => 'Apenas rascunhos podem ser excluídos.'], 422);
-        }
-
-        $consignment->delete();
-        return response()->noContent();
-    }
-
-    // ── SEND (draft → sent) ──────────────────────
-    public function send(Consignment $consignment)
-    {
-        $this->authorize('update', $consignment);
-        $consignment = $this->service->send($consignment);
-
-        return response()->json(['data' => $consignment]);
-    }
-
-    // ── RECONCILE ────────────────────────────────
+    /**
+     * Reconciliação (Acerto)
+     */
     public function reconcile(Request $request, Consignment $consignment)
     {
         $this->authorize('update', $consignment);
 
         $validated = $request->validate([
-            'items'               => 'required|array|min:1',
-            'items.*.item_id'     => 'required|integer',
-            'items.*.qty_sold'    => 'required|integer|min:0',
-            'items.*.qty_returned'=> 'required|integer|min:0',
+            'sold_items'     => 'required|array',
+            'sold_items.*.product_id' => 'required|integer',
+            'sold_items.*.quantity'   => 'required|integer|min:0',
+            'returned_items' => 'required|array',
+            'returned_items.*.product_id' => 'required|integer',
+            'returned_items.*.quantity'   => 'required|integer|min:0',
         ]);
 
-        $consignment = $this->service->reconcile($consignment, $validated['items']);
-        return response()->json(['data' => $consignment]);
+        $consignment = $this->service->reconcileConsignment(
+            $consignment->id, 
+            $validated['sold_items'], 
+            $validated['returned_items']
+        );
+
+        return response()->json([
+            'message' => 'Consignação reconciliada com sucesso. Faturamento gerado no financeiro.',
+            'data' => $consignment
+        ]);
     }
 
-    // ── CLOSE ─────────────────────────────────────
-    public function close(Consignment $consignment)
-    {
-        $this->authorize('update', $consignment);
-        $consignment = $this->service->close($consignment);
-
-        return response()->json(['data' => $consignment]);
-    }
-
-    // ── PRODUCTS (for item selection) ─────────────
+    /**
+     * Listar produtos disponíveis no inventário para consignação
+     */
     public function products()
     {
-        $products = Product::select('id', 'name', 'sku', 'base_price', 'stock')
-            ->where('stock', '>', 0)
-            ->orderBy('name')
-            ->get();
+        $products = InventoryProduct::with('product')
+            ->where('on_hand_qty', '>', 0)
+            ->get()
+            ->map(function ($ip) {
+                return [
+                    'id' => $ip->product_id,
+                    'name' => $ip->product->name,
+                    'sku' => $ip->sku,
+                    'price' => $ip->sale_price,
+                    'stock' => $ip->on_hand_qty,
+                ];
+            });
 
         return response()->json(['data' => $products]);
     }
 
-    // ── REPORT ────────────────────────────────────
-    public function report()
-    {
-        return response()->json(['data' => $this->service->report()]);
-    }
-
-    // ── DASHBOARD STATS ───────────────────────────
+    /**
+     * Estatísticas do Dashboard
+     */
     public function dashboardStats()
     {
-        $today = now()->toDateString();
-
-        $totalRua = Consignment::whereIn('status', ['sent', 'partially_returned'])->sum('total_value');
-        $vencendoHoje = Consignment::whereIn('status', ['sent', 'partially_returned'])
-            ->whereDate('due_date', $today)->count();
-        $pendentes = Consignment::whereIn('status', ['sent', 'partially_returned'])->count();
+        $totalActive = Consignment::where('status', 'active')->sum('total_value');
+        $pendingReconcile = Consignment::where('status', 'active')->count();
         $totalClosed = Consignment::where('status', 'closed')->count();
 
         return response()->json([
-            'data' => compact('totalRua', 'vencendoHoje', 'pendentes', 'totalClosed'),
+            'data' => [
+                'total_active_value' => $totalActive,
+                'pending_reconcile_count' => $pendingReconcile,
+                'total_closed_count' => $totalClosed,
+            ],
         ]);
     }
 }

@@ -25,7 +25,7 @@ export default function ConsignmentDashboard({
 }: Props) {
   const { theme } = useTheme();
   const dark = theme === 'dark';
-  const [stats, setStats] = useState<DashboardStats>({ totalRua: 0, vencendoHoje: 0, pendentes: 0, totalClosed: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ total_active_value: 0, pending_reconcile_count: 0, total_closed_count: 0 });
 
   useEffect(() => {
     api.get('/api/consignments/dashboard-stats')
@@ -40,10 +40,9 @@ export default function ConsignmentDashboard({
   const input = dark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-300 text-slate-900';
 
   const kpis = [
-    { label: 'Total na Rua', value: fmt(stats.totalRua), icon: DollarSign, color: 'text-blue-400', bg: dark ? 'bg-blue-500/10' : 'bg-blue-50' },
-    { label: 'Vencendo Hoje', value: stats.vencendoHoje, icon: Clock, color: 'text-amber-400', bg: dark ? 'bg-amber-500/10' : 'bg-amber-50' },
-    { label: 'Pendentes de Acerto', value: stats.pendentes, icon: AlertTriangle, color: 'text-orange-400', bg: dark ? 'bg-orange-500/10' : 'bg-orange-50' },
-    { label: 'Fechadas', value: stats.totalClosed, icon: CheckCircle, color: 'text-emerald-400', bg: dark ? 'bg-emerald-500/10' : 'bg-emerald-50' },
+    { label: 'Total na Rua', value: fmt(stats.total_active_value), icon: DollarSign, color: 'text-blue-400', bg: dark ? 'bg-blue-500/10' : 'bg-blue-50' },
+    { label: 'Pendentes de Acerto', value: stats.pending_reconcile_count, icon: AlertTriangle, color: 'text-orange-400', bg: dark ? 'bg-orange-500/10' : 'bg-orange-50' },
+    { label: 'Total Fechadas', value: stats.total_closed_count, icon: CheckCircle, color: 'text-emerald-400', bg: dark ? 'bg-emerald-500/10' : 'bg-emerald-50' },
   ];
 
   return (
@@ -134,23 +133,13 @@ export default function ConsignmentDashboard({
                     <td className="px-4 py-3 text-center">{r.items?.length ?? 0}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">
-                        {r.status === 'draft' && (
-                          <>
-                            <button onClick={() => onSend(r)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition-colors">
-                              Enviar
-                            </button>
-                            <button onClick={() => onDelete(r.id)} className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-500 text-xs rounded-lg font-medium transition-colors">
-                              Excluir
-                            </button>
-                          </>
-                        )}
-                        {(r.status === 'sent' || r.status === 'partially_returned') && (
+                        {r.status === 'active' && (
                           <>
                             <button onClick={() => onOpenReconcile(r)} className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs rounded-lg font-medium transition-colors">
                               Acertar
                             </button>
-                            <button onClick={() => onClose(r)} className="px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-lg font-medium transition-colors">
-                              Fechar
+                            <button onClick={() => onDelete(r.id)} className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-500 text-xs rounded-lg font-medium transition-colors">
+                              Excluir
                             </button>
                           </>
                         )}

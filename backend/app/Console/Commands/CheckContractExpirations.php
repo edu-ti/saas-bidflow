@@ -86,9 +86,9 @@ class CheckContractExpirations extends Command
     protected function createAlert($contract, string $message, int $daysUntil): void
     {
         $alertDays = match (true) {
-            $daysUntil <= 7 => 7,
-            $daysUntil <= 15 => 15,
-            $daysUntil <= 30 => 30,
+            $daysUntil === 30 => 30,
+            $daysUntil === 15 => 15,
+            $daysUntil <= 7 && $daysUntil >= 0 => 7,
             default => null,
         };
 

@@ -18,6 +18,34 @@ use Illuminate\Validation\ValidationException;
 class FinancialEngineService
 {
     // ─────────────────────────────────────────────
+    //  GENERIC PAYABLE / RECEIVABLE
+    // ─────────────────────────────────────────────
+    public function createReceivable(array $data): AccountsReceivable
+    {
+        return AccountsReceivable::create([
+            'company_id'      => $data['company_id'] ?? (Auth::check() ? Auth::user()->company_id : null),
+            'contract_id'     => $data['contract_id'] ?? null,
+            'reference_title' => $data['reference_title'],
+            'amount'          => $data['amount'],
+            'due_date'        => $data['due_date'],
+            'status'          => $data['status'] ?? 'Pending',
+            'description'     => $data['description'] ?? null,
+        ]);
+    }
+
+    public function createPayable(array $data): AccountsPayable
+    {
+        return AccountsPayable::create([
+            'company_id'      => $data['company_id'] ?? (Auth::check() ? Auth::user()->company_id : null),
+            'contract_id'     => $data['contract_id'] ?? null,
+            'reference_title' => $data['reference_title'],
+            'amount'          => $data['amount'],
+            'due_date'        => $data['due_date'],
+            'status'          => $data['status'] ?? 'Pending',
+            'description'     => $data['description'] ?? null,
+        ]);
+    }
+    // ─────────────────────────────────────────────
     //  INVOICE: Create + Auto-Provision
     // ─────────────────────────────────────────────
     public function createInvoice(array $data): Invoice

@@ -31,7 +31,7 @@ export interface ConsignmentRecord {
   id: number;
   consignee_id: number;
   user_id: number;
-  status: 'draft' | 'sent' | 'partially_returned' | 'closed';
+  status: 'active' | 'closed';
   total_value: string;
   issue_date: string | null;
   due_date: string | null;
@@ -42,10 +42,9 @@ export interface ConsignmentRecord {
 }
 
 export interface DashboardStats {
-  totalRua: number;
-  vencendoHoje: number;
-  pendentes: number;
-  totalClosed: number;
+  total_active_value: number;
+  pending_reconcile_count: number;
+  total_closed_count: number;
 }
 
 export interface WizardItem {
@@ -63,16 +62,12 @@ export interface ReconcileItem {
 }
 
 export const STATUS_LABELS: Record<string, string> = {
-  draft: 'Rascunho',
-  sent: 'Enviado',
-  partially_returned: 'Parcial',
-  closed: 'Fechado',
+  active: 'Ativo/Na Rua',
+  closed: 'Fechado/Faturado',
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
-  sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  partially_returned: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  active: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   closed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
 };
 

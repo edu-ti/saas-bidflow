@@ -82,6 +82,16 @@ class Contract extends Model
         return $this->hasMany(ContractAddendum::class);
     }
 
+    public function receivables()
+    {
+        return $this->hasMany(AccountsReceivable::class);
+    }
+
+    public function payables()
+    {
+        return $this->hasMany(AccountsPayable::class);
+    }
+
     public function attachments()
     {
         return $this->morphMany(Attachment::class, 'attachable');
