@@ -4,42 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\ChatbotFlow;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ChatbotController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $flows = ChatbotFlow::where('company_id', $request->user()->company_id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        return response()->json($flows);
+        return ChatbotFlow::orderBy('created_at', 'desc')->get();
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'nodes' => 'nullable|array',
             'connections' => 'nullable|array',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'boolean',
         ]);
-
-        $validated['company_id'] = $request->user()->company_id;
-        $validated['name'] = $validated['name'] ?? 'Fluxo Principal';
 
         $flow = ChatbotFlow::create($validated);
 
-        return response()->json([
-            'message' => 'Fluxo de chatbot criado com sucesso',
-            'flow' => $flow,
-        ], 201);
+        return response()->json($flow, 201);
     }
 
     public function show($id)
     {
-        $flow = ChatbotFlow::findOrFail($id);
-        return response()->json($flow);
+        return ChatbotFlow::findOrFail($id);
     }
 
     public function update(Request $request, $id)
@@ -50,15 +40,12 @@ class ChatbotController extends Controller
             'name' => 'sometimes|string|max:255',
             'nodes' => 'nullable|array',
             'connections' => 'nullable|array',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'sometimes|boolean',
         ]);
 
         $flow->update($validated);
 
-        return response()->json([
-            'message' => 'Fluxo atualizado com sucesso',
-            'flow' => $flow,
-        ]);
+        return $flow;
     }
 
     public function destroy($id)
@@ -66,29 +53,23 @@ class ChatbotController extends Controller
         $flow = ChatbotFlow::findOrFail($id);
         $flow->delete();
 
-        return response()->json(['message' => 'Fluxo deletado com sucesso']);
+        return response()->json(null, 204);
     }
 
-    public function active(Request $request)
+    public function active()
     {
-        $flow = ChatbotFlow::where('company_id', $request->user()->company_id)
-            ->where('is_active', true)
-            ->first();
-
-        return response()->json($flow);
+        return ChatbotFlow::where('is_active', true)->first();
     }
 
-    public function setActive(Request $request, $id)
+    public function setActive($id)
     {
-        ChatbotFlow::where('company_id', $request->user()->company_id)
+        // Deactivate all others for this company
+        ChatbotFlow::where('company_id', Auth::user()->company_id)
             ->update(['is_active' => false]);
 
         $flow = ChatbotFlow::findOrFail($id);
         $flow->update(['is_active' => true]);
 
-        return response()->json([
-            'message' => 'Fluxo ativado com sucesso',
-            'flow' => $flow,
-        ]);
+        return $flow;
     }
 }

@@ -25,11 +25,15 @@ Route::get('/user', function (Request $request) {
     $user = $request->user();
     $company = $user->company;
     $plan = $company ? $company->plan : null;
+    $role = $user->role;
+    
     $features = $plan && is_array($plan->features) ? $plan->features : [];
     $addons = $company && is_array($company->addons) ? $company->addons : [];
     
     $userData = $user->toArray();
     $userData['allowed_modules'] = array_values(array_unique(array_merge($features, $addons)));
+    $userData['role_name'] = $role ? $role->name : ($user->is_admin ? 'Administrador' : 'Usuário');
+    $userData['permissions'] = $role ? $role->permissions : ($user->is_admin ? null : []);
     
     return $userData;
 })->middleware('auth:sanctum');
@@ -39,6 +43,9 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
+    
+    // Roles & Permissions
+    Route::apiResource('roles', \App\Http\Controllers\RoleController::class);
     
     // Reports & BI
     Route::get('/reports/overview', [ReportController::class, 'overview']);
@@ -56,12 +63,12 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
         Route::put('/funnel-stages/{id}', [FunnelController::class, 'update']);
         Route::delete('/funnel-stages/{id}', [FunnelController::class, 'destroy']);
         
-        Route::get('/opportunities', [OpportunityController::class, 'index']);
-        Route::post('/opportunities', [OpportunityController::class, 'store']);
-        Route::get('/opportunities/{id}', [OpportunityController::class, 'show']);
-        Route::put('/opportunities/{id}', [OpportunityController::class, 'update']);
-        Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy']);
-        Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move']);
+        Route::get('/opportunities', [OpportunityController::class, 'index'])->middleware('permission:commercial,view');
+        Route::post('/opportunities', [OpportunityController::class, 'store'])->middleware('permission:commercial,create');
+        Route::get('/opportunities/{id}', [OpportunityController::class, 'show'])->middleware('permission:commercial,view');
+        Route::put('/opportunities/{id}', [OpportunityController::class, 'update'])->middleware('permission:commercial,edit');
+        Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy'])->middleware('permission:commercial,delete');
+        Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move'])->middleware('permission:commercial,edit');
         Route::post('/opportunities/{id}/ai-insights', [OpportunityController::class, 'updateInsights']);
         Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
         

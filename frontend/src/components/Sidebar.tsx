@@ -34,11 +34,13 @@ interface MenuItem {
   name: string;
   icon: JSX.Element;
   badge?: string;
+  permission?: string;
 }
 
 interface MenuGroup {
   title: string;
   requiredModule?: string;
+  permissionModule?: string;
   items: MenuItem[];
 }
 
@@ -68,6 +70,16 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     if (user.is_superadmin) return true;
     if (!user.allowed_modules) return false;
     return user.allowed_modules.includes(moduleKey);
+  };
+
+  const hasPermission = (module?: string, action: string = 'view') => {
+    // 1. Admin/SuperAdmin Bypass
+    if (user.is_superadmin || user.is_admin || !user.role_id) return true;
+    
+    // 2. Check Role Permissions
+    if (!user.permissions) return false;
+    const perms = user.permissions;
+    return perms[module as string]?.[action] === true;
   };
 
   useEffect(() => {
@@ -107,12 +119,12 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     {
       title: 'Gestão',
       items: [
-        { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-        { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} /> },
-        { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} /> },
-        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
-        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} /> },
-        { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} /> },
+        { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} />, permission: 'dashboard' },
+        { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} />, permission: 'admin' },
+        { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} />, permission: 'users' },
+        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} />, permission: 'reports' },
+        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} />, permission: 'reports' },
+        { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} />, permission: 'admin' },
         ...(user.is_superadmin ? [{ key: 'master' as Page, name: 'Painel Master', icon: <Lock size={18} /> }] : [])
       ]
     },
@@ -120,49 +132,49 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       title: 'Comercial',
       requiredModule: 'commercial',
       items: [
-        { key: 'clients', name: 'Clientes', icon: <User size={18} /> },
-        { key: 'leads', name: 'Leads', icon: <Users size={18} /> },
-        { key: 'proposals', name: 'Propostas', icon: <FileText size={18} /> },
-        { key: 'sales-funnel', name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
-        { key: 'products', name: 'Catálogo de Produtos', icon: <Package size={18} /> },
-        { key: 'agenda', name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
+        { key: 'clients', name: 'Clientes', icon: <User size={18} />, permission: 'clients' },
+        { key: 'leads', name: 'Leads', icon: <Users size={18} />, permission: 'leads' },
+        { key: 'proposals', name: 'Propostas', icon: <FileText size={18} />, permission: 'proposals' },
+        { key: 'sales-funnel', name: 'Funil de Vendas', icon: <KanbanSquare size={18} />, permission: 'sales_funnel' },
+        { key: 'products', name: 'Catálogo de Produtos', icon: <Package size={18} />, permission: 'inventory' },
+        { key: 'agenda', name: 'Agenda Integrada', icon: <CalendarDays size={18} />, permission: 'leads' },
       ]
     },
     {
       title: 'Licitações RPA',
       requiredModule: 'bidding',
       items: [
-        { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} /> },
-        { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} /> },
-        { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} /> },
-        { key: 'bidding-funnel', name: 'Funil de Licitações', icon: <KanbanSquare size={18} /> },
-        { key: 'auction-details', name: 'Detalhes do Pregão', icon: <ListTodo size={18} /> },
-        { key: 'ai-generator', name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 'Pro' },
+        { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} />, permission: 'bidding_radar' },
+        { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} />, permission: 'bidding_capture' },
+        { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} />, permission: 'bidding_radar' },
+        { key: 'bidding-funnel', name: 'Funil de Licitações', icon: <KanbanSquare size={18} />, permission: 'bidding_funnel' },
+        { key: 'auction-details', name: 'Detalhes do Pregão', icon: <ListTodo size={18} />, permission: 'bidding_radar' },
+        { key: 'ai-generator', name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 'Pro', permission: 'bidding_radar' },
       ]
     },
     {
       title: 'Financeiro',
       requiredModule: 'financial',
       items: [
-        { key: 'finance', name: 'Motor Financeiro', icon: <Wallet size={18} /> },
-        { key: 'accounts-payable-receivable', name: 'Contas Pagar/Receber', icon: <CreditCard size={18} /> },
-        { key: 'contracts', name: 'Contratos (CLM)', icon: <Briefcase size={18} /> },
+        { key: 'finance', name: 'Motor Financeiro', icon: <Wallet size={18} />, permission: 'finance' },
+        { key: 'accounts-payable-receivable', name: 'Contas Pagar/Receber', icon: <CreditCard size={18} />, permission: 'accounts' },
+        { key: 'contracts', name: 'Contratos (CLM)', icon: <Briefcase size={18} />, permission: 'contracts' },
       ]
     },
     {
       title: 'Ativos e Estoque',
       items: [
-        { key: 'inventory', name: 'Inventário', icon: <Boxes size={18} /> },
-        { key: 'consignment', name: 'Gestão de Consignação', icon: <Handshake size={18} /> },
+        { key: 'inventory', name: 'Inventário', icon: <Boxes size={18} />, permission: 'inventory' },
+        { key: 'consignment', name: 'Gestão de Consignação', icon: <Handshake size={18} />, permission: 'inventory' },
       ]
     },
     {
       title: 'Módulos Adicionais',
       items: [
-        { key: 'campaigns', name: 'Marketing / Campanhas', icon: <Send size={18} /> },
-        { key: 'email-marketing', name: 'E-mail Marketing', icon: <Mail size={18} /> },
-        { key: 'chatbot', name: 'Construtor de Chatbot', icon: <Bot size={18} /> },
-        { key: 'conversations', name: 'Central de Atendimento', icon: <MessageCircle size={18} /> },
+        { key: 'campaigns', name: 'Marketing / Campanhas', icon: <Send size={18} />, permission: 'marketing' },
+        { key: 'email-marketing', name: 'E-mail Marketing', icon: <Mail size={18} />, permission: 'marketing' },
+        { key: 'chatbot', name: 'Construtor de Chatbot', icon: <Bot size={18} />, permission: 'chatbot' },
+        { key: 'conversations', name: 'Central de Atendimento', icon: <MessageCircle size={18} />, permission: 'chatbot' },
         { key: 'settings', name: 'Preferências', icon: <Settings size={18} /> },
       ]
     }
@@ -223,6 +235,12 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       <nav className="flex-1 py-6 px-4 space-y-8 overflow-y-auto scrollbar-platinum scroll-smooth">
         {menuGroups.map((group, gIndex) => {
           const isLocked = !hasModule(group.requiredModule);
+          
+          // Filter items based on permission
+          const visibleItems = group.items.filter(item => hasPermission(item.permission, 'view'));
+          
+          if (visibleItems.length === 0) return null;
+
           return (
             <div key={gIndex} className={isLocked ? 'opacity-30 grayscale' : ''}>
               {isExpanded && (
@@ -242,8 +260,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                   </div>
                 </div>
               )}
-              <div className={`space-y-1.5 transition-all duration-300 overflow-hidden ${collapsedGroups.includes(group.title) && isExpanded ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-                {group.items.map((item, index) => (
+              <div className={`space-y-1.5 transition-all duration-300 overflow-hidden ${collapsedGroups.includes(group.title) && isExpanded ? 'max-h-0 opacity-0' : 'max-h-[800px] opacity-100'}`}>
+                {visibleItems.map((item, index) => (
                   <button
                     key={index}
                     onClick={() => {

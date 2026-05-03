@@ -16,11 +16,13 @@ class EmailCampaignMail extends Mailable
 
     public $subjectStr;
     public $htmlBody;
+    public $imageUrl;
 
-    public function __construct($subjectStr, $htmlBody)
+    public function __construct($subjectStr, $htmlBody, $imageUrl = null)
     {
         $this->subjectStr = $subjectStr;
         $this->htmlBody = $htmlBody;
+        $this->imageUrl = $imageUrl;
     }
 
     public function envelope(): Envelope
@@ -32,8 +34,14 @@ class EmailCampaignMail extends Mailable
 
     public function content(): Content
     {
+        $fullBody = $this->htmlBody;
+        
+        if ($this->imageUrl) {
+            $fullBody = '<div style="text-align:center; margin-bottom:20px;"><img src="' . $this->imageUrl . '" style="max-width:100%; border-radius:8px;" /></div>' . $fullBody;
+        }
+
         return new Content(
-            htmlString: $this->htmlBody,
+            htmlString: $fullBody,
         );
     }
 

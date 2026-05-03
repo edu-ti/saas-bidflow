@@ -64,23 +64,32 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
     console.error('Failed to parse user from localStorage', e);
   }
 
-  console.log('[SuperAdminRoute] Auth state:', { 
-    isAuthenticated, 
-    hasToken: !!apiToken,
-    userEmail: user?.email,
-    isSuperAdmin: user?.is_superadmin 
-  });
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user.is_superadmin) return <Navigate to="/" replace />;
 
-  if (!isAuthenticated) {
-    console.warn('[SuperAdminRoute] Not authenticated, redirecting to /login');
-    return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+// Helper para verificar permissão no frontend
+const hasPermission = (permission?: string, action: string = 'view') => {
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) return false;
+  
+  try {
+    const user = JSON.parse(storedUser);
+    if (user.is_superadmin || user.is_admin || !user.role_id) return true;
+    if (!user.permissions || !permission) return true; 
+    return user.permissions[permission]?.[action] === true;
+  } catch {
+    return false;
   }
+};
 
-  if (!user.is_superadmin) {
-    console.warn('[SuperAdminRoute] Not a superadmin, redirecting to /');
-    return <Navigate to="/" replace />;
+// Componente para rotas com permissão específica
+function PermissionRoute({ children, permission }: { children: React.ReactNode, permission: string }) {
+  if (!hasPermission(permission, 'view')) {
+    return <Navigate to="/dashboard" replace />;
   }
-
   return <>{children}</>;
 }
 
@@ -282,239 +291,297 @@ function AppContent() {
 
         <Route path="/company" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Company />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="admin">
+              <AuthenticatedLayout>
+                <Company />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/users" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <UsersManagement />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="users">
+              <AuthenticatedLayout>
+                <UsersManagement />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/reports" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Reports />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="reports">
+              <AuthenticatedLayout>
+                <Reports />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/reports-dashboard" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <ReportsDashboard />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="reports">
+              <AuthenticatedLayout>
+                <ReportsDashboard />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Comercial */}
         <Route path="/sales-funnel" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <SalesFunnel />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="sales_funnel">
+              <AuthenticatedLayout>
+                <SalesFunnel />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/leads" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Leads />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="leads">
+              <AuthenticatedLayout>
+                <Leads />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/clients" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Clients />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="clients">
+              <AuthenticatedLayout>
+                <Clients />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/proposals" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Proposals />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="proposals">
+              <AuthenticatedLayout>
+                <Proposals />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/email-marketing" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <EmailMarketing />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="marketing">
+              <AuthenticatedLayout>
+                <EmailMarketing />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/agenda" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Agenda />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="leads">
+              <AuthenticatedLayout>
+                <Agenda />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Licitações */}
         <Route path="/bidding-radar" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <BiddingRadar />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_radar">
+              <AuthenticatedLayout>
+                <BiddingRadar />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/bidding-monitoring" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <BiddingMonitoring />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_radar">
+              <AuthenticatedLayout>
+                <BiddingMonitoring />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/bidding-funnel" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <BiddingFunnel />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_funnel">
+              <AuthenticatedLayout>
+                <BiddingFunnel />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/bidding-capture" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <BiddingCapture />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_capture">
+              <AuthenticatedLayout>
+                <BiddingCapture />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/auction-details" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <AuctionDetails />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_radar">
+              <AuthenticatedLayout>
+                <AuctionDetails />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/ai-generator" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <AIGenerator />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="bidding_radar">
+              <AuthenticatedLayout>
+                <AIGenerator />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Operacional */}
         <Route path="/licenses" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Licenses />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="admin">
+              <AuthenticatedLayout>
+                <Licenses />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/consignment" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Consignment />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="inventory">
+              <AuthenticatedLayout>
+                <Consignment />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/contracts" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Contracts />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="contracts">
+              <AuthenticatedLayout>
+                <Contracts />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Estoque */}
         <Route path="/products" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Products />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="inventory">
+              <AuthenticatedLayout>
+                <Products />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/inventory" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Inventory />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="inventory">
+              <AuthenticatedLayout>
+                <Inventory />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/campaigns" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Campaigns />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="marketing">
+              <AuthenticatedLayout>
+                <Campaigns />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/tasks" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Tasks />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="dashboard">
+              <AuthenticatedLayout>
+                <Tasks />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Financeiro */}
         <Route path="/accounts-payable-receivable" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <AccountsPayableReceivable />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="accounts">
+              <AuthenticatedLayout>
+                <AccountsPayableReceivable />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/finance" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Finance />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="finance">
+              <AuthenticatedLayout>
+                <Finance />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         {/* Rotas protegidas - Configurações */}
         <Route path="/admin" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Admin />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="admin">
+              <AuthenticatedLayout>
+                <Admin />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/chatbot" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <ChatbotBuilder />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="chatbot">
+              <AuthenticatedLayout>
+                <ChatbotBuilder />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/conversations" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Conversations />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="chatbot">
+              <AuthenticatedLayout>
+                <Conversations />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
         <Route path="/settings" element={
           <ProtectedRoute>
-            <AuthenticatedLayout>
-              <Settings />
-            </AuthenticatedLayout>
+            <PermissionRoute permission="dashboard">
+              <AuthenticatedLayout>
+                <Settings />
+              </AuthenticatedLayout>
+            </PermissionRoute>
           </ProtectedRoute>
         } />
 
