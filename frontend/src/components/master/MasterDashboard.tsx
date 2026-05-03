@@ -1,7 +1,25 @@
 import React from 'react';
-import { Building2, Users, DollarSign, Activity, Zap, Globe, ShieldCheck, Sparkles, TrendingUp, BarChart3, ArrowUpRight } from 'lucide-react';
+import { Building2, Users, DollarSign, Activity, Zap, Globe, ShieldCheck, Sparkles, TrendingUp, BarChart3, ArrowUpRight, Upload, Camera } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function MasterDashboard() {
+  const [logo, setLogo] = React.useState<string>(localStorage.getItem('company_logo') || '');
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setLogo(base64);
+        localStorage.setItem('company_logo', base64);
+        window.dispatchEvent(new Event('storage'));
+        toast.success('Logotipo do sistema atualizado com sucesso!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shrink-0">
@@ -109,8 +127,71 @@ export default function MasterDashboard() {
                   </div>
                 ))}
              </div>
-          </div>
+           </div>
         </div>
+      </div>
+
+      <div className="platinum-card p-10 bg-surface-elevated/20 border border-border-subtle shadow-platinum-glow-sm overflow-hidden relative group">
+         <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+            <Camera size={180} className="text-primary" />
+         </div>
+         
+         <div className="flex flex-col md:flex-row items-center gap-12 relative z-10">
+            <div className="flex flex-col items-center gap-6">
+               <div className="w-48 h-48 rounded-[2.5rem] bg-background border-2 border-dashed border-border-medium flex items-center justify-center overflow-hidden relative group/logo shadow-inner-platinum">
+                  {logo ? (
+                    <img src={logo} alt="System Logo" className="w-full h-full object-contain p-4 group-hover/logo:scale-110 transition-transform duration-500" />
+                  ) : (
+                    <Camera size={48} className="text-text-muted opacity-20" />
+                  )}
+                  <label className="absolute inset-0 bg-primary/80 opacity-0 group-hover/logo:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all duration-300">
+                    <Upload className="text-white mb-2" size={24} />
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Alterar Logo</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                  </label>
+               </div>
+               <p className="text-[9px] font-black text-text-secondary uppercase tracking-[0.3em] italic">Preview da Identidade Global</p>
+            </div>
+
+            <div className="flex-1 space-y-8">
+               <div className="space-y-3">
+                  <h3 className="text-xl font-black text-text-primary uppercase tracking-tighter">Identidade Visual do Ecossistema</h3>
+                  <p className="text-sm text-text-secondary font-medium leading-relaxed max-w-2xl">
+                     Este logotipo será aplicado globalmente em todos os pontos de entrada do sistema, incluindo a **Landing Page**, a **Tela de Login Master** e em todos os **Tenants** que não possuírem uma marca própria configurada.
+                  </p>
+               </div>
+
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="p-6 bg-background/40 border border-border-subtle rounded-2xl space-y-2 shadow-inner-platinum group/item hover:border-primary/40 transition-colors">
+                     <span className="text-[9px] font-black text-primary uppercase tracking-widest">Dimensões Recomendadas</span>
+                     <p className="text-xs font-bold text-text-secondary">512x512px (Proporção 1:1)</p>
+                  </div>
+                  <div className="p-6 bg-background/40 border border-border-subtle rounded-2xl space-y-2 shadow-inner-platinum group/item hover:border-primary/40 transition-colors">
+                     <span className="text-[9px] font-black text-primary uppercase tracking-widest">Formato de Arquivo</span>
+                     <p className="text-xs font-bold text-text-secondary">PNG ou SVG (Transparente)</p>
+                  </div>
+               </div>
+
+               <div className="flex items-center gap-4 pt-4">
+                  <button className="px-8 py-3 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-platinum-glow-sm hover:scale-105 transition-all">
+                     Salvar Preferências Globais
+                  </button>
+                  {logo && (
+                    <button 
+                      onClick={() => {
+                        localStorage.removeItem('company_logo');
+                        setLogo('');
+                        window.dispatchEvent(new Event('storage'));
+                        toast.success('Logotipo restaurado para o padrão.');
+                      }}
+                      className="px-8 py-3 bg-surface-elevated text-text-secondary border border-border-subtle rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-red-500 hover:border-red-500/30 transition-all"
+                    >
+                      Remover Logo
+                    </button>
+                  )}
+               </div>
+            </div>
+         </div>
       </div>
     </div>
   );

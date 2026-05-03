@@ -113,6 +113,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
         { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} /> },
         { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} /> },
+        ...(user.is_superadmin ? [{ key: 'master' as Page, name: 'Painel Master', icon: <Lock size={18} /> }] : [])
       ]
     },
     {

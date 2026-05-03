@@ -38,6 +38,7 @@ import MasterDashboard from './components/master/MasterDashboard';
 import TenantList from './components/master/TenantList';
 import PlansManagement from './components/master/PlansManagement';
 import SystemHealth from './components/master/SystemHealth';
+import LandingPage from './pages/LandingPage';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
@@ -45,7 +46,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!localStorage.getItem('api_token');
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -252,18 +253,25 @@ function AppContent() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rota pública - Landing Page */}
+        <Route path="/" element={
+          (() => {
+            const token = localStorage.getItem('api_token');
+            if (!token) return <LandingPage />;
+            
+            try {
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              return user.is_superadmin ? <Navigate to="/master/dashboard" replace /> : <Navigate to="/dashboard" replace />;
+            } catch {
+              return <LandingPage />;
+            }
+          })()
+        } />
+
         {/* Rota pública - Login */}
         <Route path="/login" element={<Login />} />
 
         {/* Dashboard - Página inicial com Sidebar */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
-
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardLayout>

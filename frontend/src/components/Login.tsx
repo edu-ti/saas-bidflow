@@ -18,13 +18,20 @@ export default function Login() {
       const res = await api.post('/api/login', { email, password });
       localStorage.setItem('api_token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      navigate('/dashboard');
+      
+      if (res.data.user.is_superadmin) {
+        navigate('/master/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch {
       setError('E-mail ou senha incorretos.');
     } finally {
       setLoading(false);
     }
   };
+
+  const companyLogo = localStorage.getItem('company_logo') || '';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
@@ -41,14 +48,22 @@ export default function Login() {
 
       <div className="w-full max-w-md relative z-10 space-y-8 animate-in fade-in zoom-in-95 duration-700">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-surface border border-border-medium shadow-elevation-high group">
-             <span className="text-4xl text-primary drop-shadow-platinum-glow transition-transform group-hover:scale-110">●</span> 
-          </div>
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black text-text-primary tracking-tighter uppercase">
-              Bid<span className="text-gradient-gold">Flow</span>
-            </h1>
-            <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.4em]">SaaS Financial Engine</p>
+          <div className="flex flex-col items-center gap-6">
+            {companyLogo ? (
+              <img src={companyLogo} alt="Logo" className="h-24 w-auto object-contain animate-in fade-in zoom-in duration-700" />
+            ) : (
+              <>
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-surface border border-border-medium shadow-elevation-high group">
+                  <span className="text-4xl text-primary drop-shadow-platinum-glow transition-transform group-hover:scale-110">●</span> 
+                </div>
+                <div className="space-y-1">
+                  <h1 className="text-4xl font-black text-text-primary tracking-tighter uppercase">
+                    Bid<span className="text-gradient-gold">Flow</span>
+                  </h1>
+                  <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.4em]">SaaS Financial Engine</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
