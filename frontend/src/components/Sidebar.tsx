@@ -5,7 +5,8 @@ import {
   BarChart3, FileCheck, ClipboardList, Handshake, TrendingUp,
   CreditCard, Wallet, Shield, FolderOpen, FileSearch, ScrollText,
   Briefcase, FileSignature, Sparkles, Sun, Moon, Boxes, Send, ListTodo,
-  MessageCircle, Bot, Lock, Activity, Zap
+  MessageCircle, Bot, Lock, Activity, Zap,
+  ChevronDown, ChevronRight, Menu, ChevronLeft
 } from 'lucide-react';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
@@ -50,7 +51,8 @@ interface SidebarProps {
 export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
   const { theme, toggleTheme } = useTheme();
   const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
   const storedUser = localStorage.getItem('user');
   let user = { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, allowed_modules: [] };
   try {
@@ -82,6 +84,14 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     const interval = setInterval(fetchAlerts, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const toggleGroup = (title: string) => {
+    setCollapsedGroups(prev =>
+      prev.includes(title)
+        ? prev.filter(t => t !== title)
+        : [...prev, title]
+    );
+  };
 
   const menuGroups: MenuGroup[] = [
     {
@@ -150,20 +160,32 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   return (
     <div
       className={`h-screen bg-surface border-r border-border-subtle flex flex-col text-text-secondary flex-shrink-0 transition-all duration-500 ease-out z-50 shadow-platinum ${isExpanded ? 'w-64' : 'w-20'}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
     >
-      <div className={`p-6 pb-6 border-b border-border-subtle transition-all duration-300 ${isExpanded ? '' : 'px-2 py-6'}`}>
+      <div className={`p-6 pb-6 border-b border-border-subtle transition-all duration-300 relative ${isExpanded ? '' : 'px-2 py-6'}`}>
         {isExpanded ? (
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black text-text-primary tracking-tighter flex items-center group">
-              <div className="w-2 h-6 bg-gradient-to-b from-[#2563eb] to-[#14b8a6] rounded-full mr-3 shadow-platinum-glow group-hover:scale-y-125 transition-all duration-500" />
-              <span className="text-gradient-gold">BidFlow</span>
-            </h1>
-            <p className="text-[9px] text-text-muted uppercase tracking-[0.4em] font-black opacity-60">Intelligence & Flow</p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-text-primary tracking-tighter flex items-center group">
+                <div className="w-2 h-6 bg-gradient-to-b from-[#2563eb] to-[#14b8a6] rounded-full mr-3 shadow-platinum-glow group-hover:scale-y-125 transition-all duration-500" />
+                <span className="text-gradient-gold">BidFlow</span>
+              </h1>
+              <p className="text-[9px] text-text-muted uppercase tracking-[0.4em] font-black opacity-60">Intelligence & Flow</p>
+            </div>
+            <button 
+              onClick={() => setIsExpanded(false)}
+              className="p-2 hover:bg-surface-elevated rounded-xl transition-colors text-text-muted hover:text-primary"
+            >
+              <ChevronLeft size={20} />
+            </button>
           </div>
         ) : (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <button 
+              onClick={() => setIsExpanded(true)}
+              className="p-2 hover:bg-surface-elevated rounded-xl transition-colors text-text-muted hover:text-primary"
+            >
+              <Menu size={24} />
+            </button>
             <div className="w-2.5 h-8 bg-gradient-to-b from-[#2563eb] to-[#14b8a6] rounded-full shadow-platinum-glow animate-pulse" />
           </div>
         )}
@@ -175,14 +197,23 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
           return (
             <div key={gIndex} className={isLocked ? 'opacity-30 grayscale' : ''}>
               {isExpanded && (
-                <div className="flex items-center justify-between px-3 mb-4">
-                  <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] opacity-50">
+                <div 
+                  className="flex items-center justify-between px-3 mb-4 cursor-pointer group/header select-none"
+                  onClick={() => toggleGroup(group.title)}
+                >
+                  <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] opacity-50 group-hover/header:opacity-100 transition-opacity">
                     {group.title}
                   </p>
-                  {isLocked && <Lock size={12} className="text-text-muted" />}
+                  <div className="flex items-center gap-2">
+                    {isLocked && <Lock size={12} className="text-text-muted" />}
+                    <ChevronDown 
+                      size={12} 
+                      className={`text-text-muted transition-transform duration-300 ${collapsedGroups.includes(group.title) ? '-rotate-90' : ''}`} 
+                    />
+                  </div>
                 </div>
               )}
-              <div className="space-y-1.5">
+              <div className={`space-y-1.5 transition-all duration-300 overflow-hidden ${collapsedGroups.includes(group.title) && isExpanded ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
                 {group.items.map((item, index) => (
                   <button
                     key={index}
