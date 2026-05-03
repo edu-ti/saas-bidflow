@@ -27,63 +27,69 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-background">
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }} />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: `
+          linear-gradient(var(--color-primary) 1px, transparent 1px),
+          linear-gradient(90deg, var(--color-primary) 1px, transparent 1px)
+        `,
+        backgroundSize: '80px 80px'
+      }} />
+      
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[120px]" />
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white flex items-center justify-center gap-3 tracking-tight">
-            <span className="text-primary drop-shadow-[0_0_10px_rgba(0,212,255,0.5)]">●</span> 
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">BidFlow</span>
-          </h1>
-          <p className="text-text-muted mt-3 text-sm font-medium tracking-wide">ERP SaaS de Licitações</p>
+      <div className="w-full max-w-md relative z-10 space-y-8 animate-in fade-in zoom-in-95 duration-700">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-surface border border-border-medium shadow-elevation-high group">
+             <span className="text-4xl text-primary drop-shadow-platinum-glow transition-transform group-hover:scale-110">●</span> 
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-text-primary tracking-tighter uppercase">
+              Bid<span className="text-gradient-gold">Flow</span>
+            </h1>
+            <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.4em]">SaaS Financial Engine</p>
+          </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="platinum-card p-10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
           
-          <h2 className="text-xl font-bold text-white mb-6 tracking-tight">Entrar na plataforma</h2>
+          <div className="mb-8">
+            <h2 className="text-lg font-black text-text-primary uppercase tracking-tighter">Acesso Restrito</h2>
+            <p className="text-xs font-bold text-text-muted mt-1 uppercase tracking-widest italic">Inicie sessão para gerenciar seus ativos</p>
+          </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg mb-4 backdrop-blur-sm">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest px-4 py-3 rounded-xl mb-6 animate-in slide-in-from-top-2">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                E-mail
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest">
+                Identificador (E-mail)
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-surface/60 border border-border-subtle rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 placeholder-text-muted transition-all duration-300"
+                className="w-full px-5 py-4 bg-background/50 border border-border-subtle rounded-xl text-text-primary text-sm font-bold focus:outline-none focus:border-primary/50 placeholder:text-text-muted/50 transition-all"
                 placeholder="seu@email.com"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                Senha
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest">
+                Chave de Acesso (Senha)
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-surface/60 border border-border-subtle rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 placeholder-text-muted transition-all duration-300"
+                className="w-full px-5 py-4 bg-background/50 border border-border-subtle rounded-xl text-text-primary text-sm font-bold focus:outline-none focus:border-primary/50 placeholder:text-text-muted/50 transition-all"
                 placeholder="••••••••"
                 required
               />
@@ -92,15 +98,20 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-primary to-primaryHover hover:shadow-glow-primary disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-300 text-sm mt-2"
+              className="btn-primary w-full py-4 text-xs tracking-widest"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'AUTENTICANDO...' : 'EFETUAR LOGIN'}
             </button>
           </form>
 
-          <p className="text-center text-text-muted text-xs mt-6">
-            Dev: admin@bidflow.dev / password
-          </p>
+          <div className="mt-8 pt-8 border-t border-border-subtle flex flex-col items-center gap-2">
+            <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">Sandbox Credentials</p>
+            <p className="text-[10px] font-bold text-primary tracking-wider">admin@bidflow.dev / password</p>
+          </div>
+        </div>
+
+        <div className="text-center">
+           <p className="text-[9px] font-black text-text-muted uppercase tracking-widest opacity-50">© 2026 BIDFLOW TECHNOLOGIES • SECURED BY PLATINUM OS</p>
         </div>
       </div>
     </div>

@@ -1,66 +1,116 @@
 import React from 'react';
-import { Building2, Users, DollarSign, Activity } from 'lucide-react';
+import { Building2, Users, DollarSign, Activity, Zap, Globe, ShieldCheck, Sparkles, TrendingUp, BarChart3, ArrowUpRight } from 'lucide-react';
 
 export default function MasterDashboard() {
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dashboard Master</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Visão geral do sistema e métricas globais</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-slate-600 dark:text-slate-400">Total de Empresas</h3>
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg">
-              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">0</p>
-          <p className="text-sm text-emerald-600 mt-2 flex items-center gap-1">
-            <Activity className="w-4 h-4" /> empresas ativas
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shrink-0">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
+            Dashboard <span className="text-gradient-gold">Master</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Globe size={14} className="text-primary" />
+            Visão geral da infraestrutura e métricas globais de governança Platinum.
           </p>
         </div>
+        <div className="flex items-center gap-5 bg-surface-elevated/20 border border-border-subtle/30 p-5 rounded-2xl shadow-inner-platinum backdrop-blur-md">
+           <div className="flex flex-col items-end gap-1">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary italic">Status Global</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">Sistema Nominal</span>
+           </div>
+           <div className="w-px h-10 bg-border-subtle/30" />
+           <Zap className="text-primary w-6 h-6 animate-pulse shadow-platinum-glow-sm" />
+        </div>
+      </header>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-slate-600 dark:text-slate-400">Total de Usuários</h3>
-            <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg">
-              <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {[
+          { title: 'Total de Empresas', value: '1.240', sub: 'empresas ativas', icon: Building2, color: 'primary', trend: '+12%' },
+          { title: 'Total de Usuários', value: '48.902', sub: 'em toda a plataforma', icon: Users, color: 'accent', trend: '+8.4%' },
+          { title: 'MRR (Estimado)', value: 'R$ 840.500', sub: 'Receita recorrente mensal', icon: DollarSign, color: 'emerald', trend: '+15.2%' },
+          { title: 'Novos Cadastros', value: '154', sub: 'últimos 30 dias', icon: TrendingUp, color: 'amber', trend: '+5.1%' }
+        ].map((card, idx) => (
+          <div key={idx} className="platinum-card p-8 space-y-6 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm group hover:scale-[1.02] transition-all duration-500">
+            <div className="flex items-center justify-between">
+              <div className={`p-3 bg-${card.color === 'primary' ? 'primary' : card.color === 'emerald' ? 'emerald-500' : card.color === 'amber' ? 'amber-500' : 'accent'}/10 rounded-2xl border border-${card.color === 'primary' ? 'primary' : card.color === 'emerald' ? 'emerald-500' : card.color === 'amber' ? 'amber-500' : 'accent'}/20 shadow-inner-platinum group-hover:scale-110 transition-transform`}>
+                <card.icon className={`w-6 h-6 text-${card.color === 'primary' ? 'primary' : card.color === 'emerald' ? 'emerald-500' : card.color === 'amber' ? 'amber-500' : 'accent'}`} />
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-[9px] font-black text-emerald-500 shadow-platinum-glow-sm">
+                <ArrowUpRight size={10} /> {card.trend}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em]">{card.title}</h3>
+              <p className="text-3xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors">{card.value}</p>
+            </div>
+            <div className="pt-4 border-t border-border-subtle/20">
+               <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest flex items-center gap-2">
+                  <Activity size={12} className="text-primary" /> {card.sub}
+               </p>
             </div>
           </div>
-          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">0</p>
-          <p className="text-sm text-slate-500 mt-2">em toda a plataforma</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-slate-600 dark:text-slate-400">MRR (Estimado)</h3>
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg">
-              <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">R$ 0,00</p>
-          <p className="text-sm text-slate-500 mt-2">Receita recorrente mensal</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-slate-600 dark:text-slate-400">Novos Cadastros</h3>
-            <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
-              <Activity className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">0</p>
-          <p className="text-sm text-slate-500 mt-2">últimos 30 dias</p>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center min-h-[300px]">
-        <p className="text-slate-500 dark:text-slate-400 text-center">
-          Os gráficos globais de uso e retenção serão carregados aqui.
-        </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 platinum-card p-10 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow flex flex-col items-center justify-center min-h-[450px] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-110 group-hover:rotate-6 transition-transform duration-1000">
+             <BarChart3 size={240} className="text-primary" />
+          </div>
+          
+          <div className="flex flex-col items-center gap-8 relative z-10">
+            <div className="w-20 h-20 rounded-[2rem] bg-surface-elevated flex items-center justify-center border border-border-subtle shadow-inner-platinum animate-pulse">
+               <Sparkles size={40} className="text-primary shadow-platinum-glow-sm" />
+            </div>
+            <div className="text-center space-y-3">
+              <h3 className="text-sm font-black text-text-primary uppercase tracking-[0.5em]">Motor de Análise Preditiva</h3>
+              <p className="text-[11px] text-text-secondary font-black uppercase tracking-[0.3em] max-w-sm mx-auto leading-relaxed">
+                Os gráficos globais de uso, retenção e churn neural serão renderizados neste painel em tempo real.
+              </p>
+            </div>
+            <button className="px-10 py-4 bg-primary/10 border border-primary/20 rounded-2xl text-[10px] font-black text-primary uppercase tracking-[0.4em] hover:bg-primary hover:text-white transition-all shadow-platinum-glow-sm">
+               Forçar Sincronização de Métricas
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          <div className="platinum-card p-8 bg-surface-elevated/10 border border-border-subtle/30 shadow-platinum-glow flex flex-col items-center gap-6 group relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-6 opacity-[0.05] group-hover:scale-110 transition-transform duration-700">
+                <ShieldCheck size={120} className="text-primary" />
+             </div>
+             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner-platinum group-hover:rotate-12 transition-transform duration-500 relative z-10">
+                <ShieldCheck size={32} className="text-primary" />
+             </div>
+             <div className="text-center space-y-2 relative z-10">
+                <h4 className="text-text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Saúde da Infraestrutura</h4>
+                <p className="text-4xl font-black text-text-primary tracking-tighter shadow-platinum-glow-sm group-hover:text-primary transition-colors">99.98%</p>
+             </div>
+             <div className="w-full bg-surface-elevated rounded-full h-1.5 overflow-hidden border border-border-subtle/30 relative z-10">
+                <div className="h-full bg-primary shadow-platinum-glow-sm w-[99.98%]" />
+             </div>
+             <p className="text-[9px] text-text-secondary font-black uppercase tracking-widest text-center leading-relaxed relative z-10 opacity-60">Cluster AWS-Global-East-1 operando em alta performance sem anomalias detectadas.</p>
+          </div>
+
+          <div className="platinum-card p-8 bg-surface-elevated/20 border border-border-subtle/30 shadow-inner-platinum space-y-6">
+             <h3 className="text-[10px] font-black text-text-primary uppercase tracking-[0.4em] flex items-center gap-3">
+                <Activity size={16} className="text-primary" /> Alertas de Monitoramento
+             </h3>
+             <div className="space-y-4">
+                {[
+                  { label: 'Backup de Segurança', status: 'Concluído', color: 'emerald' },
+                  { label: 'Sincronização RPA', status: 'Processando', color: 'primary' },
+                  { label: 'Certificados SSL', status: 'Seguro', color: 'emerald' }
+                ].map((alert, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-background/50 rounded-xl border border-border-subtle hover:border-primary/20 transition-all group shadow-inner-platinum">
+                     <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest group-hover:text-text-primary transition-colors">{alert.label}</span>
+                     <span className={`text-[9px] font-black text-${alert.color === 'primary' ? 'primary' : 'emerald-500'} uppercase tracking-widest bg-${alert.color === 'primary' ? 'primary' : 'emerald-500'}/10 px-3 py-1 rounded-lg shadow-platinum-glow-sm border border-${alert.color === 'primary' ? 'primary' : 'emerald-500'}/20`}>{alert.status}</span>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </div>
       </div>
     </div>
   );

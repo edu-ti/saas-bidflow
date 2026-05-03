@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import { LayoutDashboard, Building2, LogOut, Shield, Activity } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Shield, Activity, Sun, Moon, ChevronRight, Zap, Target, ShieldCheck, Globe, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MasterLayout() {
@@ -11,71 +11,126 @@ export default function MasterLayout() {
   const handleLogout = () => {
     localStorage.removeItem('api_token');
     localStorage.removeItem('user');
+    toast.success('Sessão mestre encerrada.');
     navigate('/login');
   };
 
   const menuItems = [
-    { key: '/master/dashboard', name: 'Dashboard Master', icon: <LayoutDashboard size={18} /> },
-    { key: '/master/tenants', name: 'Gestão de Empresas', icon: <Building2 size={18} /> },
-    { key: '/master/plans', name: 'Planos de Assinatura', icon: <Building2 size={18} /> },
-    { key: '/master/system-health', name: 'Saúde do Sistema', icon: <Activity size={18} /> },
+    { key: '/master/dashboard', name: 'Controle Global', icon: <LayoutDashboard size={20} /> },
+    { key: '/master/tenants', name: 'Gestão de Tenants', icon: <Building2 size={20} /> },
+    { key: '/master/plans', name: 'Arquitetura de Planos', icon: <Shield size={20} /> },
+    { key: '/master/system-health', name: 'Saúde da Infra', icon: <Activity size={20} /> },
   ];
 
   return (
-    <div className={`min-h-screen flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
-      <aside className={`w-64 flex-shrink-0 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} border-r flex flex-col transition-all duration-300 z-20`}>
-        <div className={`h-16 flex items-center px-4 ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'} border-b`}>
-          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-            <Shield size={24} className="text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-lg text-slate-800 dark:text-slate-100">BidFlow Master</span>
+    <div className="min-h-screen flex bg-background text-text-primary overflow-hidden transition-colors duration-500">
+      {/* Sidebar Master Platinum Architecture */}
+      <aside className="w-80 flex-shrink-0 bg-surface border-r border-border-subtle flex flex-col relative z-20 shadow-platinum">
+        
+        {/* Header - Brand Identity */}
+        <div className="h-28 flex flex-col justify-center px-10 border-b border-border-subtle bg-surface-elevated/20 backdrop-blur-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700">
+            <Shield size={60} className="text-primary" />
+          </div>
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-platinum-glow-sm group-hover:rotate-12 transition-transform duration-500">
+              <Shield size={22} className="text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-xl tracking-tighter text-gradient-gold uppercase leading-none">MASTER PANEL</span>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-platinum-glow" />
+                <span className="text-[9px] font-black text-text-secondary uppercase tracking-[0.4em]">Governance Core</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4">
-          <ul className="space-y-1 px-3">
-            {menuItems.map((item) => (
-              <li key={item.key}>
-                <button
-                  onClick={() => navigate(item.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                    location.pathname.startsWith(item.key)
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 font-medium'
-                      : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  <span className={location.pathname.startsWith(item.key) ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}>
-                    {item.icon}
-                  </span>
-                  <span>{item.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-medium">
-              SA
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">Super Admin</p>
-              <p className="text-xs text-slate-500 truncate">master@bidflow.com</p>
+        {/* Navigation Core */}
+        <nav className="flex-1 overflow-y-auto py-10 px-6 space-y-10 scrollbar-platinum">
+          <div>
+            <p className="px-4 text-[10px] font-black text-text-secondary uppercase tracking-[0.5em] mb-6">Navegação Estratégica</p>
+            <div className="space-y-3">
+              {menuItems.map((item) => {
+                const isActive = location.pathname.startsWith(item.key);
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => navigate(item.key)}
+                    className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all group relative overflow-hidden ${isActive
+                      ? 'bg-primary text-white shadow-platinum-glow'
+                      : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary border border-transparent hover:border-border-subtle/50'
+                      }`}
+                  >
+                    <div className="flex items-center gap-5 relative z-10">
+                      <span className={`transition-all duration-500 ${isActive ? 'text-white scale-110' : 'text-primary group-hover:scale-110'}`}>
+                        {item.icon}
+                      </span>
+                      <span className="tracking-widest">{item.name}</span>
+                    </div>
+                    {isActive && <ChevronRight size={14} className="relative z-10 opacity-60" />}
+                    {!isActive && <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
-          
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-          >
-            <LogOut size={16} />
-            Sair
-          </button>
+
+          <div className="pt-6 border-t border-border-subtle/30 space-y-4">
+            <div className="platinum-card p-6 bg-surface-elevated/40 border border-border-subtle/30 shadow-inner-platinum space-y-4 group">
+              <div className="flex items-center justify-between">
+                <Target size={18} className="text-primary group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">99.9%</span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-text-primary uppercase tracking-widest">SLA Global</p>
+                <p className="text-[9px] text-text-secondary font-bold uppercase tracking-widest italic">Infra-Status Nominal</p>
+              </div>
+              <div className="w-full bg-background rounded-full h-1 overflow-hidden">
+                <div className="h-full bg-primary w-[99.9%] shadow-platinum-glow-sm" />
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* User Profile & Global Controls */}
+        <div className="p-8 border-t border-border-subtle bg-surface-elevated/30 backdrop-blur-xl">
+          <div className="platinum-card p-5 flex items-center gap-4 mb-8 bg-background/40 border border-border-subtle shadow-inner-platinum group hover:border-primary/40 transition-all duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center text-white font-black text-lg shadow-platinum-glow-sm group-hover:rotate-12 transition-transform duration-500">
+              <User size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-text-primary truncate uppercase tracking-[0.2em] group-hover:text-primary transition-colors">SYSADMIN</p>
+              <p className="text-[10px] text-text-secondary truncate font-bold">master@bidflow.io</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={toggleTheme}
+              className="flex flex-col items-center justify-center gap-2 py-4 px-3 text-text-secondary hover:text-primary bg-surface-elevated border border-border-subtle rounded-2xl transition-all shadow-inner-platinum hover:scale-[1.05] group"
+              title={theme === 'dark' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}
+            >
+              {theme === 'dark' ? <Moon size={20} className="group-hover:rotate-45 transition-transform duration-500" /> : <Sun size={20} className="group-hover:-rotate-12 transition-transform duration-500" />}
+              <span className="text-[8px] font-black uppercase tracking-[0.2em]">Tema</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center gap-2 py-4 px-3 text-text-secondary hover:text-red-500 bg-surface-elevated border border-border-subtle rounded-2xl transition-all shadow-inner-platinum hover:scale-[1.05] group"
+              title="Logout de Segurança"
+            >
+              <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
+              <span className="text-[8px] font-black uppercase tracking-[0.2em]">Sair</span>
+            </button>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto h-screen relative z-10">
-        <Outlet />
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-auto bg-background relative z-10 scrollbar-platinum selection:bg-primary/20 selection:text-primary">
+        <div className="h-full w-full max-w-[1920px] mx-auto">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

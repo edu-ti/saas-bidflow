@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { TrendingUp, DollarSign, Target, Award, PieChart, Zap, ShieldCheck, Activity, Globe, ArrowUpRight } from 'lucide-react';
 import api from '../lib/axios';
 
 type PipelineStat = {
@@ -29,138 +30,203 @@ export default function Dashboard() {
   useEffect(() => {
     api.get('/api/dashboard/stats')
       .then(res => {
-        setPipeline(res.data.pipeline);
-        setWinRate(res.data.win_rate);
-        setTopOrgs(res.data.top_organizations);
+        setPipeline(res.data.pipeline || []);
+        setWinRate(res.data.win_rate || { won: 0, lost: 0, rate: 0 });
+        setTopOrgs(res.data.top_organizations || []);
       })
       .catch(err => console.error("Could not fetch stats", err))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="animate-pulse text-primary font-medium">Carregando métricas estratégicas...</div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-6 animate-in fade-in duration-700">
+      <div className="relative">
+        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin shadow-platinum-glow" />
+        <Zap size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary animate-pulse" />
+      </div>
+      <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.5em]">Auditando Performance Neural...</div>
     </div>
   );
 
+  const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
+
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Performance <span className="text-gradient-gold">Estratégica</span>
-        </h1>
-        <p className="text-text-secondary max-w-prose-ui">
-          Visão consolidada do pipeline de licitações e eficiência de conversão.
-        </p>
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 animate-in fade-in duration-700 text-text-primary">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
+            Performance <span className="text-gradient-gold">Estratégica Platinum</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <ShieldCheck size={14} className="text-primary" /> 
+            Visão consolidada da inteligência comercial e fluxos de licitação RPA.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+           <div className="flex items-center gap-3 bg-surface-elevated/40 border border-border-subtle p-2 rounded-2xl shadow-platinum-glow-sm">
+              <div className="flex -space-x-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-surface bg-surface-elevated flex items-center justify-center text-[10px] font-black text-primary">
+                    {String.fromCharCode(64 + i)}
+                  </div>
+                ))}
+              </div>
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest px-2">Time Ativo</span>
+           </div>
+           <button className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] tracking-widest">
+             <Activity size={16} className="mr-2" /> Report Executivo
+           </button>
+        </div>
       </header>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="platinum-card p-8 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <svg className="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+      {/* KPI Highlight Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="flex justify-between items-start mb-8 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
+              <Award size={28} />
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Neural Success</span>
+              <div className="flex items-center text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20 mt-2 shadow-platinum-glow-sm">
+                <ArrowUpRight size={12} className="mr-2" /> +12.4%
+              </div>
+            </div>
           </div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] mb-4 text-text-muted">Taxa de Vitória</h2>
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-gradient-gold tracking-tighter">{winRate?.rate}%</span>
-            <span className="text-sm text-text-muted">Win Rate</span>
+          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Taxa de Conversão Master</h2>
+          <div className="flex items-baseline gap-4 relative z-10">
+            <span className="text-5xl font-black text-gradient-gold tracking-tighter">{winRate?.rate}%</span>
           </div>
-          <div className="mt-4 text-xs text-text-secondary flex gap-3">
-            <span className="px-2 py-1 rounded-md bg-secondary/10 text-secondary border border-secondary/20 font-medium">{winRate?.won} ganhos</span>
-            <span className="px-2 py-1 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 font-medium">{winRate?.lost} perdas</span>
+          <div className="mt-8 grid grid-cols-2 gap-6 relative z-10">
+            <div className="p-4 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
+              <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-1">Ganhos Reais</p>
+              <p className="text-lg font-black text-emerald-500">{winRate?.won}</p>
+            </div>
+            <div className="p-4 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
+              <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-1">Impacto Perda</p>
+              <p className="text-lg font-black text-red-500/60">{winRate?.lost}</p>
+            </div>
           </div>
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-primary/5 blur-[50px] rounded-full group-hover:bg-primary/10 transition-all duration-700" />
         </div>
 
-        <div className="platinum-card p-8 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <svg className="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="flex justify-between items-start mb-8 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
+              <DollarSign size={28} />
+            </div>
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Global Assets</span>
           </div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] mb-4 text-text-muted">Volume em Pipeline</h2>
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-white tracking-tighter">
-              {new Intl.NumberFormat('pt-BR', { 
-                style: 'currency', 
-                currency: 'BRL',
-                maximumFractionDigits: 0
-              }).format(pipeline.reduce((acc, curr) => acc + curr.value, 0))}
+          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Volume Total Pipeline</h2>
+          <div className="flex items-baseline gap-2 relative z-10">
+            <span className="text-4xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors">
+              {formatCurrency(pipeline.reduce((acc, curr) => acc + curr.value, 0))}
             </span>
           </div>
-          <p className="mt-4 text-xs text-text-secondary">
-            Valor total de oportunidades ativas em análise.
+          <p className="mt-8 text-[10px] text-text-secondary font-bold uppercase tracking-widest leading-relaxed opacity-60 italic border-l-2 border-secondary/30 pl-4">
+            Total bruto das oportunidades ativas em estágio de qualificação e análise RPA.
           </p>
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-secondary/5 blur-[50px] rounded-full group-hover:bg-secondary/10 transition-all duration-700" />
+        </div>
+
+        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
+           <div className="flex justify-between items-start mb-8 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
+              <PieChart size={28} />
+            </div>
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Deep Intelligence</span>
+          </div>
+          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Participações RPA Ativas</h2>
+          <div className="flex items-baseline gap-3 relative z-10">
+            <span className="text-5xl font-black text-text-primary tracking-tighter group-hover:text-accent transition-colors">
+              {pipeline.reduce((acc, curr) => acc + curr.count, 0)}
+            </span>
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Oportunidades</span>
+          </div>
+          <div className="mt-10 flex items-center gap-2 relative z-10">
+             {pipeline.map((p, i) => (
+               <div key={i} className="h-2 rounded-full transition-all hover:h-4 cursor-help shadow-platinum-glow-sm" style={{ width: `${(p.count / pipeline.reduce((a,c) => a+c.count, 0)) * 100}%`, backgroundColor: p.color || '#6366f1' }} title={`${p.name}: ${p.count}`} />
+             ))}
+          </div>
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-accent/5 blur-[50px] rounded-full group-hover:bg-accent/10 transition-all duration-700" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="platinum-card p-8">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <div className="w-1 h-6 bg-primary rounded-full" />
-            Fluxo por Etapa
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
+          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-text-primary flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+            <div className="w-1.5 h-6 bg-primary rounded-full shadow-platinum-glow" />
+            Fluxo Neural por Etapa (Valuation)
           </h3>
-          <div className="h-80 w-full">
+          <div className="h-96 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={pipeline} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-subtle)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 11 }} 
-                  dy={10}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }} 
+                  dy={15}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }}
                   tickFormatter={(val) => `R$ ${(val/1000)}k`}
                 />
                 <Tooltip 
-                  cursor={{ stroke: '#fbbf24', strokeWidth: 1 }}
+                  cursor={{ stroke: '#2563eb', strokeWidth: 2 }}
                   contentStyle={{ 
-                    backgroundColor: '#111827', 
-                    border: '1px solid rgba(255,255,255,0.08)', 
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.4)'
+                    backgroundColor: 'var(--color-surface)', 
+                    border: '1px solid var(--color-border-medium)', 
+                    borderRadius: '24px',
+                    boxShadow: 'var(--shadow-platinum)',
+                    fontSize: '11px',
+                    fontWeight: 'black',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    padding: '16px'
                   }} 
-                  formatter={(value: number) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value), 'Valor']}
+                  itemStyle={{ color: 'var(--color-primary)' }}
+                  formatter={(value: number) => [formatCurrency(value), 'VALUATION']}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="#fbbf24" 
-                  strokeWidth={3}
+                  stroke="url(#colorValue)" 
+                  strokeWidth={5}
                   fillOpacity={1} 
                   fill="url(#colorValue)" 
+                  animationDuration={2000}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="platinum-card p-8">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <div className="w-1 h-6 bg-secondary rounded-full" />
-            Principais Clientes (Órgãos)
+        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
+          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-text-primary flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+            <div className="w-1.5 h-6 bg-secondary rounded-full shadow-platinum-glow" />
+            Top Órgãos Licitantes (Target)
           </h3>
-          <div className="h-80 w-full">
+          <div className="h-96 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topOrgs} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.03)" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--color-border-subtle)" opacity={0.5} />
                 <XAxis 
                   type="number" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }}
                   tickFormatter={(val) => `R$ ${(val/1000)}k`}
+                  dy={15}
                 />
                 <YAxis 
                   dataKey="name" 
@@ -168,24 +234,34 @@ export default function Dashboard() {
                   axisLine={false} 
                   tickLine={false} 
                   width={140} 
-                  tick={{fontSize: 11, fill: '#f8fafc'}} 
+                  tick={{fontSize: 9, fill: 'var(--color-text-primary)', fontWeight: 900, textTransform: 'uppercase'}} 
                 />
                 <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  cursor={{ fill: 'var(--color-surface-elevated)', opacity: 0.2 }}
                   contentStyle={{ 
-                    backgroundColor: '#111827', 
-                    border: '1px solid rgba(255,255,255,0.08)', 
-                    borderRadius: '12px'
+                    backgroundColor: 'var(--color-surface)', 
+                    border: '1px solid var(--color-border-medium)', 
+                    borderRadius: '24px',
+                    boxShadow: 'var(--shadow-platinum)',
+                    fontSize: '11px',
+                    fontWeight: 'black',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    padding: '16px'
                   }}
-                  formatter={(value: number) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value), 'Valor Total']}
+                  itemStyle={{ color: 'var(--color-secondary)' }}
+                  formatter={(value: number) => [formatCurrency(value), 'TOTAL OPPORTUNITY']}
                 />
                 <Bar 
                   dataKey="total_value" 
-                  fill="#fbbf24" 
-                  radius={[0, 6, 6, 0]} 
+                  radius={[0, 12, 12, 0]} 
                   barSize={20}
-                  className="hover:opacity-80 transition-opacity"
-                />
+                  className="transition-all duration-500 cursor-pointer"
+                >
+                  {topOrgs.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === 0 ? '#2563eb' : '#14b8a6'} fillOpacity={1 - index * 0.15} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -194,4 +270,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Check, AlertTriangle, ShieldCheck, Zap, Info, Package } from 'lucide-react';
+import { Loader2, Check, AlertTriangle, ShieldCheck, Zap, Info, Package, DollarSign, Database, Activity, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../lib/axios';
 import Modal from '../ui/Modal';
@@ -64,35 +64,40 @@ export default function ReconcileModal({ isOpen, consignment, onClose, onSuccess
   const hasOver = rows.some((r, i) => (r.qty_sold + r.qty_returned) > consignment.items[i].qty_sent);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`PRESTAÇÃO DE CONTAS – REMESSA #${consignment.id}`} size="lg">
-      <div className="p-2 space-y-8 animate-in fade-in duration-500">
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest italic">Consignatário Designado</span>
-            <div className="h-px flex-1 bg-white/5" />
+    <Modal isOpen={isOpen} onClose={onClose} title={`PRESTAÇÃO DE CONTAS – REMESSA NEURAL #${consignment.id}`} size="lg">
+      <div className="p-4 space-y-10 animate-in fade-in duration-700">
+        <header className="flex flex-col gap-6 bg-surface-elevated/10 p-8 rounded-[2rem] border border-border-subtle/30 shadow-platinum-glow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-6 bg-primary rounded-full shadow-platinum-glow" />
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">Consignatário Estratégico em Campo</span>
           </div>
-          <div className="flex justify-between items-end">
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter">{consignment.consignee?.name}</h3>
-            <div className="text-right">
-              <span className="text-[9px] font-black text-text-muted uppercase tracking-widest block">Valuation Original</span>
-              <span className="text-sm font-black text-primary">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(consignment.total_value))}</span>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <h3 className="text-2xl font-black text-text-primary uppercase tracking-tighter flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20 shadow-inner-platinum">
+                 <ShieldCheck size={24} />
+              </div>
+              {consignment.consignee?.name}
+            </h3>
+            <div className="text-right p-4 bg-background/50 border border-border-subtle rounded-2xl shadow-inner-platinum min-w-[200px]">
+              <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] block opacity-60 mb-1">Valuation em Custódia</span>
+              <span className="text-xl font-black text-primary tracking-tighter">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(consignment.total_value))}</span>
             </div>
           </div>
         </header>
 
-        <div className="platinum-card overflow-hidden border-white/10">
+        <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/5 border-b border-white/5">
+            <thead className="bg-surface-elevated/40 border-b border-border-subtle/30">
               <tr>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted">Ativo</th>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted text-center">Remetido</th>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted text-center">Vendido</th>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted text-center">Devolvido</th>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted text-center">Balanço</th>
-                <th className="px-4 py-4 font-black uppercase text-[10px] tracking-widest text-text-muted text-right">Status</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Ativo Core</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Enviado</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Vendido</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Devolvido</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Balanço</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted text-right opacity-60">Status Cycle</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle/20">
               {consignment.items.map((item, idx) => {
                 const row = rows[idx];
                 if (!row) return null;
@@ -101,49 +106,57 @@ export default function ReconcileModal({ isOpen, consignment, onClose, onSuccess
                 const done = pending === 0 && !over;
 
                 return (
-                  <tr key={item.id} className={`hover:bg-white/[0.01] transition-colors ${over ? 'bg-red-500/5' : ''}`}>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <Package size={12} className="text-primary/60" />
-                        <div className="font-black text-[10px] text-white uppercase truncate max-w-[150px]">{item.product?.name ?? `Item #${item.product_id}`}</div>
+                  <tr key={item.id} className={`hover:bg-surface-elevated/20 transition-all duration-300 border-b border-border-subtle/10 ${over ? 'bg-red-500/5' : ''}`}>
+                    <td className="px-6 py-8">
+                      <div className="flex items-center gap-4 group/item">
+                        <div className="p-2.5 rounded-xl bg-surface-elevated/40 border border-border-subtle text-text-muted group-hover/item:text-primary transition-colors shadow-inner-platinum">
+                          <Package size={14} />
+                        </div>
+                        <div className="font-black text-[11px] text-text-primary uppercase tracking-tight truncate max-w-[180px] group-hover/item:translate-x-1 transition-transform">{item.product?.name ?? `Item_#${item.product_id}`}</div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-center text-xs font-bold text-text-secondary">{item.qty_sent}</td>
-                    <td className="px-4 py-4">
+                    <td className="px-6 py-8 text-center text-xs font-black text-text-secondary opacity-60">{item.qty_sent.toString().padStart(2, '0')}</td>
+                    <td className="px-6 py-8">
                       <div className="flex justify-center">
                         <input type="number" min={0} max={item.qty_sent}
                           value={row.qty_sold}
                           onChange={e => updateRow(idx, 'qty_sold', parseInt(e.target.value) || 0)}
-                          className={`w-16 text-center bg-background border rounded-lg py-1.5 text-xs text-white focus:border-primary/40 outline-none transition-all ${over ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10'}`}
+                          className={`w-20 text-center bg-background/50 border rounded-xl py-2.5 text-xs font-black text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum ${over ? 'border-red-500 ring-2 ring-red-500/10' : 'border-border-medium'}`}
                         />
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-6 py-8">
                       <div className="flex justify-center">
                         <input type="number" min={0} max={item.qty_sent}
                           value={row.qty_returned}
                           onChange={e => updateRow(idx, 'qty_returned', parseInt(e.target.value) || 0)}
-                          className={`w-16 text-center bg-background border rounded-lg py-1.5 text-xs text-white focus:border-primary/40 outline-none transition-all ${over ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10'}`}
+                          className={`w-20 text-center bg-background/50 border rounded-xl py-2.5 text-xs font-black text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum ${over ? 'border-red-500 ring-2 ring-red-500/10' : 'border-border-medium'}`}
                         />
                       </div>
                     </td>
-                    <td className={`px-4 py-4 text-center font-black text-xs ${pending > 0 ? 'text-amber-500' : pending === 0 ? 'text-emerald-500' : 'text-red-400'}`}>
-                      {over ? 'EXCESSO!' : pending}
+                    <td className={`px-6 py-8 text-center font-black text-xs transition-colors duration-500 ${pending > 0 ? 'text-amber-500' : pending === 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {over ? (
+                        <span className="animate-pulse flex items-center justify-center gap-2">
+                           <AlertTriangle size={12} /> EXCESSO
+                        </span>
+                      ) : pending.toString().padStart(2, '0')}
                     </td>
-                    <td className="px-4 py-4 text-right">
-                      {done ? (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
-                          <Check size={10} /> CONCLUÍDO
-                        </span>
-                      ) : over ? (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-500/10 text-red-400 text-[9px] font-black uppercase tracking-widest border border-red-500/20 animate-pulse">
-                          <AlertTriangle size={10} /> ERRO
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
-                          <Zap size={10} className="animate-pulse" /> PENDENTE
-                        </span>
-                      )}
+                    <td className="px-6 py-8 text-right">
+                      <div className="flex justify-end">
+                        {done ? (
+                          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/20 shadow-platinum-glow-sm">
+                            <Check size={12} /> CONCLUÍDO
+                          </span>
+                        ) : over ? (
+                          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-[9px] font-black uppercase tracking-[0.2em] border border-red-500/20 animate-pulse shadow-platinum-glow-sm">
+                            <AlertTriangle size={12} /> ERRO_LOG
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-[0.2em] border border-amber-500/20 shadow-platinum-glow-sm">
+                            <Zap size={12} className="animate-pulse" /> PENDENTE
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -153,46 +166,55 @@ export default function ReconcileModal({ isOpen, consignment, onClose, onSuccess
         </div>
 
         {hasOver && (
-          <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl flex items-center gap-3">
-            <AlertTriangle size={18} className="text-red-400 flex-shrink-0" />
-            <p className="text-[10px] font-black text-red-400 uppercase tracking-widest leading-relaxed">
-              Inconsistência detectada: a somatória de unidades vendidas e devolvidas excede a remessa original. Verifique os inputs.
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl flex items-start gap-4">
-            <Info size={18} className="text-primary mt-1 flex-shrink-0" />
+          <div className="p-8 bg-red-500/5 border border-red-500/20 rounded-[2rem] flex items-center gap-6 shadow-platinum-glow-sm animate-in shake duration-500">
+            <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20">
+              <AlertTriangle size={24} className="text-red-500" />
+            </div>
             <div className="space-y-1">
-              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Inteligência Fiscal</h4>
-              <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest leading-relaxed">
-                A devolução de ativos gera automaticamente um rascunho de NF-e (CFOP Devolução) no motor financeiro para fins de compliance.
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em]">Inconsistência Crítica de Ledger</p>
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] opacity-80 leading-relaxed">
+                A somatória de ativos liquidados e devolvidos excede o manifesto original de remessa. Verifique as quantidades antes da consolidação.
               </p>
             </div>
           </div>
-          <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl flex items-start gap-4">
-            <ShieldCheck size={18} className="text-emerald-400 mt-1 flex-shrink-0" />
-            <div className="space-y-1">
-              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Geração de Receita</h4>
-              <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest leading-relaxed">
-                As unidades marcadas como vendidas serão convertidas em títulos de faturamento na tesouraria contra o consignatário.
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="p-8 bg-surface-elevated/20 border border-border-subtle/30 rounded-[2.5rem] flex items-start gap-6 shadow-inner-platinum group">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20 group-hover:scale-110 transition-transform">
+               <Info size={20} />
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-text-primary uppercase tracking-[0.4em]">Inteligência Fiscal RPA</h4>
+              <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] leading-relaxed opacity-60">
+                A devolução de ativos gera automaticamente um draft de NF-e (CFOP_6209) no motor fiscal para fins de compliance auditável.
+              </p>
+            </div>
+          </div>
+          <div className="p-8 bg-surface-elevated/20 border border-border-subtle/30 rounded-[2.5rem] flex items-start gap-6 shadow-inner-platinum group">
+            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+               <Database size={20} />
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-text-primary uppercase tracking-[0.4em]">Geração de Valor Core</h4>
+              <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] leading-relaxed opacity-60">
+                Unidades liquidadas serão convertidas em títulos de faturamento na tesouraria global contra o consignatário designado.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
+        <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle/30">
           <button onClick={onClose}
-            className="px-8 py-4 text-[10px] font-black text-text-muted hover:text-white uppercase tracking-widest transition-all"
+            className="px-10 py-5 text-[10px] font-black text-text-muted hover:text-text-primary uppercase tracking-[0.4em] transition-all"
           >
-            Abortar
+            ABORTAR ACERTO
           </button>
           <button onClick={handleSave} disabled={saving || hasOver}
-            className="px-10 py-4 bg-primary text-background text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary-hover transition-all shadow-platinum-glow flex items-center gap-2 disabled:opacity-20"
+            className="btn-primary py-5 px-16 shadow-platinum-glow flex items-center gap-5 uppercase text-[11px] tracking-[0.4em] disabled:opacity-20"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck size={16} />}
-            Consolidar Acerto
+            {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck size={24} className="shadow-platinum-glow-sm" />}
+            CONSOLIDAR ACERTO NEURAL
           </button>
         </div>
       </div>

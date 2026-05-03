@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Search, Paperclip, Send, MoreVertical, Smile, Check, CheckCheck, Phone, Video,
   MessageSquare, Loader2, X, User, ShieldCheck, Zap, BarChart3, Target, Clock, Filter,
-  Bot, Globe, MessageCircle
+  Bot, Globe, MessageCircle, Layout, ChevronRight, Activity, Database
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
@@ -102,82 +102,85 @@ const Conversations = () => {
 
   if (isLoading && conversations.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center gap-4 opacity-40">
-        <Loader2 className="animate-spin text-primary w-10 h-10" />
-        <p className="font-black uppercase tracking-[0.3em] text-[10px] text-white">Sincronizando Canais...</p>
+      <div className="h-full flex flex-col items-center justify-center gap-6 animate-pulse">
+        <div className="w-16 h-16 rounded-[2rem] bg-surface-elevated flex items-center justify-center border border-border-subtle shadow-inner-platinum">
+           <Loader2 className="animate-spin text-primary w-8 h-8" />
+        </div>
+        <p className="font-black uppercase tracking-[0.5em] text-[10px] text-text-muted">Sincronizando Canais Omnichannel...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8 h-[calc(100vh-4rem)] w-full flex flex-col bg-background space-y-8 text-white overflow-hidden">
+    <div className="p-8 h-[calc(100vh-4rem)] w-full flex flex-col bg-background space-y-8 text-text-primary overflow-hidden animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
             Strategic <span className="text-gradient-gold">Conversations</span>
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
-            <Globe size={12} className="text-primary" />
-            Central Omnichannel de atendimento e engajamento em tempo real.
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Globe size={14} className="text-primary" />
+            Central Omnichannel de atendimento e engajamento em tempo real Platinum.
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {[
-            { label: 'Ativos', val: stats.active, color: 'text-emerald-400' },
-            { label: 'Pendentes', val: stats.pending, color: 'text-amber-400' },
+            { label: 'Ativos', val: stats.active, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: 'Pendentes', val: stats.pending, color: 'text-amber-500', bg: 'bg-amber-500/10' },
           ].map((s, i) => (
-            <div key={i} className="bg-white/5 border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
-              <span className={`text-[10px] font-black uppercase tracking-widest ${s.color}`}>{s.label}</span>
-              <span className="text-sm font-black">{s.val}</span>
+            <div key={i} className="bg-surface-elevated/20 border border-border-subtle/30 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-inner-platinum">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${s.color}`}>{s.label}</span>
+              <div className="w-px h-4 bg-border-subtle/30" />
+              <span className="text-sm font-black text-text-primary">{s.val}</span>
             </div>
           ))}
         </div>
       </header>
 
-      <div className="flex-1 flex gap-8 overflow-hidden">
+      <div className="flex-1 flex gap-8 overflow-hidden min-h-0">
         {/* Contacts Sidebar */}
-        <div className="w-96 flex flex-col gap-6">
-          <div className="platinum-card p-4 relative">
-            <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+        <div className="w-96 flex flex-col gap-8 shrink-0">
+          <div className="platinum-card p-4 relative bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-platinum-glow-sm">
+            <Search className="absolute left-8 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5 group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Rastrear contato ou canal..."
+              placeholder="Rastrear contato ou canal digital..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-background border border-white/5 rounded-xl text-sm focus:border-primary/30 outline-none transition-all text-white placeholder:text-text-muted"
+              className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold focus:border-primary/40 outline-none transition-all text-text-primary placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
 
-          <div className="platinum-card flex-1 overflow-y-auto scrollbar-platinum p-2 space-y-2">
+          <div className="platinum-card flex-1 overflow-y-auto scrollbar-platinum p-3 space-y-3 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
             {conversations.map((conv) => (
               <button
                 key={conv.id}
                 onClick={() => setSelectedConversationId(conv.id)}
-                className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all border group ${
+                className={`w-full p-5 rounded-[1.5rem] flex items-center gap-5 transition-all duration-500 border-2 group ${
                   selectedConversationId === conv.id
-                    ? "bg-primary/10 border-primary/20 shadow-platinum-glow"
-                    : "bg-transparent border-transparent hover:bg-white/[0.02]"
+                    ? "bg-primary/5 border-primary/30 shadow-platinum-glow-sm"
+                    : "bg-transparent border-transparent hover:bg-surface-elevated/20"
                 }`}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg transition-all ${
-                   selectedConversationId === conv.id ? 'bg-primary text-background shadow-platinum-glow' : 'bg-white/5 text-text-muted group-hover:bg-white/10'
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 shadow-inner-platinum ${
+                   selectedConversationId === conv.id ? 'bg-primary text-white shadow-platinum-glow' : 'bg-surface-elevated/40 text-text-muted border border-border-subtle group-hover:bg-surface-elevated'
                 }`}>
-                  {conv.contact_name?.charAt(0) || <User size={20} />}
+                  {conv.contact_name?.charAt(0) || <User size={24} />}
                 </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex justify-between items-center mb-0.5">
-                    <p className={`font-bold text-sm truncate ${selectedConversationId === conv.id ? 'text-primary' : 'text-white'}`}>
-                      {conv.contact_name || conv.contact_phone || "Unknown Account"}
+                <div className="flex-1 min-w-0 text-left space-y-1">
+                  <div className="flex justify-between items-center">
+                    <p className={`font-black text-sm truncate uppercase tracking-tight transition-colors ${selectedConversationId === conv.id ? 'text-primary' : 'text-text-primary'}`}>
+                      {conv.contact_name || conv.contact_phone || "Account_RPA"}
                     </p>
-                    <span className="text-[9px] font-black text-text-muted uppercase tracking-tighter">
+                    <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
                       {new Date(conv.updated_at).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-text-muted uppercase tracking-widest font-medium truncate">
+                    <p className="text-[10px] text-text-muted uppercase tracking-[0.3em] font-black opacity-40 truncate">
                       {conv.channel} Protocol
                     </p>
-                    {conv.status === 'pending' && <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shadow-platinum-glow" />}
+                    {conv.status === 'pending' && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-platinum-glow" />}
                   </div>
                 </div>
               </button>
@@ -186,50 +189,53 @@ const Conversations = () => {
         </div>
 
         {/* Chat Window */}
-        <div className="flex-1 platinum-card flex flex-col overflow-hidden bg-white/[0.01]">
+        <div className="flex-1 platinum-card flex flex-col overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
           {selectedConversationId ? (
             <>
               {/* Chat Header */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black">
-                    {conversations.find(c => c.id === selectedConversationId)?.contact_name?.charAt(0) || <User size={20} />}
+              <div className="p-8 border-b border-border-subtle/30 flex items-center justify-between bg-surface-elevated/20">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xl shadow-inner-platinum">
+                    {conversations.find(c => c.id === selectedConversationId)?.contact_name?.charAt(0) || <User size={24} />}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-white tracking-tight">
-                      {conversations.find(c => c.id === selectedConversationId)?.contact_name || "Account Profile"}
+                  <div className="space-y-1">
+                    <h3 className="font-black text-text-primary tracking-tighter text-lg uppercase">
+                      {conversations.find(c => c.id === selectedConversationId)?.contact_name || "Profile Session"}
                     </h3>
-                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Active Session</p>
+                    <div className="flex items-center gap-3">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-platinum-glow animate-pulse" />
+                       <p className="text-[10px] text-primary font-black uppercase tracking-[0.3em]">Conexão Ativa</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="p-3 text-text-muted hover:text-primary transition-all"><Phone size={18} /></button>
-                  <button className="p-3 text-text-muted hover:text-primary transition-all"><Video size={18} /></button>
-                  <button className="p-3 text-text-muted hover:text-white transition-all"><MoreVertical size={18} /></button>
+                <div className="flex gap-4">
+                  <button className="p-4 bg-surface-elevated/40 text-text-muted hover:text-primary transition-all rounded-2xl border border-border-subtle shadow-inner-platinum"><Phone size={20} /></button>
+                  <button className="p-4 bg-surface-elevated/40 text-text-muted hover:text-primary transition-all rounded-2xl border border-border-subtle shadow-inner-platinum"><Video size={20} /></button>
+                  <button className="p-4 bg-surface-elevated/40 text-text-muted hover:text-text-primary transition-all rounded-2xl border border-border-subtle shadow-inner-platinum"><MoreVertical size={20} /></button>
                 </div>
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-platinum">
+              <div className="flex-1 overflow-y-auto p-10 space-y-8 scrollbar-platinum">
                 {isLoadingMessages ? (
-                  <div className="h-full flex flex-col items-center justify-center opacity-20">
-                    <Loader2 className="animate-spin mb-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Recuperando Histórico...</span>
+                  <div className="h-full flex flex-col items-center justify-center opacity-20 gap-6">
+                    <Loader2 className="animate-spin w-12 h-12 text-primary" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-text-muted">Recuperando Ledger de Histórico...</span>
                   </div>
                 ) : (
                   messages.map((msg, i) => (
-                    <div key={i} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[70%] p-4 rounded-2xl relative transition-all group ${
+                    <div key={i} className={`flex ${msg.direction === "outbound" ? "justify-end" : "justify-start"} animate-in slide-in-from-bottom-4 duration-500`}>
+                      <div className={`max-w-[70%] p-6 rounded-[2rem] relative transition-all group duration-500 ${
                         msg.direction === "outbound"
-                          ? "bg-primary text-background font-medium rounded-tr-none shadow-platinum-glow"
-                          : "bg-white/[0.03] border border-white/5 text-white rounded-tl-none hover:bg-white/[0.05]"
+                          ? "bg-primary text-white font-medium rounded-tr-none shadow-platinum-glow"
+                          : "bg-surface-elevated/40 border border-border-subtle/30 text-text-primary rounded-tl-none hover:bg-surface-elevated/60 shadow-platinum-glow-sm"
                       }`}>
-                        <p className="text-sm leading-relaxed">{msg.content}</p>
-                        <div className={`text-[9px] mt-2 font-black uppercase tracking-tighter opacity-50 ${
-                          msg.direction === "outbound" ? "text-background" : "text-text-muted"
+                        <p className="text-sm leading-relaxed font-medium">{msg.content}</p>
+                        <div className={`text-[10px] mt-4 font-black uppercase tracking-widest opacity-60 flex items-center gap-3 ${
+                          msg.direction === "outbound" ? "text-white/80" : "text-text-muted"
                         }`}>
                           {formatTime(msg.created_at)}
-                          {msg.direction === "outbound" && <span className="ml-2">● Encriptado</span>}
+                          {msg.direction === "outbound" ? <CheckCheck size={14} className="text-white/60" /> : <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />}
                         </div>
                       </div>
                     </div>
@@ -239,40 +245,40 @@ const Conversations = () => {
               </div>
 
               {/* Input Area */}
-              <div className="p-6 bg-white/[0.02] border-t border-white/5 flex gap-4">
-                <button className="p-4 bg-white/5 text-text-muted rounded-xl hover:bg-white/10 hover:text-primary transition-all">
-                  <Paperclip size={20} />
+              <div className="p-8 bg-surface-elevated/20 border-t border-border-subtle/30 flex gap-6 items-center">
+                <button className="p-5 bg-surface-elevated/40 text-text-muted rounded-[1.5rem] hover:bg-surface-elevated hover:text-primary transition-all border border-border-subtle shadow-inner-platinum">
+                  <Paperclip size={24} />
                 </button>
-                <div className="flex-1 relative">
+                <div className="flex-1 relative group">
                   <input
                     type="text"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    placeholder="Digite sua mensagem estratégica..."
-                    className="w-full h-full px-6 py-4 bg-background border border-white/5 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all placeholder:text-text-muted"
+                    placeholder="Digite sua resposta estratégica em tempo real..."
+                    className="w-full px-8 py-5 bg-background/50 border border-border-medium rounded-[1.5rem] text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                     <button className="p-2 text-text-muted hover:text-primary transition-all"><Smile size={18} /></button>
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                     <button className="p-2 text-text-muted hover:text-primary transition-all group-hover:scale-110"><Smile size={22} /></button>
                   </div>
                 </div>
                 <button
                   onClick={handleSendMessage}
                   disabled={!messageInput.trim() || isSending}
-                  className="p-4 bg-primary text-background rounded-xl hover:bg-primary-hover shadow-platinum-glow transition-all disabled:opacity-50"
+                  className="p-5 bg-primary text-white rounded-[1.5rem] hover:bg-primary-hover shadow-platinum-glow transition-all duration-500 disabled:opacity-50 group"
                 >
-                  {isSending ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
+                  {isSending ? <Loader2 size={28} className="animate-spin" /> : <Send size={28} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
                 </button>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center gap-6 opacity-40">
-              <div className="w-20 h-20 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center">
-                <MessageCircle size={40} className="text-primary" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-8 opacity-40">
+              <div className="w-32 h-32 rounded-[2.5rem] bg-surface-elevated/40 border border-border-subtle flex items-center justify-center shadow-inner-platinum">
+                <MessageCircle size={60} className="text-primary shadow-platinum-glow-sm" />
               </div>
-              <div className="text-center space-y-2">
-                <p className="font-black text-white uppercase tracking-[0.3em] text-xs">Omnichannel Hub</p>
-                <p className="text-[10px] text-text-muted uppercase tracking-widest">Selecione uma transmissão para iniciar o engajamento</p>
+              <div className="text-center space-y-3">
+                <p className="font-black text-text-primary uppercase tracking-[0.5em] text-sm">Omnichannel Strategic Hub</p>
+                <p className="text-[11px] text-text-muted uppercase tracking-[0.3em] font-black opacity-60">Selecione uma transmissão no ledger para iniciar o engajamento neural</p>
               </div>
             </div>
           )}

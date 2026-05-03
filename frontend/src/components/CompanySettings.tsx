@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/axios';
-import { Loader2, Save, Building } from 'lucide-react';
+import { Loader2, Save, Building, ShieldCheck, Activity, Zap, History, Target } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AuditLog {
@@ -54,25 +54,35 @@ export default function CompanySettings() {
 
   if (user?.role !== 'Admin') {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Acesso negado. Apenas administradores podem acessar esta página.</p>
+      <div className="flex flex-col items-center justify-center py-32 space-y-6 opacity-40">
+        <ShieldCheck size={56} className="text-primary" />
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-text-muted">Acesso negado. Governança Admin requerida.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      <div>
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Configurações da Empresa</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie os dados cadastrais do seu Tenant (ID: {user.company_id})</p>
+    <div className="space-y-12 animate-in fade-in duration-700">
+      <div className="space-y-1">
+        <h2 className="text-xl font-black text-text-primary uppercase tracking-widest">Configurações da Empresa</h2>
+        <p className="text-[10px] text-text-muted font-black uppercase tracking-[0.3em] opacity-60 flex items-center gap-2">
+          <Building size={12} className="text-primary" /> Gerencie os dados cadastrais do seu Tenant (ID: {user.company_id})
+        </p>
       </div>
 
-      <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Dados Cadastrais</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Razão Social</label>
+      <div className="space-y-12">
+          {/* Business Info */}
+          <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
+            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+               <div className="p-3 bg-primary/10 rounded-xl text-primary shadow-platinum-glow-sm">
+                  <Activity size={20} />
+               </div>
+               <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Identidade Corporativa</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Razão Social</label>
                 <input 
                   type="text" 
                   value={companyInfo.name} 
@@ -80,11 +90,11 @@ export default function CompanySettings() {
                     setCompanyInfo({...companyInfo, name: e.target.value});
                     setIsEditing(true);
                   }}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 dark:text-white transition-colors" 
+                  className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CNPJ</label>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">CNPJ Platinum</label>
                 <input 
                   type="text" 
                   value={companyInfo.cnpj} 
@@ -92,97 +102,117 @@ export default function CompanySettings() {
                     setCompanyInfo({...companyInfo, cnpj: e.target.value});
                     setIsEditing(true);
                   }}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 dark:text-white transition-colors" 
+                  className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum font-mono" 
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subdomínio (BidFlow)</label>
-                <input 
-                  type="text" 
-                  value={companyInfo.domain} 
-                  onChange={(e) => {
-                    setCompanyInfo({...companyInfo, domain: e.target.value});
-                    setIsEditing(true);
-                  }}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 dark:text-white transition-colors" 
-                />
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Subdomínio Estratégico (BidFlow)</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={companyInfo.domain} 
+                    onChange={(e) => {
+                      setCompanyInfo({...companyInfo, domain: e.target.value});
+                      setIsEditing(true);
+                    }}
+                    className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
+                  />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary font-black text-[10px] uppercase tracking-widest opacity-60">Verified Domain</div>
+                </div>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
+            
+            <div className="flex justify-end pt-4">
               <button 
                 onClick={handleSave}
                 disabled={!isEditing || isSaving}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] uppercase tracking-widest flex items-center gap-3 disabled:opacity-30 disabled:shadow-none"
               >
-                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                Salvar Alterações
+                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                Confirmar Alterações Master
               </button>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Integrações de API (Webhooks)</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Configure chaves para o Robô Python de OCR e Radar de Licitações.</p>
-            <div className="mt-4 p-4 bg-gray-900 rounded-lg border border-gray-800">
-              <code className="text-emerald-400 text-sm font-mono block">POST /api/webhooks/radar-sync</code>
-              <p className="text-xs text-gray-400 mt-2 font-mono">Token de Autenticação gerado apenas por Administradores.</p>
+          {/* Webhooks & RPA */}
+          <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
+            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+               <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 shadow-platinum-glow-sm">
+                  <Zap size={20} />
+               </div>
+               <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Integrações & Webhooks RPA</h3>
+            </div>
+            <p className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] leading-relaxed opacity-60">Configure chaves para o Robô Python de OCR e Radar de Licitações Platinum.</p>
+            <div className="bg-background/80 p-8 rounded-[2rem] border border-border-subtle/50 relative overflow-hidden shadow-inner-platinum">
+              <code className="text-emerald-500 text-xs font-mono block relative z-10">POST /api/webhooks/radar-sync</code>
+              <p className="text-[9px] text-text-muted mt-4 font-mono relative z-10 italic uppercase tracking-widest opacity-40">Auth Token: generated_master_key_v4_bidflow_secure</p>
+              <div className="absolute right-0 bottom-0 p-8 opacity-5">
+                 <Zap size={80} className="text-primary" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Saúde do Sistema (Robô de IA)</h2>
+          {/* System Health */}
+          <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
+            <div className="flex justify-between items-center border-b border-border-subtle/30 pb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500 shadow-platinum-glow-sm">
+                   <Target size={20} />
+                </div>
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Saúde do Robô IA BidFlow</h3>
+              </div>
               <button 
                 onClick={fetchHealth} 
-                className="text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 font-medium transition-colors border border-gray-200 dark:border-gray-600"
+                className="px-6 py-2.5 bg-surface-elevated/40 border border-border-subtle rounded-xl text-[9px] font-black text-text-primary uppercase tracking-[0.2em] hover:bg-surface-elevated transition-all shadow-platinum-glow-sm"
               >
-                Atualizar Status
+                Refresh Status
               </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700/50 p-5 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between transition-colors">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fila de Processamento</p>
-                  <p className="text-3xl font-bold text-gray-800 dark:text-white">{health.pending_jobs}</p>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-background/50 p-8 rounded-[2rem] border border-border-subtle/50 flex flex-col justify-center gap-2 shadow-inner-platinum">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">Jobs em Fila</p>
+                <p className="text-4xl font-black text-text-primary tracking-tighter">{health.pending_jobs}</p>
               </div>
               
-              <div className={`p-5 rounded-lg border flex items-center justify-between transition-colors ${health.failed_jobs > 0 ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900/30' : 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900/30'}`}>
-                 <div>
-                    <p className={`text-sm font-medium mb-1 ${health.failed_jobs > 0 ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>Jobs Falhados</p>
-                    <p className={`text-3xl font-bold ${health.failed_jobs > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-500'}`}>{health.failed_jobs}</p>
-                 </div>
+              <div className={`p-8 rounded-[2rem] border flex flex-col justify-center gap-2 shadow-platinum-glow-sm transition-all duration-500 ${health.failed_jobs > 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                 <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${health.failed_jobs > 0 ? 'text-red-500' : 'text-emerald-500'}`}>Falhas de Processamento</p>
+                 <p className={`text-4xl font-black tracking-tighter ${health.failed_jobs > 0 ? 'text-red-500' : 'text-emerald-500'}`}>{health.failed_jobs}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Auditoria do Kanban (Tracking de Movimentos)</h2>
-            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl">
-               <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-                 <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                   <tr>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Usuário</th>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Ação</th>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Origem</th>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Destino</th>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">IP</th>
-                     <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Data</th>
+          {/* Audit Logs */}
+          <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
+            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+               <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500 shadow-platinum-glow-sm">
+                  <History size={20} />
+               </div>
+               <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Audit Trail & Tracking</h3>
+            </div>
+            <div className="overflow-x-auto scrollbar-platinum border border-border-subtle/30 rounded-[2rem]">
+               <table className="w-full text-left text-sm">
+                 <thead>
+                   <tr className="bg-surface-elevated/40 border-b border-border-subtle">
+                     <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">Operador</th>
+                     <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">Ação / Evento</th>
+                     <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">IP Endpoint</th>
+                     <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60 text-right">Timestamp</th>
                    </tr>
                  </thead>
-                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                 <tbody className="divide-y divide-border-subtle/30">
                    {auditLogs.length > 0 ? auditLogs.map((log) => (
-                     <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                       <td className="px-4 py-3">{log.user?.name || 'Sistema'}</td>
-                       <td className="px-4 py-3">{log.action}</td>
-                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{log.old_value}</td>
-                       <td className="px-4 py-3 font-semibold text-gray-800 dark:text-white">{log.new_value}</td>
-                       <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{log.ip_address}</td>
-                       <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{new Date(log.created_at).toLocaleString()}</td>
+                     <tr key={log.id} className="hover:bg-surface-elevated/20 transition-all group duration-300">
+                       <td className="px-8 py-6 font-black text-text-primary uppercase text-[10px] tracking-tight">{log.user?.name || 'SISTEMA AUTÔNOMO'}</td>
+                       <td className="px-8 py-6">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase">{log.action}</div>
+                          <div className="text-[9px] text-primary font-mono mt-1 font-black">{log.new_value}</div>
+                       </td>
+                       <td className="px-8 py-6 font-mono text-[10px] text-text-muted opacity-60">{log.ip_address}</td>
+                       <td className="px-8 py-6 text-right text-[10px] font-black text-text-muted uppercase tracking-widest">{new Date(log.created_at).toLocaleString('pt-BR')}</td>
                      </tr>
                    )) : (
-                     <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum evento registrado.</td></tr>
+                     <tr><td colSpan={4} className="px-8 py-24 text-center text-text-muted uppercase text-[9px] font-black tracking-[0.4em] opacity-30">Nenhum evento auditado nas últimas 24h</td></tr>
                    )}
                  </tbody>
                </table>
@@ -192,4 +222,3 @@ export default function CompanySettings() {
     </div>
   );
 }
-

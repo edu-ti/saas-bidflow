@@ -1,60 +1,80 @@
 @import "tailwindcss";
 
-@theme {
-  /* Platinum Design Palette */
-  --color-background: #0a0a0b;
-  --color-surface: #111827;
+:root {
+  /* Core Brand Palette - BidFlow Identity */
+  --color-primary: #6366f1; /* Indigo */
+  --color-primary-rgb: 99, 102, 241;
+  --color-secondary: #14b8a6; /* Teal */
+  --color-secondary-rgb: 20, 184, 166;
+  --color-accent: #8b5cf6; /* Violet */
+  --color-accent-rgb: 139, 92, 246;
+
+  /* Semantic - Light Mode (Flow Light) */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #475569;
+  --color-border-subtle: #e2e8f0;
+  --color-border-medium: #cbd5e1;
+  --color-border-strong: #64748b;
+  
+  /* Gradients - Digital Flow */
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+  --shadow-platinum: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
+  --shadow-platinum-glow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+.dark {
+  /* Semantic - Dark Mode (Flow Deep) */
+  --color-background: #020617;
+  --color-surface: #0f172a;
   --color-surface-elevated: #1e293b;
-  --color-primary: #fbbf24; /* Amber Gold */
-  --color-primary-hover: #f59e0b;
-  --color-secondary: #10b981; /* Emerald Growth */
-  --color-accent: #6366f1; /* Indigo Strategic */
-  
-  --color-metallic-light: #334155;
-  --color-metallic-medium: #1e293b;
-  --color-metallic-dark: #0f172a;
-  
   --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-border-subtle: #1e293b;
+  --color-border-medium: #334155;
+  --color-border-strong: #64748b;
+
+  /* Gradients - Digital Flow Dark */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
+  --shadow-platinum: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-platinum-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+}
+
+@theme {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
   
-  --color-border-subtle: rgba(255, 255, 255, 0.04);
-  --color-border-medium: rgba(255, 255, 255, 0.08);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
   
-  /* Shadows & Glows */
-  --shadow-platinum-glow: 0 0 25px rgba(251, 191, 36, 0.08);
-  --shadow-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --shadow-elevation-high: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-medium: var(--color-border-medium);
   
-  /* Animations (Performance Optimized) */
-  --animate-float: float 6s ease-in-out infinite;
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
+  --shadow-platinum: var(--shadow-platinum);
+  --shadow-platinum-glow: var(--shadow-platinum-glow);
 }
 
 @layer base {
-  html {
-    @apply bg-background text-text-primary;
-    /* Fluid Typography: 16px to 18px */
-    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-    line-height: 1.6;
-  }
-  
   body {
-    @apply bg-background text-text-primary antialiased selection:bg-primary/30 selection:text-primary;
-    background: 
-      radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.02) 0%, transparent 50%),
-      #0a0a0b;
+    @apply bg-background text-text-primary antialiased selection:bg-primary/30 selection:text-primary transition-colors duration-300;
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
   }
 
   h1, h2, h3, h4 {
-    @apply font-bold tracking-tight text-white;
-    line-height: 1.2;
+    @apply font-black tracking-tighter text-text-primary uppercase;
+    line-height: 1.1;
   }
 
   * {
@@ -62,35 +82,68 @@
   }
 
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    @apply w-1.5 h-1.5;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-background;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-metallic-light/20 rounded-full hover:bg-primary/40 transition-colors;
+    @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
   }
 }
 
-@layer utilities {
+@layer components {
   .platinum-card {
-    @apply bg-surface/40 backdrop-blur-md border border-border-subtle rounded-2xl transition-all duration-300;
-    box-shadow: var(--shadow-inner-glow);
+    @apply bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-[2.5rem] transition-all duration-500;
+    box-shadow: var(--shadow-platinum);
   }
-  
+
   .platinum-card:hover {
-    @apply border-primary/20 bg-surface/60;
-    box-shadow: var(--shadow-platinum-glow), var(--shadow-inner-glow);
+    @apply border-primary/30 bg-surface/70 translate-y-[-4px];
+    box-shadow: var(--shadow-platinum-glow);
+  }
+
+  .btn-primary {
+    @apply flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-black rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 uppercase text-[10px] tracking-[0.3em];
+    box-shadow: var(--shadow-platinum-glow);
+  }
+  .btn-primary:hover {
+    @apply scale-[1.02];
+    box-shadow: var(--shadow-platinum);
   }
 
   .text-gradient-gold {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-primary via-amber-200 to-amber-500;
+    @apply bg-gradient-to-r from-[#2563eb] via-[#8b5cf6] to-[#14b8a6] bg-clip-text text-transparent;
+    background-size: 200% auto;
+    animation: flowGradient 5s linear infinite;
   }
 
-  .max-w-prose-ui {
-    max-width: 65ch;
+  .shadow-platinum-glow {
+    box-shadow: var(--shadow-platinum-glow);
   }
+
+  .shadow-inner-platinum {
+    @apply shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)];
+  }
+
+  .dark .shadow-inner-platinum {
+    @apply shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)];
+  }
+}
+
+@keyframes flowGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite linear;
 }

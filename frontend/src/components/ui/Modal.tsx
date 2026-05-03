@@ -39,22 +39,22 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
     >
       {/* Backdrop with extreme blur and dark overlay */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
+        className="absolute inset-0 bg-background/80 backdrop-blur-md transition-opacity duration-300"
         onClick={onClose}
         aria-hidden="true"
       />
       
       {/* Platinum Modal Content */}
       <div 
-        className={`relative w-full ${sizeClasses[size]} bg-surface border border-white/10 rounded-[2rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200`}
+        className={`relative w-full ${sizeClasses[size]} bg-surface border border-border-medium rounded-[2rem] shadow-elevation-high max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200`}
       >
         {/* Subtle top gradient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/[0.02] flex-shrink-0">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-border-subtle bg-surface-elevated/20 flex-shrink-0">
           <div className="space-y-1">
-            <h2 id="modal-title" className="text-sm font-black text-white uppercase tracking-[0.3em]">
+            <h2 id="modal-title" className="text-sm font-black text-text-primary uppercase tracking-[0.3em]">
               {title}
             </h2>
             <div className="flex items-center gap-2 text-[10px] text-text-muted font-bold uppercase tracking-widest">
@@ -65,14 +65,14 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
           <button
             onClick={onClose}
             aria-label="Fechar modal"
-            className="p-3 hover:bg-white/5 text-text-muted hover:text-white rounded-2xl transition-all border border-transparent hover:border-white/10 group"
+            className="p-3 hover:bg-surface-elevated text-text-muted hover:text-text-primary rounded-2xl transition-all border border-transparent hover:border-border-subtle group"
           >
             <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
           </button>
         </div>
         
         {/* Body */}
-        <div className="p-8 overflow-y-auto custom-scrollbar">
+        <div className="p-8 overflow-y-auto custom-scrollbar bg-background/20">
           <div className="animate-in slide-in-from-bottom-2 duration-300">
             {children}
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Building2, Search, ArrowRight, UserCircle, Plus, Edit } from 'lucide-react';
+import { Building2, Search, ArrowRight, UserCircle, Plus, Edit, ShieldCheck, Globe, Loader2, Save, Layout, Zap, Key, Activity, Target, Trash2, Check, RefreshCw, ChevronRight } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import Modal from '../ui/Modal';
@@ -19,16 +19,6 @@ interface Tenant {
   addons?: string[];
 }
 
-const AVAILABLE_MODULES = [
-  { key: 'management', label: '1. Gestão (Dash, Config, Equipe, BI, Licenças)' },
-  { key: 'commercial', label: '2. Comercial (Clientes, Leads, Propostas, Funil, Catálogo, Agenda)' },
-  { key: 'bidding', label: '3. Licitações (Radar, Editais, Monitoramento, Funil, Pregão, IA)' },
-  { key: 'financial', label: '4. Financeiro (Motor, Contas, Contratos CLM)' },
-  { key: 'inventory', label: '5. Estoque (Inventário, Consignado)' },
-  { key: 'marketing', label: '6. Add-on: Marketing (Campanhas, E-mail)' },
-  { key: 'chatbot', label: '7. Add-on: Chatbot & Conversas' },
-];
-
 interface Plan {
   id: number;
   name: string;
@@ -42,12 +32,10 @@ export default function TenantList() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   
-  // Form states
   const [companyName, setCompanyName] = useState('');
   const [companyCnpj, setCompanyCnpj] = useState('');
   const [planId, setPlanId] = useState('');
@@ -57,32 +45,18 @@ export default function TenantList() {
   const [status, setStatus] = useState('active');
   const [addons, setAddons] = useState<string[]>([]);
 
-  const selectedPlanFeatures = useMemo(() => {
-    if (!planId) return [];
-    const plan = plans.find(p => p.id.toString() === planId);
-    return plan?.features || [];
-  }, [planId, plans]);
-
-  useEffect(() => {
-    if (selectedPlanFeatures.length > 0) {
-      setAddons(prev => {
-        const filtered = prev.filter(addon => !selectedPlanFeatures.includes(addon));
-        return filtered.length !== prev.length ? filtered : prev;
-      });
-    }
-  }, [selectedPlanFeatures]);
-
   useEffect(() => {
     fetchTenants();
     fetchPlans();
   }, []);
 
   const fetchTenants = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/api/master/tenants');
       setTenants(res.data.data || res.data);
     } catch (err) {
-      toast.error('Erro ao carregar empresas');
+      toast.error('Erro na varredura de clusters corporativos.');
     } finally {
       setLoading(false);
     }
@@ -93,22 +67,22 @@ export default function TenantList() {
       const res = await api.get('/api/master/plans');
       setPlans(res.data);
     } catch (err) {
-      toast.error('Erro ao carregar planos');
+      console.error(err);
     }
   };
 
   const handleImpersonate = async (tenantId: number, tenantName: string) => {
     try {
-      const toastId = toast.loading(`Iniciando sessão como ${tenantName}...`);
+      const toastId = toast.loading(`Orquestrando túnel neural para ${tenantName}...`);
       const res = await api.post(`/api/master/tenants/${tenantId}/impersonate`);
       
       localStorage.setItem('api_token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       
-      toast.success(`Sessão iniciada na empresa ${tenantName}`, { id: toastId });
+      toast.success(`Túnel estabelecido com sucesso na empresa ${tenantName}`, { id: toastId });
       window.location.href = '/';
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao iniciar sessão');
+      toast.error(err.response?.data?.message || 'Falha na autenticação do túnel');
     }
   };
 
@@ -139,44 +113,33 @@ export default function TenantList() {
 
   const handleSaveTenant = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!planId) {
-      toast.error('Selecione um plano');
-      return;
-    }
+    if (!planId) { toast.error('Defina o Tier de Assinatura'); return; }
 
     setIsSubmitting(true);
     try {
+      const payload = {
+        name: companyName,
+        document: companyCnpj,
+        plan_id: planId,
+        admin_name: adminName,
+        admin_email: adminEmail,
+        password: adminPassword || undefined,
+        status,
+        addons,
+      };
+
       if (editingTenant) {
-        // Edit existing tenant
-        await api.put(`/api/master/tenants/${editingTenant.id}`, {
-          name: companyName,
-          document: companyCnpj,
-          plan_id: planId,
-          admin_name: adminName,
-          admin_email: adminEmail,
-          password: adminPassword || undefined,
-          status,
-          addons,
-        });
-        toast.success('Empresa atualizada com sucesso!');
+        await api.put(`/api/master/tenants/${editingTenant.id}`, payload);
+        toast.success('Clusters atualizados com sucesso!');
       } else {
-        // Create new tenant
-        await api.post('/api/master/tenants', {
-          name: companyName,
-          document: companyCnpj,
-          plan_id: planId,
-          admin_name: adminName,
-          admin_email: adminEmail,
-          password: adminPassword,
-          status,
-        });
-        toast.success('Empresa cadastrada com sucesso!');
+        await api.post('/api/master/tenants', payload);
+        toast.success('Nova instância provisionada com sucesso!');
       }
       
       setIsModalOpen(false);
       fetchTenants();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao salvar empresa');
+      toast.error(err.response?.data?.message || 'Erro crítico no provisionamento');
     } finally {
       setIsSubmitting(false);
     }
@@ -189,127 +152,151 @@ export default function TenantList() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Gestão de Empresas</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Lista de todos os tenants registrados na plataforma</p>
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 shrink-0">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
+            Tenant <span className="text-gradient-gold">Governance</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Globe size={14} className="text-primary" />
+            Gestão de infraestrutura multi-tenant e provisionamento de ecossistemas Platinum.
+          </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <div className="flex flex-wrap items-center gap-5 w-full lg:w-auto">
+          <div className="relative group flex-1 lg:flex-none">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary group-focus-within:text-primary transition-colors" />
             <input
               type="text"
-              placeholder="Buscar empresa ou CNPJ..."
+              placeholder="Varredura de instâncias..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full md:w-80 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              className="pl-12 pr-6 py-4 w-full lg:w-80 rounded-2xl border border-border-medium bg-surface-elevated/10 text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum font-black text-[10px] uppercase tracking-widest placeholder:text-text-secondary/60"
             />
           </div>
           <button
             onClick={() => openModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
+            className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-4 uppercase text-[10px] tracking-[0.3em] whitespace-nowrap group"
           >
-            <Plus size={20} />
-            Cadastrar Empresa
+            <Plus size={20} className="group-hover:scale-125 transition-transform" />
+            Provisionar Empresa
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+        <div className="px-10 py-6 bg-surface-elevated/20 border-b border-border-subtle/30 flex items-center justify-between">
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner-platinum">
+                 <ShieldCheck size={20} />
+              </div>
+              <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.4em]">Clusters Corporativos Ativos</h3>
+           </div>
+           <button onClick={fetchTenants} className="p-3 text-text-secondary hover:text-primary transition-all rounded-xl hover:bg-primary/5">
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+           </button>
+        </div>
+        
+        <div className="overflow-x-auto scrollbar-platinum">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-surface-elevated/40 border-b border-border-subtle">
               <tr>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Empresa</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">CNPJ</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Plano</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">Usuários</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Status</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Criada em</th>
-                <th className="px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 text-right">Ações</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary">Instância / Branding</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary">Matriz Documental</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary">Power Tier</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary text-center">Nodes</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary">Estado</th>
+                <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-secondary text-right">Ações de Tunelamento</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody className="divide-y divide-border-subtle/10">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-2"></div>
-                      <p>Carregando empresas...</p>
+                  <td colSpan={6} className="px-10 py-40">
+                    <div className="flex flex-col items-center justify-center gap-8">
+                      <div className="w-16 h-16 rounded-[2rem] bg-surface-elevated flex items-center justify-center border border-border-subtle shadow-inner-platinum">
+                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.5em] text-text-secondary animate-pulse">Sincronizando Malha Neural Multi-Tenant...</p>
                     </div>
                   </td>
                 </tr>
               ) : filteredTenants.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
-                    Nenhuma empresa encontrada com os critérios de busca.
+                  <td colSpan={6} className="px-10 py-40 text-center">
+                    <div className="flex flex-col items-center gap-6 opacity-30">
+                       <Building2 size={60} className="text-text-secondary" />
+                       <p className="text-[11px] font-black uppercase tracking-[0.5em] text-text-secondary">Nenhuma instância detectada na varredura global.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredTenants.map((tenant) => (
-                  <tr key={tenant.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                          <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <tr key={tenant.id} className="hover:bg-surface-elevated/30 transition-all group border-b border-border-subtle/10 duration-500">
+                    <td className="px-10 py-10">
+                      <div className="flex items-center gap-6">
+                        <div className="w-14 h-14 rounded-2xl bg-surface-elevated border border-border-subtle/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-700 shadow-inner-platinum relative overflow-hidden">
+                          <Building2 className="w-7 h-7 text-primary shadow-platinum-glow-sm relative z-10" />
+                          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100">{tenant.name}</p>
-                          <p className="text-xs text-slate-500">ID: {tenant.id}</p>
+                          <p className="font-black text-text-primary uppercase tracking-tighter text-base group-hover:text-primary transition-colors">{tenant.name}</p>
+                          <div className="flex items-center gap-3 mt-1">
+                             <span className="text-[9px] text-text-secondary font-black uppercase tracking-widest">ID: {tenant.id.toString().padStart(4, '0')}</span>
+                             <div className="w-1 h-1 rounded-full bg-border-subtle" />
+                             <span className="text-[9px] text-text-secondary font-black uppercase tracking-widest italic">{new Date(tenant.created_at).toLocaleDateString('pt-BR')}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-mono">
-                      {tenant.cnpj || 'Não informado'}
+                    <td className="px-10 py-10">
+                       <div className="text-[11px] text-text-secondary font-black tracking-[0.2em] bg-surface-elevated/40 px-4 py-2 rounded-xl border border-border-subtle shadow-inner-platinum inline-block uppercase">
+                          {tenant.cnpj || 'DRAFT_CNPJ'}
+                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 text-xs font-medium">
-                        {tenant.plan_name || 'Nenhum'}
+                    <td className="px-10 py-10">
+                      <span className="inline-flex items-center gap-3 px-5 py-2 rounded-2xl bg-primary/10 text-primary border border-primary/20 text-[10px] font-black uppercase tracking-widest shadow-platinum-glow-sm">
+                        <Zap size={12} className="animate-pulse" />
+                        {tenant.plan_name || 'LEGACY_CORE'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
-                        <UserCircle className="w-3.5 h-3.5" />
-                        {tenant.users_count} / {tenant.max_users || '∞'}
+                    <td className="px-10 py-10 text-center">
+                      <div className="inline-flex flex-col items-center gap-1">
+                        <span className="text-lg font-black text-text-primary tracking-tighter">{tenant.users_count}</span>
+                        <div className="w-12 h-1 bg-surface-elevated/60 rounded-full overflow-hidden border border-border-subtle/20">
+                           <div className="h-full bg-primary" style={{ width: `${Math.min((tenant.users_count / (tenant.max_users || 100)) * 100, 100)}%` }} />
+                        </div>
+                        <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest">Limit: {tenant.max_users || '∞'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <td className="px-10 py-10">
+                      <span className={`inline-flex items-center gap-3 px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest border backdrop-blur-md shadow-platinum-glow-sm ${
                         tenant.status === 'active' 
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
                           : tenant.status === 'past_due'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
-                          : tenant.status === 'suspended'
-                          ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400'
-                          : 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400'
+                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          : 'bg-red-500/10 text-red-500 border-red-500/20'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          tenant.status === 'active' ? 'bg-emerald-500' : 
-                          tenant.status === 'past_due' ? 'bg-amber-500' : 
-                          tenant.status === 'suspended' ? 'bg-red-500' : 'bg-slate-500'
-                        }`}></span>
-                        {tenant.status === 'active' ? 'Ativo' : tenant.status === 'past_due' ? 'Atrasado' : tenant.status === 'suspended' ? 'Suspenso' : 'Cancelado'}
+                        <div className={`w-2 h-2 rounded-full bg-current ${tenant.status === 'active' ? 'animate-pulse shadow-platinum-glow' : ''}`}></div>
+                        {tenant.status === 'active' ? 'Operational' : tenant.status === 'past_due' ? 'Review Needed' : 'Suspended'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                      {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-2 items-center">
-                      <button
-                        onClick={() => openModal(tenant)}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
-                        title="Editar Empresa"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleImpersonate(tenant.id, tenant.name)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
-                      >
-                        Acessar Painel
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
+                    <td className="px-10 py-10 text-right">
+                      <div className="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-6 group-hover:translate-x-0">
+                        <button
+                          onClick={() => openModal(tenant)}
+                          className="p-4 text-text-secondary hover:text-primary bg-surface-elevated/40 border border-border-subtle rounded-2xl transition-all shadow-inner-platinum hover:scale-110"
+                          title="Refinar Parâmetros"
+                        >
+                          <Edit size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleImpersonate(tenant.id, tenant.name)}
+                          className="btn-primary py-3.5 px-8 text-[10px] font-black tracking-[0.2em] shadow-platinum-glow flex items-center gap-4 group/btn"
+                        >
+                          Acessar <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -319,179 +306,158 @@ export default function TenantList() {
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingTenant ? 'Editar Empresa' : 'Cadastrar Nova Empresa'}>
-        <form onSubmit={handleSaveTenant} className="space-y-6">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingTenant ? 'REFINAR INSTÂNCIA CORPORATIVA' : 'PROVISIONAR NOVO TENANT PLATINUM'} size="lg">
+        <form onSubmit={handleSaveTenant} className="p-10 space-y-12">
           
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
-              Dados da Empresa
-            </h3>
+          <div className="space-y-10">
+            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+               <Activity size={20} className="text-primary" />
+               <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.5em]">Arquitetura de Malha Corporativa</h3>
+            </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Razão Social / Nome</label>
-                <input
-                  type="text"
-                  required
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="col-span-2 group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">Razão Social / Nome de Operação Platinum *</label>
+                <div className="relative mt-3">
+                   <Building2 className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6 group-focus-within:opacity-100 transition-opacity" />
+                   <input
+                     type="text"
+                     required
+                     value={companyName}
+                     onChange={(e) => setCompanyName(e.target.value)}
+                     className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-8 py-6 text-base font-black text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum uppercase tracking-tight"
+                     placeholder="EX: BIDFLOW GLOBAL SOLUTIONS S/A"
+                   />
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">CNPJ</label>
-                <input
-                  type="text"
-                  required
-                  value={companyCnpj}
-                  onChange={(e) => setCompanyCnpj(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
+              <div className="group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">CNPJ Digital de Auditoria</label>
+                <div className="relative mt-3">
+                   <ShieldCheck className="absolute left-8 top-1/2 -translate-y-1/2 text-text-secondary opacity-60 w-6 h-6 group-focus-within:text-primary group-focus-within:opacity-100 transition-all" />
+                   <input
+                     type="text"
+                     required
+                     value={companyCnpj}
+                     onChange={(e) => setCompanyCnpj(e.target.value)}
+                     className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-8 py-6 text-sm font-black text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum tracking-[0.2em]"
+                     placeholder="00.000.000/0000-00"
+                   />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Plano de Assinatura</label>
-                <select
-                  required
-                  value={planId}
-                  onChange={(e) => setPlanId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                >
-                  <option value="">Selecione um plano</option>
-                  {plans.map(plan => (
-                    <option key={plan.id} value={plan.id}>{plan.name} - R$ {Number(plan.monthly_price).toFixed(2)}</option>
-                  ))}
-                </select>
+              <div className="group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">Power Tier de Assinatura</label>
+                <div className="relative mt-3">
+                   <Zap className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6" />
+                   <select
+                     required
+                     value={planId}
+                     onChange={(e) => setPlanId(e.target.value)}
+                     className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-12 py-6 text-[11px] font-black uppercase tracking-[0.3em] text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer shadow-inner-platinum"
+                   >
+                     <option value="" className="bg-surface">SELECIONAR TIER...</option>
+                     {plans.map(plan => (
+                       <option key={plan.id} value={plan.id} className="bg-surface">{plan.name.toUpperCase()} · BRL {Number(plan.monthly_price).toFixed(0)}</option>
+                     ))}
+                   </select>
+                   <ChevronRight size={14} className="absolute right-8 top-1/2 -translate-y-1/2 rotate-90 text-text-secondary opacity-60" />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status da Assinatura</label>
-                <select
-                  required
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                >
-                  <option value="active">Ativo (Em Dia)</option>
-                  <option value="past_due">Atrasado (Past Due)</option>
-                  <option value="suspended">Suspenso (Bloqueado)</option>
-                  <option value="cancelled">Cancelado</option>
-                </select>
+              <div className="group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">Status do Cluster Multi-Tenant</label>
+                <div className="relative mt-3">
+                   <Layout className="absolute left-8 top-1/2 -translate-y-1/2 text-text-secondary opacity-60 w-6 h-6 group-focus-within:text-primary transition-all" />
+                   <select
+                     required
+                     value={status}
+                     onChange={(e) => setStatus(e.target.value)}
+                     className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-12 py-6 text-[11px] font-black uppercase tracking-[0.3em] text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer shadow-inner-platinum"
+                   >
+                     <option value="active" className="bg-surface">OPERACIONAL (NOMINAL)</option>
+                     <option value="past_due" className="bg-surface">PENDÊNCIA FINANCEIRA (ALERTA)</option>
+                     <option value="suspended" className="bg-surface">SUSPENSO (OFFLINE)</option>
+                     <option value="cancelled" className="bg-surface">CANCELADO / PURGED</option>
+                   </select>
+                   <ChevronRight size={14} className="absolute right-8 top-1/2 -translate-y-1/2 rotate-90 text-text-secondary opacity-60" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
-              Dados do Administrador
-            </h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nome Completo</label>
-              <input
-                type="text"
-                required
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
+          <div className="space-y-10">
+            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
+               <UserCircle size={20} className="text-primary" />
+               <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.5em]">Identidade Neural do Super Admin</h3>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">E-mail de Login</label>
+            
+            <div className="group">
+              <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">Nome Completo do Gestor de Cluster</label>
+              <div className="relative mt-3">
+                <UserCircle className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6 group-focus-within:opacity-100 transition-all" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-8 py-6 text-sm font-black text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum uppercase tracking-tight"
+                  placeholder="NOME DO ADMINISTRADOR"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">E-mail Primário de Túnel</label>
+                <div className="relative mt-3">
+                  <Globe className="absolute left-8 top-1/2 -translate-y-1/2 text-text-secondary opacity-60 w-6 h-6 group-focus-within:text-primary group-focus-within:opacity-100 transition-all" />
+                  <input
+                    type="email"
+                    required
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-8 py-6 text-sm font-black text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum font-mono lowercase tracking-wider"
+                    placeholder="admin@bidflow.io"
+                  />
+                </div>
+              </div>
               
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {editingTenant ? 'Nova Senha (Opcional)' : 'Senha Provisória'}
+              <div className="group">
+                <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.4em] px-4 group-focus-within:text-primary transition-colors">
+                  {editingTenant ? 'Nova RSA de Acesso (Criptografada)' : 'Senha Neural Provisória'}
                 </label>
-                <input
-                  type="password"
-                  required={!editingTenant}
-                  minLength={6}
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder={editingTenant ? 'Deixe em branco para não alterar' : ''}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
+                <div className="relative mt-3">
+                  <Key className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6 group-focus-within:opacity-100 transition-all" />
+                  <input
+                    type="password"
+                    required={!editingTenant}
+                    minLength={6}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder={editingTenant ? 'MANTER CRIPTOGRAFIA ATUAL' : '••••••••'}
+                    className="w-full bg-background/50 border border-border-medium rounded-[1.5rem] pl-20 pr-8 py-6 text-sm font-black text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {editingTenant && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">
-                Módulos Adicionais (Add-ons)
-              </h3>
-              <p className="text-xs text-slate-500 mb-2">
-                Ligue ou desligue módulos avulsos para esta empresa. O plano principal já inclui módulos base.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {AVAILABLE_MODULES.map((mod) => {
-                  const isIncludedInPlan = selectedPlanFeatures.includes(mod.key);
-                  const isChecked = isIncludedInPlan || addons.includes(mod.key);
-
-                  return (
-                    <label 
-                      key={mod.key} 
-                      className={`flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors ${
-                        isIncludedInPlan 
-                          ? 'opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-800/50' 
-                          : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        disabled={isIncludedInPlan}
-                        onChange={(e) => {
-                          if (isIncludedInPlan) return;
-                          if (e.target.checked) {
-                            setAddons([...addons, mod.key]);
-                          } else {
-                            setAddons(addons.filter(k => k !== mod.key));
-                          }
-                        }}
-                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900 disabled:opacity-50"
-                      />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        {mod.label}
-                        {isIncludedInPlan && (
-                          <span className="ml-2 text-[10px] font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Incluso no plano
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex flex-col md:flex-row justify-end gap-6 pt-12 border-t border-border-subtle/30">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              className="px-12 py-5 text-[11px] font-black text-text-secondary hover:text-text-primary uppercase tracking-[0.4em] transition-all bg-surface-elevated/40 border border-border-subtle rounded-2xl hover:bg-surface-elevated"
             >
-              Cancelar
+              Abortar Operação
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="btn-primary py-5 px-16 shadow-platinum-glow uppercase text-[12px] font-black tracking-[0.4em] flex items-center justify-center gap-5 disabled:opacity-50 group"
             >
-              {isSubmitting ? 'Salvando...' : (editingTenant ? 'Salvar Alterações' : 'Cadastrar Empresa')}
+              {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save size={24} className="group-hover:scale-110 transition-transform" />}
+              {isSubmitting ? 'Sincronizando Malha...' : (editingTenant ? 'Consolidar Cluster' : 'Provisionar Ecossistema')}
             </button>
           </div>
         </form>

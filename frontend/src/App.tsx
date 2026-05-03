@@ -126,7 +126,7 @@ function Topbar({ title }: { title?: string }) {
   };
 
   return (
-    <div className="h-20 bg-background/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40">
+    <div className="h-20 bg-background/80 backdrop-blur-xl border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-40">
       <div className="flex items-center gap-6">
         <div className="flex flex-col">
           <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">
@@ -134,9 +134,9 @@ function Topbar({ title }: { title?: string }) {
             <span className="w-1 h-1 rounded-full bg-primary/40" />
             <span className="text-primary/60 italic lowercase">v2.0 Platinum</span>
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
+          <h2 className="text-xl font-bold text-text-primary tracking-tight flex items-center gap-3">
             {getPageTitle()}
-            <span className="w-px h-4 bg-white/10 mx-1" />
+            <span className="w-px h-4 bg-border-medium mx-1" />
           </h2>
         </div>
       </div>
@@ -148,10 +148,10 @@ function Topbar({ title }: { title?: string }) {
             {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
           </span>
         </div>
-        <div className="w-px h-8 bg-white/5" />
+        <div className="w-px h-8 bg-border-subtle" />
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-primary to-amber-600 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-          <button className="relative p-2 bg-surface rounded-full border border-white/10 text-text-muted hover:text-white transition-colors">
+          <button className="relative p-2 bg-surface rounded-full border border-border-subtle text-text-muted hover:text-text-primary transition-colors">
             <Activity size={18} />
           </button>
         </div>

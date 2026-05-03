@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Sparkles, Loader2, FileWarning, Clock, FileText, Plus, Settings, Trash2, Edit2, MoreVertical, Lock } from 'lucide-react';
+import { Sparkles, Loader2, FileWarning, Clock, FileText, Plus, Settings, Trash2, Edit2, MoreVertical, Lock, TrendingUp, DollarSign } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../lib/axios';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -167,24 +167,24 @@ export default function SalesFunnel() {
   };
 
   return (
-    <div className="p-8 h-screen w-full flex flex-col bg-background space-y-8 overflow-hidden">
+    <div className="p-8 h-screen w-full flex flex-col bg-background space-y-10 overflow-hidden animate-in fade-in duration-700">
       <Toaster position="top-right" />
       
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Pipeline <span className="text-gradient-gold">Estratégico</span>
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
+            Pipeline <span className="text-gradient-gold">Comercial</span>
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
-            <Lock size={12} className="text-primary" />
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Lock size={14} className="text-primary" />
             Fluxo comercial monitorado com inteligência de conversão Platinum.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <button 
             onClick={() => { setStageToEdit(null); setIsStageModalOpen(true); }}
             aria-label="Configurar novas etapas do funil"
-            className="flex items-center gap-3 px-6 py-3 bg-surface-elevated/50 text-white font-bold rounded-xl border border-white/10 hover:bg-surface-elevated transition-all text-xs uppercase tracking-widest"
+            className="flex items-center gap-3 px-8 py-3 bg-surface-elevated/40 text-text-primary font-black rounded-xl border border-border-subtle hover:bg-surface-elevated transition-all text-[10px] uppercase tracking-widest shadow-platinum-glow-sm"
           >
             <Settings size={16} className="text-primary" />
             Fases
@@ -192,7 +192,7 @@ export default function SalesFunnel() {
           <button 
             onClick={() => handleCreateOpp()}
             aria-label="Criar nova oportunidade comercial"
-            className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest"
+            className="btn-primary py-3 px-8 shadow-platinum-glow"
           >
             <Plus size={16} />
             Novo Deal
@@ -203,10 +203,10 @@ export default function SalesFunnel() {
       {loading ? (
         <div className="flex-1 flex gap-6 overflow-hidden">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="min-w-[320px] bg-white/5 rounded-2xl p-4 space-y-4 animate-pulse">
-              <div className="h-6 bg-white/5 rounded w-1/2" />
-              <div className="h-24 bg-white/5 rounded-xl" />
-              <div className="h-24 bg-white/5 rounded-xl" />
+            <div key={i} className="min-w-[320px] bg-surface-elevated/20 rounded-[2rem] p-6 space-y-6 animate-pulse border border-border-subtle/30">
+              <div className="h-6 bg-surface-elevated/40 rounded-lg w-1/2" />
+              <div className="h-32 bg-surface-elevated/40 rounded-2xl" />
+              <div className="h-32 bg-surface-elevated/40 rounded-2xl" />
             </div>
           ))}
         </div>
@@ -219,23 +219,23 @@ export default function SalesFunnel() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`min-w-[320px] max-w-[320px] bg-surface-elevated/30 rounded-2xl p-4 flex flex-col border border-white/5 transition-all ${snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20 shadow-platinum-glow' : ''}`}
+                    className={`min-w-[340px] max-w-[340px] bg-surface-elevated/20 rounded-[2rem] p-5 flex flex-col border border-border-subtle transition-all duration-300 ${snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20 shadow-platinum-glow' : ''}`}
                   >
                     {/* Stage Header */}
-                    <div className="flex items-center justify-between mb-6 px-1 group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: stage.color }}></div>
-                        <h3 className="font-bold text-white text-sm tracking-tight uppercase">{stage.name}</h3>
+                    <div className="flex items-center justify-between mb-8 px-2 group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-1.5 h-6 rounded-full shadow-sm" style={{ backgroundColor: stage.color }}></div>
+                        <h3 className="font-black text-text-primary text-[11px] tracking-[0.2em] uppercase">{stage.name}</h3>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-white/5 text-text-muted text-[10px] px-2 py-0.5 rounded-md font-black">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-surface-elevated/60 text-text-muted text-[9px] px-2.5 py-1 rounded-lg font-black border border-border-subtle">
                           {opportunities.filter(opp => opp.funnel_stage_id === stage.id).length}
                         </span>
-                        <div className="hidden group-hover:flex items-center gap-1">
-                          <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1 transition-colors" title="Editar">
+                        <div className="hidden group-hover:flex items-center gap-2">
+                          <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1.5 hover:bg-surface-elevated rounded-lg transition-all" title="Editar">
                             <Edit2 size={12} />
                           </button>
-                          <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-red-400 p-1 transition-colors" title="Excluir">
+                          <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-red-400 p-1.5 hover:bg-red-400/5 rounded-lg transition-all" title="Excluir">
                             <Trash2 size={12} />
                           </button>
                         </div>
@@ -243,7 +243,7 @@ export default function SalesFunnel() {
                     </div>
 
                     {/* Opportunity Cards */}
-                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto min-h-[200px] scrollbar-hide">
+                    <div className="flex-1 flex flex-col gap-5 overflow-y-auto min-h-[200px] scrollbar-hide px-1">
                       {opportunities.filter(opp => opp.funnel_stage_id === stage.id).map((opp, index) => (
                         <Draggable key={opp.id} draggableId={opp.id.toString()} index={index}>
                           {(provided, snapshot) => (
@@ -252,31 +252,32 @@ export default function SalesFunnel() {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               onClick={() => handleEditOpp(opp)}
-                              className={`bg-background/40 p-5 rounded-xl border border-white/5 hover:border-primary/30 hover:bg-surface-elevated transition-all cursor-pointer group/card ${snapshot.isDragging ? 'shadow-2xl rotate-1 z-50 bg-surface-elevated scale-105 border-primary/50' : ''} ${draggingId === opp.id ? 'opacity-40 grayscale' : ''}`}
+                              className={`bg-background/60 p-6 rounded-[1.5rem] border border-border-subtle hover:border-primary/40 hover:bg-surface-elevated transition-all cursor-pointer group/card shadow-sm ${snapshot.isDragging ? 'shadow-platinum-glow-lg rotate-1 z-50 bg-surface-elevated scale-105 border-primary/50' : ''} ${draggingId === opp.id ? 'opacity-40 grayscale' : ''}`}
                             >
-                              <div className="space-y-4">
-                                <div className="flex justify-between items-start">
-                                  <p className="font-bold text-white text-sm leading-tight group-hover/card:text-primary transition-colors">{opp.title}</p>
-                                  <MoreVertical size={14} className="text-text-muted opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                              <div className="space-y-5">
+                                <div className="flex justify-between items-start gap-4">
+                                  <p className="font-black text-text-primary text-xs leading-relaxed group-hover/card:text-primary transition-colors uppercase tracking-tight">{opp.title}</p>
+                                  <MoreVertical size={14} className="text-text-muted opacity-0 group-hover/card:opacity-100 transition-opacity shrink-0" />
                                 </div>
 
-                                <div className="flex justify-between items-end">
+                                <div className="flex justify-between items-end pt-4 border-t border-border-subtle/50">
                                   <div className="space-y-1">
-                                    <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block">Potencial</span>
-                                    <span className="text-white font-black tracking-tight">
+                                    <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] block">Potencial Base</span>
+                                    <div className="flex items-center gap-1.5 text-text-primary font-black tracking-tighter text-sm">
+                                      <DollarSign size={14} className="text-primary/60" />
                                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(opp.value))}
-                                    </span>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col items-end gap-1">
-                                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
+                                  <div className="flex flex-col items-end gap-2">
+                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-md border uppercase tracking-widest ${opp.type === 'bidding' ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
                                       {opp.type === 'bidding' ? 'Licitação' : 'Comercial'}
                                     </span>
                                     {opp.win_probability && (
-                                      <div className="flex items-center gap-1.5">
-                                        <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                                          <div className="h-full bg-secondary" style={{ width: opp.win_probability }}></div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-16 h-1.5 bg-surface-elevated/60 rounded-full overflow-hidden border border-border-subtle">
+                                          <div className="h-full bg-secondary shadow-[0_0_8px_rgba(var(--color-secondary-rgb),0.4)]" style={{ width: opp.win_probability }}></div>
                                         </div>
-                                        <span className="text-[10px] text-text-muted font-bold">{opp.win_probability}</span>
+                                        <span className="text-[10px] text-text-muted font-black">{opp.win_probability}</span>
                                       </div>
                                     )}
                                   </div>
@@ -291,9 +292,10 @@ export default function SalesFunnel() {
                       <button 
                         onClick={() => handleCreateOpp(stage.id)}
                         aria-label={`Adicionar deal em ${stage.name}`}
-                        className="mt-2 py-4 flex items-center justify-center gap-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-xl border border-dashed border-white/5 hover:border-primary/30 transition-all text-[10px] font-black uppercase tracking-[0.2em]"
+                        className="mt-4 py-6 flex flex-col items-center justify-center gap-3 text-text-muted hover:text-primary hover:bg-primary/5 rounded-[1.5rem] border-2 border-dashed border-border-subtle hover:border-primary/40 transition-all group/new"
                       >
-                        <Plus size={14} /> Novo Negócio
+                        <Plus size={20} className="group-hover/new:scale-125 transition-transform" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em]">Integrar Deal</span>
                       </button>
                     </div>
                   </div>
@@ -302,13 +304,16 @@ export default function SalesFunnel() {
             ))}
             
             {/* New Stage Placeholder */}
-            <div className="min-w-[320px]">
+            <div className="min-w-[340px] flex flex-col">
               <button 
                 onClick={() => { setStageToEdit(null); setIsStageModalOpen(true); }}
                 aria-label="Adicionar nova fase estratégica"
-                className="w-full h-16 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all font-black gap-3 text-xs uppercase tracking-widest"
+                className="w-full h-24 border-2 border-dashed border-border-subtle rounded-[2rem] flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all font-black gap-4 group/stage shadow-sm"
               >
-                <Plus size={18} /> Adicionar Fase
+                <div className="p-2 bg-surface-elevated rounded-xl group-hover/stage:bg-primary/10 transition-colors">
+                  <Plus size={20} />
+                </div>
+                <span className="text-[10px] uppercase tracking-[0.3em]">Nova Fase Estratégica</span>
               </button>
             </div>
           </div>

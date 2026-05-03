@@ -73,7 +73,7 @@ export const STATUS_COLORS: Record<string, string> = {
 
 export const STATUS_COLORS_PLATINUM: Record<string, string> = {
   active: 'bg-primary/10 text-primary border-primary/20',
-  closed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  closed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
 };
 
 export function fmt(value: string | number | null) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, User, FileText, Lock, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, User, FileText, Lock, ShieldAlert, Sparkles, ChevronRight } from 'lucide-react';
 
 interface PreProposal {
   id: string;
@@ -23,45 +23,49 @@ export default function PreProposalsList() {
   if (mockPreProposals.length === 0) return null;
 
   return (
-    <div className="platinum-card p-8 mb-8 animate-in fade-in duration-500">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          <ShieldAlert size={20} />
+    <div className="platinum-card p-10 mb-10 animate-in fade-in duration-500 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-5">
+          <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center text-primary shadow-platinum-glow-sm">
+            <ShieldAlert size={24} />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-text-primary uppercase tracking-[0.4em]">Requisições de Pré-Proposta</h2>
+            <p className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-1 opacity-60 italic">Demandas internas pendentes de formalização estratégica</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">Requisições de Pré-Proposta</h2>
-          <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5 italic">Demandas internas pendentes de formalização</p>
+        <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-[9px] font-black text-primary uppercase tracking-widest">
+           <Sparkles size={12} className="animate-pulse" /> IA Sugestion Ativa
         </div>
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-4">
         {mockPreProposals.map((item) => (
           <div 
             key={item.id} 
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white/[0.02] border border-white/5 rounded-2xl p-5 transition-all hover:bg-white/[0.04] hover:border-white/10 group"
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-surface-elevated/20 border border-border-subtle/30 rounded-3xl p-6 transition-all duration-500 hover:bg-surface-elevated/40 hover:border-primary/30 group shadow-inner-platinum"
           >
-            <div className="space-y-2 mb-4 sm:mb-0">
-              <h3 className="font-bold text-sm text-white group-hover:text-primary transition-colors">{item.title}</h3>
-              <div className="flex flex-wrap items-center gap-4 text-[10px] text-text-muted font-black uppercase tracking-widest">
-                <span className="flex items-center gap-1.5"><User size={12} className="text-primary/60" /> {item.requester}</span>
-                <span className="flex items-center gap-1.5"><FileText size={12} className="text-primary/60" /> REF: {item.number !== 'null' ? item.number : 'PENDENTE'}</span>
+            <div className="space-y-3 mb-6 sm:mb-0">
+              <h3 className="font-black text-sm text-text-primary group-hover:text-primary transition-colors tracking-tight uppercase">{item.title}</h3>
+              <div className="flex flex-wrap items-center gap-6 text-[10px] text-text-muted font-black uppercase tracking-widest opacity-60">
+                <span className="flex items-center gap-2.5"><User size={14} className="text-primary/60" /> {item.requester}</span>
+                <span className="flex items-center gap-2.5"><FileText size={14} className="text-primary/60" /> REF: {item.number !== 'null' ? item.number : 'PENDENTE_SINC'}</span>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
               <button 
-                aria-label="Descartar solicitação"
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-[10px] font-black text-red-400 bg-red-400/5 hover:bg-red-400/10 border border-red-400/20 rounded-xl transition-all uppercase tracking-widest"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-6 py-3.5 text-[10px] font-black text-red-500 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 rounded-2xl transition-all uppercase tracking-widest"
               >
-                <Trash2 size={12} />
+                <Trash2 size={14} />
                 Descartar
               </button>
               <button 
-                aria-label="Formalizar proposta"
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 text-[10px] font-black text-background bg-primary hover:bg-primary-hover rounded-xl transition-all shadow-platinum-glow uppercase tracking-widest"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-10 py-3.5 text-[10px] font-black text-background bg-primary hover:bg-primary-hover rounded-2xl transition-all shadow-platinum-glow uppercase tracking-widest group-hover:scale-105"
               >
-                <Plus size={14} />
+                <Plus size={16} />
                 Formalizar
+                <ChevronRight size={14} className="ml-1 opacity-40" />
               </button>
             </div>
           </div>

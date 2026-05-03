@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Send, XCircle, Plus, Loader2, Search, Zap, ShieldCheck } from 'lucide-react';
+import { FileText, Send, XCircle, Plus, Loader2, Search, Zap, ShieldCheck, ChevronRight, Layout, DollarSign, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -18,10 +18,10 @@ interface Invoice {
 }
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  draft:      { label: 'Rascunho',   cls: 'bg-white/5 text-text-muted border-white/10' },
-  sent:       { label: 'Transmitida',cls: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  authorized: { label: 'Autorizada', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  cancelled:  { label: 'Cancelada',  cls: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  draft:      { label: 'Rascunho',   cls: 'bg-surface-elevated/40 text-text-muted border-border-subtle' },
+  sent:       { label: 'Transmitida',cls: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+  authorized: { label: 'Autorizada', cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+  cancelled:  { label: 'Cancelada',  cls: 'bg-red-500/10 text-red-500 border-red-500/20' },
 };
 
 function fmt(v: string | number) {
@@ -82,89 +82,110 @@ export default function InvoiceManager() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
+            Repositório <span className="text-gradient-gold">Fiscal & Compliance</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Database size={14} className="text-primary" />
+            Orquestração de emissão, transmissão e cancelamento de documentos fiscais eletrônicos.
+          </p>
+        </div>
+      </header>
+
       {/* Platinum Filter Bar */}
-      <div className="platinum-card p-5 flex flex-col sm:flex-row gap-4 items-center">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+      <div className="platinum-card p-8 flex flex-col sm:flex-row gap-6 items-center bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-platinum-glow-sm">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
           <input 
             value={search} 
             onChange={e => setSearch(e.target.value)} 
-            placeholder="Localizar por número, chave ou destinatário..."
-            className="w-full pl-11 pr-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/30" 
+            placeholder="Interrogar por número, chave ou destinatário digital..."
+            className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum" 
           />
         </div>
-        <select 
-          value={filterType} 
-          onChange={e => setFilterType(e.target.value)} 
-          className="px-6 py-3 bg-white/[0.02] border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white focus:border-primary/40 outline-none transition-all appearance-none min-w-[180px]"
-        >
-          <option value="" className="bg-surface">Todas as Operações</option>
-          <option value="output" className="bg-surface">Fluxo de Saída</option>
-          <option value="input" className="bg-surface">Fluxo de Entrada</option>
-        </select>
+        <div className="relative">
+          <select 
+            value={filterType} 
+            onChange={e => setFilterType(e.target.value)} 
+            className="pl-6 pr-12 py-4 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer min-w-[220px] shadow-inner-platinum"
+          >
+            <option value="" className="bg-surface">Todas as Operações Core</option>
+            <option value="output" className="bg-surface">Fluxo de Saída Neural</option>
+            <option value="input" className="bg-surface">Fluxo de Entrada RPA</option>
+          </select>
+          <ChevronRight size={14} className="absolute right-5 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+        </div>
         <button 
           onClick={() => { setForm({ type:'output', number:'', total_value:'', recipient_name:'', recipient_document:'', notes:'', items_json:'[]' }); setModalOpen(true); }}
-          className="px-8 py-3.5 bg-primary text-background font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-all shadow-platinum-glow flex items-center gap-2"
+          className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest whitespace-nowrap"
         >
-          <Plus size={14} /> Nova NF-e
+          <Plus size={18} /> Nova Emissão NF-e
         </button>
       </div>
 
       {/* Platinum Table */}
-      <div className="platinum-card overflow-hidden">
+      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Consultando Ledger Fiscal...</span>
+          <div className="flex flex-col items-center justify-center py-40 gap-6 opacity-40">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] animate-pulse">Sincronizando Ledger Fiscal SEFAZ...</span>
           </div>
         ) : invoices.length === 0 ? (
-          <div className="py-24 text-center space-y-4 opacity-30">
-            <FileText className="w-16 h-16 mx-auto text-text-muted" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Nenhum registro encontrado</p>
+          <div className="py-40 text-center space-y-6 opacity-40">
+            <div className="w-20 h-20 bg-surface-elevated rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border-subtle shadow-inner-platinum">
+               <FileText className="w-10 h-10 text-text-muted" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Nenhum registro fiscal no horizonte atual</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-white/[0.02] border-b border-white/5">
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Identificador</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Natureza</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Destinatário</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Valor Operacional</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Integridade</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-black text-text-muted uppercase tracking-widest">Ações Estratégicas</th>
+          <div className="overflow-x-auto scrollbar-platinum">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-surface-elevated/40 border-b border-border-subtle">
+                <tr>
+                  <th className="px-8 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Identificador Digital</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Natureza Operacional</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Destinatário</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Valuation de Ciclo</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Integridade SEFAZ</th>
+                  <th className="px-8 py-6 text-right text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Ações Estratégicas</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-subtle/20">
                 {invoices.map(inv => (
-                  <tr key={inv.id} className="hover:bg-white/[0.01] transition-colors group">
-                    <td className="px-6 py-5 font-mono text-xs text-white/80 group-hover:text-primary transition-colors">{inv.number || `#${inv.id}`}</td>
-                    <td className="px-6 py-5">
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                        {inv.type === 'output' ? <Zap size={10} className="text-emerald-400" /> : <ShieldCheck size={10} className="text-blue-400" />}
-                        {inv.type === 'output' ? 'Saída' : 'Entrada'}
+                  <tr key={inv.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-300">
+                    <td className="px-8 py-8 font-black text-[11px] text-text-primary tracking-widest group-hover:text-primary transition-colors">{inv.number || `DRAFT_#${inv.id}`}</td>
+                    <td className="px-8 py-8">
+                      <span className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em] flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full shadow-platinum-glow ${inv.type === 'output' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                        {inv.type === 'output' ? 'Saída_Digital' : 'Entrada_RPA'}
                       </span>
                     </td>
-                    <td className="px-6 py-5 font-bold text-white text-sm">{inv.recipient_name || '-'}</td>
-                    <td className="px-6 py-5 font-black text-white text-sm">{fmt(inv.total_value)}</td>
-                    <td className="px-6 py-5">
-                      <span className={`inline-flex px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${STATUS_MAP[inv.status]?.cls}`}>
+                    <td className="px-8 py-8 font-black text-text-primary text-xs uppercase tracking-tight group-hover:translate-x-1 transition-all duration-300">{inv.recipient_name || 'DESTINATÁRIO_PENDENTE'}</td>
+                    <td className="px-8 py-8 font-black text-text-primary tracking-tighter text-sm group-hover:text-primary transition-colors">{fmt(inv.total_value)}</td>
+                    <td className="px-8 py-8">
+                      <span className={`inline-flex px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border shadow-platinum-glow-sm ${STATUS_MAP[inv.status]?.cls}`}>
+                        <div className="w-1.5 h-1.5 rounded-full bg-current mr-2 animate-pulse" />
                         {STATUS_MAP[inv.status]?.label}
                       </span>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center justify-end gap-3">
+                    <td className="px-8 py-8">
+                      <div className="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
                         {inv.status === 'draft' && (
-                          <button onClick={() => handleTransmit(inv.id)} className="px-4 py-2 bg-primary hover:bg-primary-hover text-background text-[10px] font-black rounded-lg transition-all flex items-center gap-2 uppercase tracking-widest">
-                            <Send className="w-3 h-3" /> Transmitir
+                          <button onClick={() => handleTransmit(inv.id)} className="btn-primary py-2.5 px-6 text-[9px] font-black rounded-xl shadow-platinum-glow flex items-center gap-2">
+                            <Send className="w-3 h-3" /> Transmitir SEFAZ
                           </button>
                         )}
                         {['sent','authorized'].includes(inv.status) && (
-                          <button onClick={() => handleCancel(inv.id)} className="px-4 py-2 bg-white/5 hover:bg-red-500/10 text-red-400 border border-white/10 hover:border-red-500/20 text-[10px] font-black rounded-lg transition-all flex items-center gap-2 uppercase tracking-widest">
-                            <XCircle className="w-3 h-3" /> Cancelar
+                          <button onClick={() => handleCancel(inv.id)} className="px-5 py-2.5 bg-red-500/5 hover:bg-red-500/10 text-red-500/60 border border-red-500/10 hover:border-red-500/20 text-[9px] font-black rounded-xl transition-all flex items-center gap-2 uppercase tracking-widest shadow-inner-platinum">
+                            <XCircle className="w-3.5 h-3.5" /> Cancelar Operação
                           </button>
                         )}
+                        <button className="p-3 bg-surface-elevated/40 text-text-muted hover:text-primary rounded-xl border border-border-subtle shadow-inner-platinum transition-all">
+                           <Layout size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -175,47 +196,58 @@ export default function InvoiceManager() {
         )}
       </div>
 
-      {/* Create Modal - Styled via props / global styles if applicable */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nova Emissão Fiscal" size="lg">
-        <form onSubmit={handleCreate} className="space-y-6 p-2">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Natureza da Operação*</label>
-              <select value={form.type} onChange={e => setForm({...form, type: e.target.value as 'input'|'output'})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 appearance-none">
-                <option value="output" className="bg-surface">Saída (Venda/Serviço)</option>
-                <option value="input" className="bg-surface">Entrada (Compra/Estorno)</option>
-              </select>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="NOVA EMISSÃO FISCAL PLATINUM" size="lg">
+        <form onSubmit={handleCreate} className="p-4 space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Natureza da Operação Core*</label>
+              <div className="relative">
+                <select value={form.type} onChange={e => setForm({...form, type: e.target.value as 'input'|'output'})} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-6 pr-12 py-5 text-xs font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none appearance-none cursor-pointer shadow-inner-platinum">
+                  <option value="output" className="bg-surface">Saída Neural (Venda/Serviço)</option>
+                  <option value="input" className="bg-surface">Entrada RPA (Compra/Estorno)</option>
+                </select>
+                <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Número (Referência)</label>
-              <input value={form.number} onChange={e => setForm({...form, number: e.target.value})} placeholder="Numeração Automática" className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Razão Social / Destinatário</label>
-              <input value={form.recipient_name} onChange={e => setForm({...form, recipient_name: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">CPF / CNPJ</label>
-              <input value={form.recipient_document} onChange={e => setForm({...form, recipient_document: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Número de Referência</label>
+              <div className="relative">
+                <FileText className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
+                <input value={form.number} onChange={e => setForm({...form, number: e.target.value})} placeholder="SEQ_AUTOMATIC_PLATINUM" className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-bold text-text-primary focus:border-primary/40 outline-none shadow-inner-platinum" />
+              </div>
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-primary uppercase tracking-widest">Valor Total da Operação*</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Razão Social / Destinatário Digital</label>
+              <div className="relative">
+                <ShieldCheck className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/60 w-6 h-6" />
+                <input value={form.recipient_name} onChange={e => setForm({...form, recipient_name: e.target.value})} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-bold text-text-primary focus:border-primary/40 outline-none shadow-inner-platinum" />
+              </div>
+            </div>
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">CPF / CNPJ Validado</label>
+              <div className="relative">
+                <Database className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
+                <input value={form.recipient_document} onChange={e => setForm({...form, recipient_document: e.target.value})} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-bold text-text-primary focus:border-primary/40 outline-none shadow-inner-platinum" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4 group">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Valuation Total da Operação Fiscal*</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-xs">R$</span>
-              <input type="number" step="0.01" required value={form.total_value} onChange={e => setForm({...form, total_value: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
+              <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500 w-6 h-6" />
+              <input type="number" step="0.01" required value={form.total_value} onChange={e => setForm({...form, total_value: e.target.value})} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-xl font-black text-emerald-500 outline-none focus:border-primary/40 shadow-inner-platinum" placeholder="0.00" />
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-primary uppercase tracking-widest">Observações Tributárias</label>
-            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={3} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 resize-none" />
+          <div className="space-y-4 group">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Cláusulas & Observações Tributárias</label>
+            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={3} className="w-full bg-background/50 border border-border-medium rounded-2xl px-8 py-5 text-sm font-medium text-text-primary outline-none focus:border-primary/40 resize-none shadow-inner-platinum" placeholder="Especifique as regras fiscais e desonerações..." />
           </div>
-          <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
-            <button type="button" onClick={() => setModalOpen(false)} className="px-8 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/5 transition-all">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-10 py-3 bg-primary hover:bg-primary-hover text-background rounded-xl text-[10px] font-black uppercase tracking-widest shadow-platinum-glow flex items-center gap-2 transition-all disabled:opacity-50">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Consolidar Emissão
+          <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle/30">
+            <button type="button" onClick={() => setModalOpen(false)} className="px-10 py-5 text-[10px] font-black text-text-muted hover:text-text-primary uppercase tracking-[0.3em] transition-all">Descartar</button>
+            <button type="submit" disabled={saving} className="btn-primary py-5 px-12 shadow-platinum-glow uppercase text-[11px] tracking-[0.4em] flex items-center gap-4 transition-all disabled:opacity-50">
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus size={20} />} Consolidar Registro Fiscal
             </button>
           </div>
         </form>

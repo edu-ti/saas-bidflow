@@ -66,110 +66,113 @@ export default function Products() {
   );
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
             Catálogo de <span className="text-gradient-gold">Produtos & Ativos</span>
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
-            <ShieldCheck size={12} className="text-primary" />
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <ShieldCheck size={14} className="text-primary" />
             Gestão de ativos, precificação estratégica e inteligência de catálogo.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-3 px-8 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-[10px] tracking-[0.2em]"
+          className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest"
         >
-          <Plus className="w-4 h-4" />
-          Registrar Ativo
+          <Plus className="w-5 h-5" />
+          Registrar Ativo Platinum
         </button>
       </header>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[
-          { label: 'Total de SKUs', val: products.length, icon: Package, color: 'text-primary' },
-          { label: 'Categorias Ativas', val: [...new Set(products.map(p => p.category))].filter(Boolean).length, icon: Layers, color: 'text-blue-400' },
-          { label: 'Valuation Médio', val: formatCurrency((products.reduce((acc, p) => acc + parseFloat(p.base_price), 0) / (products.length || 1)).toString()), icon: BarChart3, color: 'text-emerald-400' },
+          { label: 'Total de SKUs', val: products.length, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'Categorias Ativas', val: [...new Set(products.map(p => p.category))].filter(Boolean).length, icon: Layers, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+          { label: 'Valuation Médio', val: formatCurrency((products.reduce((acc, p) => acc + parseFloat(p.base_price), 0) / (products.length || 1)).toString()), icon: BarChart3, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
         ].map((stat, i) => (
-          <div key={i} className="platinum-card p-6 flex items-center gap-5 group hover:border-primary/20 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <stat.icon className={`w-6 h-6 ${stat.color}`} />
+          <div key={i} className="platinum-card p-8 flex items-center justify-between group bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 overflow-hidden relative">
+            <div className="space-y-2 relative z-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-text-muted opacity-60">{stat.label}</p>
+              <p className="text-2xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors duration-500">{stat.val}</p>
             </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{stat.label}</p>
-              <p className="text-xl font-black text-white mt-0.5">{stat.val}</p>
+            <div className={`p-5 rounded-2xl ${stat.bg} border border-border-subtle ${stat.color} group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm relative z-10`}>
+              <stat.icon size={28} />
             </div>
+            <div className={`absolute -right-4 -bottom-4 w-24 h-24 ${stat.bg} blur-[60px] opacity-10 group-hover:opacity-30 transition-opacity`} />
           </div>
         ))}
       </div>
 
-      <div className="platinum-card p-4">
+      <div className="platinum-card p-8 bg-surface-elevated/10 backdrop-blur-xl shrink-0">
         <div className="flex gap-4 flex-wrap">
-          <div className="flex-1 min-w-[280px] relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+          <div className="flex-1 min-w-[300px] relative group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors w-5 h-5" />
             <input
               type="text"
               placeholder="Rastrear por SKU, Nome ou Categoria..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-background border border-white/5 rounded-xl text-sm focus:border-primary/30 outline-none transition-all text-white placeholder:text-text-muted"
+              className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-subtle rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
-          <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all flex items-center gap-2">
-            <Filter size={16} className="text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Ajustar Filtros</span>
+          <button className="px-8 py-4 bg-surface-elevated/40 border border-border-subtle text-text-muted rounded-2xl hover:bg-surface-elevated hover:text-text-primary transition-all flex items-center gap-3">
+            <Filter size={18} className="text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Ajustar Filtros</span>
           </button>
         </div>
       </div>
 
-      <div className="platinum-card overflow-hidden">
+      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md flex-1">
         {loading ? (
-          <div className="p-20 text-center text-text-muted uppercase text-[10px] font-black tracking-[0.3em]">
-            <Loader2 className="animate-spin inline mr-3" /> Indexando Ativos...
+          <div className="flex flex-col items-center justify-center py-40 gap-6">
+            <Loader2 className="w-12 h-12 animate-spin text-primary/40" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-text-muted animate-pulse">Indexando Catálogo Estratégico...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-platinum">
             <table className="w-full text-left text-sm">
-              <thead className="bg-white/5 border-b border-white/5">
+              <thead className="bg-surface-elevated/30 border-b border-border-subtle">
                 <tr>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">SKU / Ident.</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Produto / Descrição</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Classificação</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Valuation Base</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">SKU / Ident.</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Produto / Descrição</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Classificação</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60 text-right">Valuation Base</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-subtle/30">
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-8 py-20 text-center">
-                      <div className="flex flex-col items-center gap-4 opacity-40">
-                        <Target size={40} className="text-primary" />
-                        <p className="font-black text-text-secondary uppercase tracking-[0.2em] text-[10px]">Nenhum ativo localizado</p>
+                    <td colSpan={4} className="px-10 py-32 text-center">
+                      <div className="flex flex-col items-center gap-6 opacity-20">
+                        <Target size={56} className="text-primary" />
+                        <p className="font-black text-text-primary uppercase tracking-[0.4em] text-[10px]">Nenhum ativo localizado no cluster</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   filteredProducts.map(product => (
-                    <tr key={product.id} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="px-8 py-6 font-mono text-[10px] text-primary font-black uppercase tracking-tighter">
+                    <tr key={product.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/20 duration-300">
+                      <td className="px-10 py-8 font-mono text-xs text-primary font-black uppercase tracking-tighter group-hover:scale-105 transition-transform w-fit">
                         {product.sku || '---'}
                       </td>
-                      <td className="px-8 py-6">
-                        <div className="font-bold text-white group-hover:text-primary transition-colors uppercase tracking-tight">{product.name}</div>
+                      <td className="px-10 py-8">
+                        <div className="font-black text-text-primary group-hover:text-primary transition-colors uppercase tracking-tight text-xs">{product.name}</div>
+                        <div className="text-[9px] text-text-muted font-black mt-2 uppercase tracking-widest opacity-60">ID Digital: #{product.id.toString().padStart(6, '0')}</div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-text-muted text-[9px] font-black uppercase tracking-widest">
+                      <td className="px-10 py-8">
+                        <span className="px-4 py-2 rounded-xl bg-surface-elevated/50 border border-border-subtle text-text-muted text-[9px] font-black uppercase tracking-[0.2em] shadow-platinum-glow-sm">
                           {product.category || 'N/A'}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex flex-col items-end">
-                          <span className="text-white font-black tracking-tight text-base">
+                      <td className="px-10 py-8 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-text-primary font-black tracking-tighter text-sm group-hover:text-primary transition-colors">
                             {formatCurrency(product.base_price)}
                           </span>
-                          <span className="text-[8px] text-text-muted uppercase font-black tracking-[0.2em] italic">Preço de Referência</span>
+                          <span className="text-[8px] text-text-muted uppercase font-black tracking-[0.3em] italic opacity-50">Price Point</span>
                         </div>
                       </td>
                     </tr>
@@ -181,72 +184,73 @@ export default function Products() {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="REGISTRAR ATIVO ESTRATÉGICO" size="md">
-        <form onSubmit={handleSubmit} className="space-y-8 p-2">
-          <div className="space-y-1">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Identificação do Produto *</label>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="REGISTRAR ATIVO ESTRATÉGICO PLATINUM" size="md">
+        <form onSubmit={handleSubmit} className="space-y-10 p-2">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Identificação do Produto *</label>
             <input
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all"
+              className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum"
               placeholder="Ex: Monitor Profissional 4K 27 pol"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">SKU / Código Único</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">SKU / Código Único</label>
               <input
                 type="text"
                 value={formData.sku}
                 onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-mono uppercase"
+                className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-black text-text-primary font-mono uppercase shadow-inner-platinum"
                 placeholder="PROD-100X"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Categoria Estratégica</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Categoria Estratégica</label>
               <input
                 type="text"
                 value={formData.category}
                 onChange={e => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white"
+                className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary shadow-inner-platinum"
                 placeholder="Hardware, Licenças..."
               />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Valuation Base (R$) *</label>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Valuation Base (R$) *</label>
             <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-sm">R$</div>
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary font-black text-sm">R$</div>
               <input
                 type="number"
                 step="0.01"
                 value={formData.base_price}
                 onChange={e => setFormData({ ...formData, base_price: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black"
+                className="w-full pl-16 pr-6 py-4 bg-background border border-border-medium rounded-2xl text-sm text-text-primary font-black shadow-inner-platinum font-mono"
                 placeholder="0.00"
                 required
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t border-white/5">
+          <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest"
+              className="px-8 py-4 text-text-muted font-black hover:text-text-primary transition-all text-[10px] uppercase tracking-[0.3em]"
             >
               Descartar
             </button>
             <button
               type="submit"
-              className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-[10px] uppercase tracking-widest"
+              className="btn-primary py-4 px-12 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest"
             >
-              Consolidar Ativo
+              <ShieldCheck size={20} />
+              Consolidar Ativo Platinum
             </button>
           </div>
         </form>

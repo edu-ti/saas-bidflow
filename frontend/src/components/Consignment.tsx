@@ -9,7 +9,6 @@ import ReconcileModal from './consignment/ReconcileModal';
 
 export default function Consignment() {
   const { theme } = useTheme();
-  const dark = theme === 'dark';
 
   const [records, setRecords] = useState<ConsignmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,11 +83,8 @@ export default function Consignment() {
     setReconcileOpen(true);
   };
 
-  const base = 'bg-background text-white';
-
   return (
-    <div className={`min-h-screen p-8 ${base}`}>
-
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
       <ConsignmentDashboard
         records={records}
         loading={loading}

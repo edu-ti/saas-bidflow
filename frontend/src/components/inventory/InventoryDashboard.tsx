@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Package, Plus, Search, Edit2, Trash2, Eye, ArrowUpRight, ArrowDownLeft,
-  AlertTriangle, DollarSign, Boxes, X, ChevronDown, Filter, Warehouse, Lock, ShieldCheck, Zap, BarChart3, TrendingDown, Target, Loader2
+  AlertTriangle, DollarSign, Boxes, X, ChevronDown, Filter, Warehouse, Lock, ShieldCheck, Zap, BarChart3, TrendingDown, Target, Loader2, Layout, Activity, Database
 } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
@@ -149,118 +149,130 @@ const InventoryDashboard = () => {
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700 overflow-x-hidden">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shrink-0">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
             Asset & <span className="text-gradient-gold">Inventory Control</span>
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
-            <Warehouse size={12} className="text-primary" />
-            Gestão estratégica de ativos, SKUs e movimentações logísticas.
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+            <Warehouse size={14} className="text-primary" />
+            Gestão estratégica de ativos, SKUs e movimentações logísticas Platinum.
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-xs tracking-widest"
+          className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest whitespace-nowrap"
         >
-          <Plus className="w-4 h-4" />
-          Registrar Ativo
+          <Plus className="w-5 h-5" />
+          Registrar Ativo Neural
         </button>
       </header>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {[
-          { label: 'Total SKUs', val: dashboardStats?.total_products, icon: Package, color: 'text-primary' },
-          { label: 'Valuation Total', val: formatCurrency(dashboardStats?.total_value || 0), icon: DollarSign, color: 'text-emerald-400' },
-          { label: 'Low Stock Alert', val: dashboardStats?.low_stock, icon: AlertTriangle, color: 'text-amber-500' },
-          { label: 'Out of Stock', val: dashboardStats?.out_of_stock, icon: Boxes, color: 'text-red-400' },
+          { label: 'Total SKUs Ativos', val: dashboardStats?.total_products, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'Valuation de Estoque', val: formatCurrency(dashboardStats?.total_value || 0), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+          { label: 'Alerta de Baixa', val: dashboardStats?.low_stock, icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+          { label: 'Ruptura de Fluxo', val: dashboardStats?.out_of_stock, icon: Boxes, color: 'text-red-500', bg: 'bg-red-500/10' },
         ].map((stat, i) => (
-          <div key={i} className="platinum-card p-6 flex items-center gap-5 group hover:border-primary/20 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <stat.icon className={`w-6 h-6 ${stat.color}`} />
+          <div key={i} className="platinum-card p-8 flex items-center justify-between group bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-platinum-glow-sm">
+            <div className="space-y-3">
+              <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">{stat.label}</p>
+              <p className="text-2xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors duration-500">{stat.val || 0}</p>
             </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{stat.label}</p>
-              <p className="text-xl font-black text-white mt-0.5">{stat.val || 0}</p>
+            <div className={`w-16 h-16 rounded-2xl ${stat.bg} border border-border-subtle flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform duration-500 shadow-inner-platinum`}>
+              <stat.icon size={28} className="shadow-platinum-glow-sm" />
             </div>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl w-fit">
-        {['products', 'movements', 'settings'].map(tab => (
+      <div className="flex items-center gap-4 bg-surface-elevated/20 border border-border-subtle/30 p-2.5 rounded-[3rem] w-fit shadow-platinum-glow-sm backdrop-blur-md">
+        {[
+          { id: 'products', label: 'Estoque Local' },
+          { id: 'movements', label: 'Movimentações RPA' },
+          { id: 'settings', label: 'Parâmetros Core' }
+        ].map(tab => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === tab ? 'bg-primary text-background shadow-platinum-glow' : 'text-text-muted hover:text-white'
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-3 px-10 py-4 rounded-[2.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+              activeTab === tab.id 
+                ? 'bg-primary text-white shadow-platinum-glow' 
+                : 'text-text-muted hover:text-text-primary hover:bg-surface-elevated/50'
             }`}
           >
-            {tab === 'products' ? 'Estoque Local' : tab === 'movements' ? 'Movimentações' : 'Configurações'}
+            {tab.label}
           </button>
         ))}
       </div>
 
       {activeTab === 'products' && (
-        <div className="platinum-card overflow-hidden">
-          <div className="p-4 bg-white/[0.01] border-b border-white/5">
-            <div className="relative max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+          <div className="p-8 bg-surface-elevated/20 border-b border-border-subtle/30">
+            <div className="relative max-w-xl group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
-                placeholder="Rastrear SKU ou Identificador..."
+                placeholder="Rastrear SKU ou Identificador Digital..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-background border border-white/5 rounded-xl text-sm text-white focus:border-primary/30 outline-none transition-all placeholder:text-text-muted"
+                className="w-full pl-16 pr-6 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
               />
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-platinum">
             <table className="w-full text-left text-sm">
-              <thead className="bg-white/5 border-b border-white/5">
+              <thead className="bg-surface-elevated/40 border-b border-border-subtle">
                 <tr>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">SKU / Identidade</th>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Ativo / Marca</th>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-center">Físico</th>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-center">Disponível</th>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Valuation</th>
-                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Ações</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">SKU / Identidade</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Ativo / Marca Platinum</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60 text-center">Físico</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60 text-center">Disponibilidade</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60 text-right">Valuation</th>
+                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-subtle/20">
                 {loading ? (
-                  <tr><td colSpan={6} className="px-6 py-12 text-center text-text-muted uppercase text-[10px] font-black tracking-widest"><Loader2 className="animate-spin inline mr-2" /> Sincronizando Ativos...</td></tr>
+                  <tr><td colSpan={6} className="px-10 py-40 text-center text-text-muted uppercase text-[10px] font-black tracking-widest animate-pulse"><Loader2 className="animate-spin inline mr-6 w-12 h-12 text-primary" /> Sincronizando Ativos Globais...</td></tr>
+                ) : products.length === 0 ? (
+                  <tr><td colSpan={6} className="px-10 py-40 text-center text-text-muted uppercase text-[10px] font-black tracking-widest opacity-40">Nenhum ativo localizado no ledger</td></tr>
                 ) : products.map(product => (
-                  <tr key={product.id} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="px-6 py-6">
-                      <div className="font-mono text-xs font-bold text-primary">{product.sku || 'N/A'}</div>
-                      <div className="text-[10px] text-text-muted font-bold mt-1 uppercase tracking-widest">{product.barcode}</div>
+                  <tr key={product.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-300">
+                    <td className="px-10 py-8">
+                      <div className="font-mono text-[11px] font-black text-primary group-hover:scale-110 transition-transform w-fit bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10 shadow-platinum-glow-sm">{product.sku || 'N/A_SKU'}</div>
+                      <div className="text-[10px] text-text-muted font-black mt-2.5 uppercase tracking-widest opacity-50">{product.barcode || 'NO_BARCODE'}</div>
                     </td>
-                    <td className="px-6 py-6">
-                      <div className="font-bold text-white uppercase text-xs">{product.product?.name || '-'}</div>
-                      <div className="text-[10px] text-text-muted font-bold mt-1 uppercase tracking-widest">{product.brand?.name || '-'}</div>
-                    </td>
-                    <td className="px-6 py-6 text-center font-black text-white">{product.on_hand_qty || 0}</td>
-                    <td className="px-6 py-6 text-center">
-                      <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-md border ${
-                        (product.on_hand_qty - product.reserved_qty) > 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
-                      }`}>
-                        {product.on_hand_qty - product.reserved_qty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-6 text-right">
-                      <div className="flex flex-col items-end">
-                        <span className="font-black text-white">{formatCurrency(product.sale_price)}</span>
-                        <span className="text-[8px] text-text-muted uppercase tracking-[0.2em] font-black">Markup {product.markup}%</span>
+                    <td className="px-10 py-8">
+                      <div className="font-black text-text-primary uppercase text-sm tracking-tight group-hover:text-primary transition-colors">{product.product?.name || 'Item não Catalogado'}</div>
+                      <div className="text-[10px] text-text-muted font-black mt-2 uppercase tracking-widest opacity-60 flex items-center gap-2">
+                         <Target size={12} className="text-primary/60" />
+                         {product.brand?.name || 'Marca Genérica'}
                       </div>
                     </td>
-                    <td className="px-6 py-6 text-right">
-                      <div className="flex justify-end gap-1">
-                        <button onClick={() => handleOpenModal(product)} className="p-2 text-text-muted hover:text-primary transition-all"><Edit2 size={16} /></button>
-                        <button className="p-2 text-text-muted hover:text-red-400 transition-all"><Trash2 size={16} /></button>
+                    <td className="px-10 py-8 text-center font-black text-text-primary text-base tracking-tighter">{product.on_hand_qty || 0}</td>
+                    <td className="px-10 py-8 text-center">
+                      <span className={`px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border backdrop-blur-md shadow-platinum-glow-sm ${
+                        (product.on_hand_qty - product.reserved_qty) > 0 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                      }`}>
+                        <div className="w-1.5 h-1.5 rounded-full bg-current mr-2 inline-block animate-pulse" />
+                        {product.on_hand_qty - product.reserved_qty} {product.unit?.acro || 'UN'}
+                      </span>
+                    </td>
+                    <td className="px-10 py-8 text-right">
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="font-black text-text-primary text-sm tracking-tighter group-hover:text-primary transition-colors">{formatCurrency(product.sale_price)}</span>
+                        <span className="text-[9px] text-text-muted uppercase tracking-[0.3em] font-black italic opacity-50">Markup: {product.markup}%</span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-8 text-right">
+                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                        <button onClick={() => handleOpenModal(product)} className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Editar Ativo"><Edit2 size={18} /></button>
+                        <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all shadow-inner-platinum" title="Remover Ativo"><Trash2 size={18} /></button>
                       </div>
                     </td>
                   </tr>
@@ -271,65 +283,85 @@ const InventoryDashboard = () => {
         </div>
       )}
 
-      {/* Simplified for demo, actual implementation would refactor the rest of tabs similarly */}
       {activeTab === 'settings' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
           {[
-            { label: 'Marcas Estratégicas', count: brands.length, icon: Target },
-            { label: 'Categorias de Ativo', count: categories.length, icon: Zap },
-            { label: 'Unidades de Medida', count: units.length, icon: BarChart3 },
-            { label: 'Depósitos Logísticos', count: depots.length, icon: Warehouse },
+            { label: 'Marcas Estratégicas', count: brands.length, icon: Target, color: 'text-primary', bg: 'bg-primary/10' },
+            { label: 'Categorias de Ativo', count: categories.length, icon: Zap, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { label: 'Unidades de Medida', count: units.length, icon: Activity, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+            { label: 'Depósitos Logísticos', count: depots.length, icon: Warehouse, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
           ].map((set, i) => (
-            <div key={i} className="platinum-card p-8 flex flex-col gap-6 group hover:border-primary/20 transition-all">
+            <div key={i} className="platinum-card p-10 flex flex-col gap-12 group hover:border-primary/40 transition-all duration-700 bg-surface-elevated/10 backdrop-blur-md shadow-platinum-glow-sm">
               <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-[1.5rem] bg-white/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <set.icon size={24} />
+                <div className={`w-16 h-16 rounded-[2rem] ${set.bg} border border-border-subtle flex items-center justify-center ${set.color} group-hover:scale-110 transition-transform duration-700 shadow-inner-platinum`}>
+                  <set.icon size={32} className="shadow-platinum-glow-sm" />
                 </div>
-                <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Gerenciar</button>
+                <button className="text-[10px] font-black uppercase tracking-[0.3em] text-primary hover:text-primary-hover transition-colors flex items-center gap-2 border-b border-primary/20 pb-1">
+                  Gerenciar <ChevronDown size={14} className="opacity-60" />
+                </button>
               </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{set.label}</p>
-                <p className="text-3xl font-black text-white mt-1">{set.count}</p>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-text-muted opacity-60">{set.label}</p>
+                <p className="text-4xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors duration-700">{set.count}</p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingProduct ? 'REFINAR ATIVO DE INVENTÁRIO' : 'INTEGRAR NOVO ATIVO'}>
-        <form onSubmit={handleSave} className="space-y-8 p-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">SKU Estratégico</label>
-              <input type="text" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-mono" />
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingProduct ? 'REFINAR ATIVO DE INVENTÁRIO' : 'INTEGRAR NOVO ATIVO NEURAL'} size="lg">
+        <form onSubmit={handleSave} className="p-4 space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">SKU Estratégico Platinum</label>
+              <div className="relative">
+                <Package className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
+                <input type="text" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/30 shadow-inner-platinum font-mono" placeholder="Ex: SKU-NEURAL-882" />
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Depósito Alvo</label>
-              <select value={formData.depot_id} onChange={e => setFormData({ ...formData, depot_id: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white appearance-none">
-                <option value="">Selecione...</option>
-                {depots.map(d => <option key={d.id} value={d.id} className="bg-surface">{d.name}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Preço Custo</label>
-              <input type="number" step="0.01" value={formData.cost_price} onChange={e => setFormData({ ...formData, cost_price: Number(e.target.value) })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Markup (%)</label>
-              <input type="number" step="0.01" value={formData.markup} onChange={e => setFormData({ ...formData, markup: Number(e.target.value) })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-primary font-black" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Soma em Estoque</label>
-              <input type="number" value={formData.on_hand_qty} onChange={e => setFormData({ ...formData, on_hand_qty: Number(e.target.value) })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black" />
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Depósito Logístico Alvo</label>
+              <div className="relative">
+                 <Warehouse className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/60 w-6 h-6" />
+                <select value={formData.depot_id} onChange={e => setFormData({ ...formData, depot_id: e.target.value })} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-xs font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none appearance-none cursor-pointer shadow-inner-platinum">
+                  <option value="" className="bg-surface">Selecionar Unidade Logística...</option>
+                  {depots.map(d => <option key={d.id} value={d.id} className="bg-surface font-bold text-text-primary">{d.name.toUpperCase()}</option>)}
+                </select>
+                <ChevronDown size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-text-muted opacity-40" />
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t border-white/5">
-            <button type="button" onClick={() => setShowModal(false)} className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest">Descartar</button>
-            <button type="submit" className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest">{editingProduct ? 'Confirmar Mudanças' : 'Validar Entrada'}</button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Custo Unitário (BRL)</label>
+              <div className="relative">
+                <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
+                <input type="number" step="0.01" value={formData.cost_price} onChange={e => setFormData({ ...formData, cost_price: Number(e.target.value) })} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all font-mono shadow-inner-platinum" />
+              </div>
+            </div>
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Markup Operacional (%)</label>
+              <div className="relative">
+                <Zap className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/60 w-6 h-6" />
+                <input type="number" step="0.01" value={formData.markup} onChange={e => setFormData({ ...formData, markup: Number(e.target.value) })} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all font-mono shadow-inner-platinum" />
+              </div>
+            </div>
+            <div className="space-y-4 group">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Soma Física em Estoque</label>
+              <div className="relative">
+                <Boxes className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
+                <input type="number" value={formData.on_hand_qty} onChange={e => setFormData({ ...formData, on_hand_qty: Number(e.target.value) })} className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-6 py-5 text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all font-mono shadow-inner-platinum" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle/30">
+            <button type="button" onClick={() => setShowModal(false)} className="px-10 py-5 text-text-muted font-black hover:text-text-primary transition-all text-[10px] uppercase tracking-[0.4em]">Descartar</button>
+            <button type="submit" className="btn-primary py-5 px-14 shadow-platinum-glow flex items-center gap-4 uppercase text-[11px] tracking-[0.4em]">
+               <ShieldCheck size={22} className="shadow-platinum-glow-sm" />
+               {editingProduct ? 'Consolidar Mudanças' : 'Validar Entrada Neural'}
+            </button>
           </div>
         </form>
       </Modal>

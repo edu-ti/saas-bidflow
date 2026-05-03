@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Upload, Save, Loader2, Shield, Landmark, ShieldCheck, Lock } from 'lucide-react';
+import { Settings, Upload, Save, Loader2, Shield, Landmark, ShieldCheck, Lock, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 
@@ -65,17 +65,20 @@ export default function TaxSettings() {
   };
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
-      <Loader2 className="w-10 h-10 animate-spin text-primary" />
-      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Consultando Regras Tributárias...</span>
+    <div className="flex flex-col items-center justify-center py-32 gap-6 animate-in fade-in duration-700">
+      <div className="relative">
+        <Loader2 className="w-12 h-12 animate-spin text-primary opacity-40" />
+        <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary w-5 h-5" />
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-text-muted">Consultando Regras Tributárias...</span>
     </div>
   );
 
   return (
-    <div className="max-w-4xl space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-4xl space-y-10 animate-in fade-in duration-700 text-text-primary">
       
       <header className="space-y-1">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
+        <h2 className="text-2xl font-black text-text-primary uppercase tracking-tighter">
           Conformidade <span className="text-gradient-gold">Fiscal & Regulatória</span>
         </h2>
         <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
@@ -83,59 +86,68 @@ export default function TaxSettings() {
         </p>
       </header>
 
-      <form onSubmit={handleSave} className="space-y-8">
+      <form onSubmit={handleSave} className="space-y-10">
         {/* Rules Card */}
-        <div className="platinum-card overflow-hidden">
-          <div className="px-8 py-5 bg-white/[0.02] border-b border-white/5 flex items-center gap-3">
-            <Settings className="w-4 h-4 text-primary" />
-            <h3 className="text-xs font-black text-white uppercase tracking-widest">Matriz Tributária</h3>
+        <div className="platinum-card overflow-hidden border-border-subtle/30 bg-surface-elevated/10 backdrop-blur-xl">
+          <div className="px-10 py-6 bg-surface-elevated/20 border-b border-border-subtle flex items-center gap-4">
+            <Settings className="w-5 h-5 text-primary shadow-platinum-glow-sm" />
+            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em]">Matriz Tributária Neural</h3>
           </div>
-          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Regime Especial</label>
-              <select 
-                value={config.regime_especial} 
-                onChange={e => setConfig({...config, regime_especial: e.target.value})} 
-                className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all appearance-none"
-              >
-                <option value="" className="bg-surface">Selecionar Regime...</option>
-                {REGIMES.map(r => <option key={r} value={r} className="bg-surface">{r}</option>)}
-              </select>
+          <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                <Shield size={12} /> Regime Especial
+              </label>
+              <div className="relative group">
+                <select 
+                  value={config.regime_especial} 
+                  onChange={e => setConfig({...config, regime_especial: e.target.value})} 
+                  className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none shadow-inner-platinum"
+                >
+                  <option value="" className="bg-surface text-text-primary">Selecionar Regime...</option>
+                  {REGIMES.map(r => <option key={r} value={r} className="bg-surface text-text-primary">{r}</option>)}
+                </select>
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-primary transition-colors">
+                  <Settings size={14} />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Alíquota Padrão Operacional (%)</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                 <Landmark size={12} /> Alíquota Operacional (%)
+              </label>
               <input 
                 type="number" step="0.01" min="0" max="100" 
                 value={config.aliquota_padrao}
                 onChange={e => setConfig({...config, aliquota_padrao: e.target.value})}
-                className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all" 
+                className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
               />
             </div>
           </div>
         </div>
 
         {/* Behavior Card */}
-        <div className="platinum-card overflow-hidden">
-          <div className="px-8 py-5 bg-white/[0.02] border-b border-white/5 flex items-center gap-3">
-            <Landmark className="w-4 h-4 text-primary" />
-            <h3 className="text-xs font-black text-white uppercase tracking-widest">Diretrizes de Tesouraria</h3>
+        <div className="platinum-card overflow-hidden border-border-subtle/30 bg-surface-elevated/10 backdrop-blur-xl">
+          <div className="px-10 py-6 bg-surface-elevated/20 border-b border-border-subtle flex items-center gap-4">
+            <Landmark className="w-5 h-5 text-primary shadow-platinum-glow-sm" />
+            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em]">Diretrizes de Tesouraria</h3>
           </div>
-          <div className="p-8">
-             <label className="flex items-start gap-4 p-6 bg-white/[0.02] border border-white/10 rounded-2xl hover:border-primary/30 cursor-pointer transition-all group">
+          <div className="p-10">
+             <label className="flex items-start gap-6 p-8 bg-surface-elevated/20 border border-border-subtle rounded-3xl hover:border-primary/40 cursor-pointer transition-all group shadow-inner-platinum">
               <div className="flex items-center h-6">
                 <input 
                   type="checkbox" 
                   checked={config.permite_saldo_negativo} 
                   onChange={e => setConfig({...config, permite_saldo_negativo: e.target.checked})} 
-                  className="w-5 h-5 rounded border-white/10 bg-white/5 text-primary focus:ring-primary focus:ring-offset-background" 
+                  className="w-6 h-6 rounded-lg border-border-medium bg-background text-primary focus:ring-primary focus:ring-offset-background transition-all" 
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-black text-white uppercase tracking-tighter group-hover:text-primary transition-colors">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-black text-text-primary uppercase tracking-tighter group-hover:text-primary transition-colors">
                   Permitir Exposição Bancária (Saldo Negativo)
                 </span>
-                <span className="text-[10px] text-text-muted font-bold leading-relaxed uppercase tracking-widest">
-                  Habilita o uso de crédito especial, permitindo liquidações de saída mesmo com ausência de fundos imediatos.
+                <span className="text-[10px] text-text-muted font-black leading-relaxed uppercase tracking-[0.2em] opacity-60">
+                  Habilita o uso de crédito especial, permitindo liquidações de saída mesmo com ausência de fundos imediatos. Uso restrito a supervisores.
                 </span>
               </div>
             </label>
@@ -146,60 +158,62 @@ export default function TaxSettings() {
           <button 
             type="submit" 
             disabled={saving}
-            className="px-10 py-3.5 bg-primary hover:bg-primary-hover text-background rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-platinum-glow disabled:opacity-50"
+            className="btn-primary py-4 px-12 shadow-platinum-glow flex items-center gap-3 uppercase text-[11px] tracking-[0.3em] font-black"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             Consolidar Diretrizes
           </button>
         </div>
       </form>
 
       {/* Certificate Card */}
-      <div className="platinum-card overflow-hidden">
-        <div className="px-8 py-5 bg-white/[0.02] border-b border-white/5 flex items-center gap-3">
-          <Shield className="w-4 h-4 text-primary" />
-          <h3 className="text-xs font-black text-white uppercase tracking-widest">Certificação Digital A1</h3>
+      <div className="platinum-card overflow-hidden border-border-subtle/30 bg-surface-elevated/10 backdrop-blur-xl">
+        <div className="px-10 py-6 bg-surface-elevated/20 border-b border-border-subtle flex items-center gap-4">
+          <Shield className="w-5 h-5 text-primary shadow-platinum-glow-sm" />
+          <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em]">Certificação Digital A1 Platinum</h3>
         </div>
-        <div className="p-8 space-y-8">
+        <div className="p-10 space-y-10">
           {config.certificado_path ? (
-            <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center gap-6 animate-in zoom-in-95 duration-500">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <ShieldCheck size={28} />
+            <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center gap-8 animate-in zoom-in-95 duration-700 shadow-inner-platinum">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-platinum-glow-sm group">
+                <ShieldCheck size={32} className="group-hover:scale-110 transition-transform" />
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-black text-white uppercase tracking-tighter">Certificado Ativo & Criptografado</p>
-                <p className="text-[10px] text-emerald-400/70 font-bold uppercase tracking-widest">Repositório privado configurado. Identidade fiscal validada para emissão.</p>
+              <div className="space-y-2">
+                <p className="text-sm font-black text-text-primary uppercase tracking-tighter">Certificado Ativo & Criptografado</p>
+                <p className="text-[10px] text-emerald-500/70 font-black uppercase tracking-[0.2em]">Repositório privado configurado. Identidade fiscal validada para emissão neural de NF-e.</p>
               </div>
             </div>
           ) : (
-            <div className="p-10 border-2 border-dashed border-white/10 rounded-2xl text-center space-y-4 bg-white/[0.01]">
-              <Shield className="w-12 h-12 mx-auto text-text-muted/30" />
-              <div className="space-y-1">
-                <p className="text-xs font-black text-white uppercase tracking-widest">Nenhuma Assinatura Digital Detectada</p>
-                <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Necessário para autenticação SEFAZ e emissão de documentos.</p>
+            <div className="p-12 border-2 border-dashed border-border-medium rounded-3xl text-center space-y-5 bg-surface-elevated/5 group hover:border-primary/40 transition-all duration-500">
+              <Shield className="w-16 h-16 mx-auto text-text-muted/20 group-hover:text-primary/20 transition-colors" />
+              <div className="space-y-2">
+                <p className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Nenhuma Assinatura Digital Detectada</p>
+                <p className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] opacity-60">Necessário para autenticação SEFAZ e emissão de documentos fiscais automatizados.</p>
               </div>
             </div>
           )}
 
-          <div className="p-8 bg-white/[0.02] border border-white/5 rounded-2xl space-y-6">
-            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Sincronizar Nova Identidade</h4>
-            <div className="flex flex-col md:flex-row md:items-end gap-6">
-              <div className="flex-1 space-y-2">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Senha da Chave Privada *</label>
+          <div className="p-10 bg-surface-elevated/20 border border-border-subtle rounded-3xl space-y-8 shadow-inner-platinum">
+            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] flex items-center gap-3">
+               <Key size={12} /> Sincronizar Nova Identidade Fiscal
+            </h4>
+            <div className="flex flex-col md:flex-row md:items-end gap-8">
+              <div className="flex-1 space-y-3">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Senha da Chave Privada (RSA 4096)</label>
                 <input 
                   type="password" 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
-                  placeholder="Informe a senha do certificado..."
-                  className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 transition-all" 
+                  placeholder="Informe a senha criptográfica..."
+                  className="w-full bg-background border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary outline-none focus:border-primary/40 transition-all shadow-inner-platinum placeholder:text-text-muted/30" 
                 />
               </div>
               
               <label className="cursor-pointer group">
                 <input type="file" accept=".pfx,.p12" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCertUpload(e.target.files[0]); }} />
-                <span className="inline-flex items-center justify-center gap-3 px-8 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 group-hover:border-primary/40 transition-all shadow-lg w-full md:w-auto">
-                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {config.certificado_path ? 'Substituir' : 'Upload .PFX'}
+                <span className="inline-flex items-center justify-center gap-4 px-10 py-4 bg-surface-elevated/50 border border-border-medium text-text-primary rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-surface-elevated group-hover:border-primary/40 transition-all shadow-platinum-glow-sm w-full md:w-auto">
+                  {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                  {config.certificado_path ? 'Substituir' : 'Upload .PFX Neural'}
                 </span>
               </label>
             </div>
@@ -209,4 +223,3 @@ export default function TaxSettings() {
     </div>
   );
 }
-
