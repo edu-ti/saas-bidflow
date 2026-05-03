@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../lib/axios';
-import { Loader2, Save, Building, ShieldCheck, Activity, Zap, History, Target } from 'lucide-react';
+import { Loader2, Save, Building, ShieldCheck, Activity, Zap, History, Target, Plus, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AuditLog {
@@ -21,7 +21,10 @@ export default function CompanySettings() {
     name: 'GC Representações & Serviços',
     cnpj: '00.111.222/0001-33',
     domain: 'gcrepresentacoes.bidflow.com',
+    logo: localStorage.getItem('company_logo') || ''
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [health, setHealth] = useState({ pending_jobs: 0, failed_jobs: 0, status: 'healthy' });
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -42,10 +45,27 @@ export default function CompanySettings() {
     fetchHealth();
   }, []);
 
+  const handleLogoUpload = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setCompanyInfo(prev => ({ ...prev, logo: base64String }));
+        setIsEditing(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     setIsSaving(true);
     // Simulate API call
     setTimeout(() => {
+      localStorage.setItem('company_logo', companyInfo.logo);
+      window.dispatchEvent(new Event('storage')); // Trigger update for other components
       setIsSaving(false);
       setIsEditing(false);
       toast.success('Dados cadastrais atualizados!');
@@ -73,11 +93,48 @@ export default function CompanySettings() {
       <div className="space-y-12">
           {/* Business Info */}
           <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
-            <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-               <div className="p-3 bg-primary/10 rounded-xl text-primary shadow-platinum-glow-sm">
-                  <Activity size={20} />
-               </div>
-               <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Identidade Corporativa</h3>
+            <div className="flex items-center justify-between border-b border-border-subtle/30 pb-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl text-primary shadow-platinum-glow-sm">
+                    <Activity size={20} />
+                </div>
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Identidade Corporativa</h3>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <div 
+                  className="relative group cursor-pointer" 
+                  onClick={handleLogoUpload}
+                  title="Upload Logo da Empresa"
+                >
+                  <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  {companyInfo.logo ? (
+                    <img
+                      src={companyInfo.logo}
+                      alt="Company Logo"
+                      className="w-16 h-16 rounded-2xl object-contain border border-border-subtle bg-background p-2 relative z-10 shadow-platinum-glow-sm"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-surface-elevated flex items-center justify-center border border-border-subtle relative z-10 text-text-muted hover:text-primary transition-colors">
+                      <ImageIcon size={24} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl z-20 backdrop-blur-[2px]">
+                    <Plus size={20} className="text-primary" />
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    className="hidden" 
+                    accept="image/*" 
+                  />
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-[9px] font-black text-text-muted uppercase tracking-widest opacity-40">Logo do Tenant</p>
+                  <p className="text-[10px] font-bold text-text-secondary mt-1">PNG/SVG Transparente</p>
+                </div>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
