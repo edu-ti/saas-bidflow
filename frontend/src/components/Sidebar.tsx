@@ -12,7 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export type Page =
   // Gestão
-  | 'dashboard' | 'company' | 'users' | 'reports'
+  | 'dashboard' | 'company' | 'users' | 'reports' | 'reports-dashboard'
   // Comercial
   | 'sales-funnel' | 'leads' | 'clients' | 'proposals' | 'ai-generator' | 'email-marketing' | 'agenda'
   // Licitações
@@ -28,6 +28,19 @@ export type Page =
   // Configurações
   | 'admin' | 'system-health' | 'settings';
 
+interface MenuItem {
+  key: Page;
+  name: string;
+  icon: JSX.Element;
+  badge?: string;
+}
+
+interface MenuGroup {
+  title: string;
+  requiredModule?: string;
+  items: MenuItem[];
+}
+
 interface SidebarProps {
   activePage: Page;
   onNavigate: (page: Page) => void;
@@ -39,7 +52,13 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, allowed_modules: [] };
+  let user = { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, allowed_modules: [] };
+  try {
+    const parsed = storedUser ? JSON.parse(storedUser) : null;
+    if (parsed) user = { ...user, ...parsed };
+  } catch (e) {
+    console.error('Failed to parse user in Sidebar', e);
+  }
 
   const hasModule = (moduleKey?: string) => {
     if (!moduleKey) return true;
@@ -64,118 +83,104 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     return () => clearInterval(interval);
   }, []);
 
-  const menuGroups = [
+  const menuGroups: MenuGroup[] = [
     {
-      title: '🔹 Gestão',
+      title: 'Gestão',
       items: [
-        { key: 'dashboard' as Page, name: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-        { key: 'company' as Page, name: 'Minha Empresa', icon: <Building2 size={18} /> },
-        { key: 'users' as Page, name: 'Equipa / Utilizadores', icon: <Users size={18} /> },
-        { key: 'reports' as Page, name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
-        { key: 'licenses' as Page, name: 'Gestão de Licenças e Certidões', icon: <FileCheck size={18} /> },
+        { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+        { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} /> },
+        { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} /> },
+        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} /> },
+        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} /> },
+        { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} /> },
       ]
     },
     {
-      title: '🔹 Comercial',
+      title: 'Comercial',
       requiredModule: 'commercial',
       items: [
-        { key: 'sales-funnel' as Page, name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
-        { key: 'leads' as Page, name: 'Leads', icon: <Users size={18} /> },
-        { key: 'clients' as Page, name: 'Clientes', icon: <User size={18} /> },
-        { key: 'products' as Page, name: 'Produtos (Catálogo)', icon: <Package size={18} /> },
-        { key: 'proposals' as Page, name: 'Propostas', icon: <FileText size={18} /> },
-        { key: 'agenda' as Page, name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
+        { key: 'clients', name: 'Clientes', icon: <User size={18} /> },
+        { key: 'leads', name: 'Leads', icon: <Users size={18} /> },
+        { key: 'proposals', name: 'Propostas', icon: <FileText size={18} /> },
+        { key: 'sales-funnel', name: 'Funil de Vendas', icon: <KanbanSquare size={18} /> },
+        { key: 'products', name: 'Catálogo de Produtos', icon: <Package size={18} /> },
+        { key: 'agenda', name: 'Agenda Integrada', icon: <CalendarDays size={18} /> },
       ]
     },
     {
-      title: '🔹 Licitações',
+      title: 'Licitações',
       requiredModule: 'bidding',
       items: [
-        { key: 'bidding-funnel' as Page, name: 'Funil de Licitações', icon: <KanbanSquare size={18} /> },
-        { key: 'bidding-radar' as Page, name: 'Radar Licitações', icon: <Radar size={18} /> },
-        { key: 'bidding-monitoring' as Page, name: 'Monitoramento de Licitações', icon: <FileSearch size={18} /> },
-        { key: 'bidding-capture' as Page, name: 'Captura de Editais', icon: <ClipboardList size={18} /> },
-        { key: 'auction-details' as Page, name: 'Detalhes do Pregão', icon: <ScrollText size={18} /> },
-        { key: 'ai-generator' as Page, name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 1 },
+        { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} /> },
+        { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} /> },
+        { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} /> },
+        { key: 'bidding-funnel', name: 'Funil de Licitações', icon: <KanbanSquare size={18} /> },
+        { key: 'auction-details', name: 'Detalhes do Pregão', icon: <ListTodo size={18} /> },
+        { key: 'ai-generator', name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 'Pro' },
       ]
     },
     {
-      title: '🔹 Estoque',
-      requiredModule: 'inventory',
-      items: [
-        { key: 'inventory' as Page, name: 'Inventário', icon: <Boxes size={18} /> },
-        { key: 'consignment' as Page, name: 'Gestão de Consignado', icon: <Handshake size={18} /> },
-      ]
-    },
-    {
-      title: '🔹 Financeiro',
+      title: 'Financeiro',
       requiredModule: 'financial',
       items: [
-        { key: 'finance' as Page, name: 'Motor Financeiro', icon: <Wallet size={18} /> },
-        { key: 'accounts-payable-receivable' as Page, name: 'Contas a Pagar / Receber', icon: <CreditCard size={18} /> },
-        { key: 'contracts' as Page, name: 'Contratos', icon: <Briefcase size={18} /> },
+        { key: 'finance', name: 'Motor Financeiro', icon: <Wallet size={18} /> },
+        { key: 'accounts-payable-receivable', name: 'Contas Pagar/Receber', icon: <CreditCard size={18} /> },
+        { key: 'contracts', name: 'Contratos (CLM)', icon: <Briefcase size={18} /> },
       ]
     },
     {
-      title: '🔹 Marketing',
-      requiredModule: 'marketing',
+      title: 'Estoque',
       items: [
-        { key: 'campaigns' as Page, name: 'Campanhas', icon: <Send size={18} /> },
-        { key: 'email-marketing' as Page, name: 'E-mail Marketing', icon: <Mail size={18} /> },
-        { key: 'tasks' as Page, name: 'Tarefas', icon: <ListTodo size={18} /> },
+        { key: 'inventory', name: 'Inventário', icon: <Boxes size={18} /> },
+        { key: 'consignment', name: 'Gestão de Consignação', icon: <Handshake size={18} /> },
       ]
     },
     {
-      title: '🔹 Chatbot & Conversas',
-      requiredModule: 'chatbot',
+      title: 'Módulos Adicionais',
       items: [
-        { key: 'chatbot' as Page, name: 'Construtor de Chatbot', icon: <Bot size={18} /> },
-        { key: 'conversations' as Page, name: 'Conversas', icon: <MessageCircle size={18} /> },
-      ]
-    },
-    {
-      title: '🔹 Configurações',
-      items: [
-        { key: 'admin' as Page, name: 'Administrador', icon: <Shield size={18} /> },
-        ...(user.is_superadmin ? [{ key: 'system-health' as Page, name: 'Saúde do Sistema', icon: <Activity size={18} /> }] : []),
-        { key: 'settings' as Page, name: 'Minhas Configurações', icon: <Settings size={18} /> },
+        { key: 'campaigns', name: 'Marketing / Campanhas', icon: <Send size={18} /> },
+        { key: 'email-marketing', name: 'E-mail Marketing', icon: <Mail size={18} /> },
+        { key: 'chatbot', name: 'Construtor de Chatbot', icon: <Bot size={18} /> },
+        { key: 'conversations', name: 'Central de Atendimento', icon: <MessageCircle size={18} /> },
+        { key: 'settings', name: 'Preferências', icon: <Settings size={18} /> },
       ]
     }
   ];
 
   return (
     <div
-      className={`h-screen bg-slate-900 flex flex-col text-slate-300 flex-shrink-0 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
+      className={`h-screen bg-background border-r border-border-subtle flex flex-col text-text-secondary flex-shrink-0 transition-all duration-500 ease-out z-50 ${isExpanded ? 'w-64' : 'w-20'}`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      <div className={`p-6 pb-4 border-b border-slate-800 transition-all duration-300 ${isExpanded ? '' : 'px-2 py-4'}`}>
+      <div className={`p-6 pb-6 border-b border-border-subtle transition-all duration-300 ${isExpanded ? '' : 'px-2 py-6'}`}>
         {isExpanded && (
-          <>
-            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center">
-              <span className="text-blue-500 mr-2">●</span> BidFlow
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-white tracking-tighter flex items-center group">
+              <div className="w-2 h-6 bg-primary rounded-full mr-3 shadow-platinum-glow group-hover:scale-y-110 transition-transform" />
+              <span className="text-gradient-gold">BidFlow</span>
             </h1>
-            <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">ERP SaaS</p>
-          </>
+            <p className="text-[10px] text-text-muted uppercase tracking-[0.3em] font-bold">Strategic Intelligence</p>
+          </div>
         )}
         {!isExpanded && (
-          <h1 className="text-2xl font-bold text-white tracking-tight text-center">
-            <span className="text-blue-500">●</span>
-          </h1>
+          <div className="flex justify-center">
+            <div className="w-2 h-8 bg-primary rounded-full shadow-platinum-glow" />
+          </div>
         )}
       </div>
 
-      <nav className="flex-1 py-4 px-2 space-y-4 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 py-6 px-3 space-y-6 overflow-y-auto custom-scrollbar scroll-smooth">
         {menuGroups.map((group, gIndex) => {
           const isLocked = !hasModule(group.requiredModule);
           return (
-          <div key={gIndex} className={isLocked ? 'opacity-50' : ''}>
+          <div key={gIndex} className={isLocked ? 'opacity-40 grayscale' : ''}>
             {isExpanded && (
-              <div className="flex items-center justify-between px-3 mb-2">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between px-3 mb-3">
+                <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
                   {group.title}
                 </p>
-                {isLocked && <Lock size={12} className="text-slate-500" />}
+                {isLocked && <Lock size={10} className="text-text-muted" />}
               </div>
             )}
             <div className="space-y-1">
@@ -184,22 +189,22 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                   key={index}
                   onClick={() => {
                     if (isLocked) {
-                      alert(`Módulo Premium: Entre em contato para ativar o ${group.title.replace('🔹 ', '')}`);
+                      alert(`Módulo Premium: Entre em contato para ativar o acesso a ${group.title}`);
                     } else if (item.key) {
                       onNavigate(item.key);
                     }
                   }}
-                  className={`w-full flex items-center py-2 rounded-md text-sm font-medium transition-colors text-left ${item.key === activePage && !isLocked
-                    ? 'bg-blue-600 text-white'
-                    : 'hover:bg-slate-800 hover:text-white text-slate-400'
-                    } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${isExpanded ? 'px-3' : 'px-0 justify-center'}`}
+                  className={`w-full flex items-center py-2.5 rounded-xl text-sm font-medium transition-all duration-300 text-left group ${item.key === activePage && !isLocked
+                    ? 'bg-primary/10 text-primary border border-primary/20 shadow-platinum-glow'
+                    : 'hover:bg-surface-elevated/50 hover:text-text-primary text-text-muted'
+                    } ${!item.key ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${isExpanded ? 'px-4' : 'px-0 justify-center'}`}
                 >
-                  <span className="text-slate-400 flex-shrink-0">{item.icon}</span>
+                  <span className={`flex-shrink-0 transition-all duration-300 group-hover:scale-110 ${item.key === activePage && !isLocked ? 'text-primary' : ''}`}>{item.icon}</span>
                   {isExpanded && (
                     <>
-                      <span className="truncate ml-3">{item.name}</span>
+                      <span className="truncate ml-3 tracking-tight">{item.name}</span>
                       {item.badge && !isLocked && (
-                        <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                        <span className="ml-auto bg-primary/20 text-primary text-[9px] font-black px-1.5 py-0.5 rounded border border-primary/30 uppercase tracking-tighter">
                           {item.badge}
                         </span>
                       )}
@@ -212,47 +217,50 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         )})}
       </nav>
 
-      <div className={`p-4 border-t border-slate-800 bg-slate-950/30 transition-all duration-300 ${isExpanded ? '' : 'p-2'}`}>
+      <div className={`p-4 border-t border-border-subtle bg-surface/20 transition-all duration-300 ${isExpanded ? '' : 'px-2'}`}>
         {isExpanded ? (
-          <>
-            <div className="flex items-center space-x-3 mb-4">
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
-                title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
-              >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-surface-elevated/30 border border-white/5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-amber-500 to-amber-600 flex items-center justify-center text-background font-black text-lg shadow-elevation-high">
                 {user.name?.charAt(0).toUpperCase() ?? 'A'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user.name}</p>
-                <p className="text-xs text-slate-400 truncate">Empresa #{user.company_id}</p>
+                <p className="text-sm font-bold text-white truncate tracking-tight">{user.name}</p>
+                <p className="text-[10px] text-text-muted truncate uppercase tracking-widest font-bold">Premium Plan</p>
               </div>
             </div>
-            <button
-              onClick={onLogout}
-              className="flex items-center w-full px-3 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
-              <LogOut size={18} className="mr-3" />
-              Sair do Sistema
-            </button>
-          </>
+            
+            <div className="grid grid-cols-2 gap-2">
+               <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center p-2.5 text-text-muted hover:text-primary hover:bg-surface-elevated rounded-xl transition-all border border-white/5"
+                title="Alternar Tema"
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button
+                onClick={onLogout}
+                className="flex items-center justify-center p-2.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-white/5"
+                title="Sair"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <button
+          <div className="flex flex-col items-center gap-3">
+             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-600 flex items-center justify-center text-background font-black text-lg shadow-elevation-high">
+                {user.name?.charAt(0).toUpperCase() ?? 'A'}
+              </div>
+             <button
               onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
-              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+              className="p-3 text-text-muted hover:text-primary hover:bg-surface-elevated rounded-xl transition-all"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-              {user.name?.charAt(0).toUpperCase() ?? 'A'}
-            </div>
             <button
               onClick={onLogout}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+              className="p-3 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
               <LogOut size={18} />
             </button>
           </div>

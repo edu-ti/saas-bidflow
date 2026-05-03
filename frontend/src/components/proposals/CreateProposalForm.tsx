@@ -1,274 +1,300 @@
 import React, { useState } from 'react';
-import { X, Search, Plus, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { X, Search, Plus, Image as ImageIcon, Trash2, ShieldCheck, FileText, DollarSign, Clock, Truck, ShieldAlert, Zap, User } from 'lucide-react';
 
 export default function CreateProposalForm({ onClose }: { onClose: () => void }) {
   const [clientType, setClientType] = useState<'pj' | 'pf'>('pj');
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
+    <div className="platinum-card overflow-hidden mb-8 animate-in fade-in zoom-in-95 duration-500">
       
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white">Criar Nova Proposta</h2>
-        <div className="flex items-center space-x-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-            Fechar
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-8 border-b border-white/5 bg-white/[0.02] gap-6">
+        <div className="space-y-1">
+          <h2 className="text-xl font-black text-white uppercase tracking-[0.2em]">Engenharia de Proposta</h2>
+          <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest italic">Formalização de oferta técnico-comercial</p>
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={onClose} 
+            className="flex-1 md:flex-none px-6 py-2.5 text-[10px] font-black text-text-muted hover:text-white transition-all uppercase tracking-widest"
+          >
+            Descartar
           </button>
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-            Cancelar
-          </button>
-          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors shadow-sm">
-            Criar Proposta
+          <button 
+            onClick={onClose} 
+            className="flex-1 md:flex-none px-8 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-[10px] tracking-widest"
+          >
+            Gerar Proposta Final
           </button>
         </div>
       </div>
 
-      <div className="p-6 space-y-8">
+      <div className="p-8 space-y-12">
         
-        {/* Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Data de Criação</label>
-            <input type="date" className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm text-slate-500 dark:text-slate-400 focus:outline-none" defaultValue={new Date().toISOString().split('T')[0]} readOnly />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Validade da Proposta</label>
-            <input type="date" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
-            <select className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white">
-              <option value="rascunho">Rascunho</option>
-              <option value="enviada">Enviada</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Motivo</label>
-            <input type="text" placeholder="Ex: Preço alto..." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-          </div>
-        </div>
-
-        {/* Client Selection */}
-        <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-4">Selecionar Cliente</h3>
-          
-          <div className="flex items-center space-x-6 mb-4">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input type="radio" name="clientType" value="pj" checked={clientType === 'pj'} onChange={() => setClientType('pj')} className="text-blue-600 focus:ring-blue-500" />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Pessoa Jurídica</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input type="radio" name="clientType" value="pf" checked={clientType === 'pf'} onChange={() => setClientType('pf')} className="text-blue-600 focus:ring-blue-500" />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Pessoa Física</span>
-            </label>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input type="text" placeholder="Pesquisar organização..." className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+        {/* Step 1: Basic Info */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <ShieldCheck size={18} />
             </div>
-            <button className="flex items-center px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Parâmetros de Auditoria</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Data de Emissão</label>
+              <input type="date" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-text-muted cursor-not-allowed opacity-60" defaultValue={new Date().toISOString().split('T')[0]} readOnly />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Validade da Oferta</label>
+              <input type="date" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Status do Fluxo</label>
+              <select className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none appearance-none">
+                <option value="rascunho">Rascunho Estratégico</option>
+                <option value="enviada">Documento Enviado</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Motivação do Cliente</label>
+              <input type="text" placeholder="Ex: Substituição Tecnológica" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all" />
+            </div>
+          </div>
+        </section>
+
+        {/* Step 2: Client Selection */}
+        <section className="space-y-6 border-t border-white/5 pt-12">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <User size={18} />
+            </div>
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Identificação do Prospecto</h3>
+          </div>
+          
+          <div className="flex items-center gap-8 mb-6">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${clientType === 'pj' ? 'border-primary bg-primary/10' : 'border-white/10 group-hover:border-white/30'}`}>
+                {clientType === 'pj' && <div className="w-2 h-2 rounded-full bg-primary shadow-platinum-glow" />}
+              </div>
+              <input type="radio" name="clientType" value="pj" checked={clientType === 'pj'} onChange={() => setClientType('pj')} className="hidden" />
+              <span className="text-xs font-bold text-white uppercase tracking-widest">Pessoa Jurídica</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${clientType === 'pf' ? 'border-primary bg-primary/10' : 'border-white/10 group-hover:border-white/30'}`}>
+                {clientType === 'pf' && <div className="w-2 h-2 rounded-full bg-primary shadow-platinum-glow" />}
+              </div>
+              <input type="radio" name="clientType" value="pf" checked={clientType === 'pf'} onChange={() => setClientType('pf')} className="hidden" />
+              <span className="text-xs font-bold text-white uppercase tracking-widest">Pessoa Física</span>
+            </label>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+              <input type="text" placeholder="Interrogar base de clientes..." className="w-full pl-11 pr-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all placeholder:text-text-muted" />
+            </div>
+            <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+              <Plus size={14} className="text-primary" />
+              Novo Cadastro
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Items */}
-        <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-4">Itens da Proposta</h3>
+        {/* Step 3: Items */}
+        <section className="space-y-6 border-t border-white/5 pt-12">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <Zap size={18} />
+              </div>
+              <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Escopo de Soluções</h3>
+            </div>
+            <div className="flex items-center gap-3">
+               <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                <FileText size={12} className="text-primary" /> Do Catálogo
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all">
+                <Plus size={12} /> Adicionar Manualmente
+              </button>
+            </div>
+          </div>
           
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 relative">
-            <button className="absolute top-4 right-4 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
-              <X className="w-5 h-5" />
+          <div className="bg-white/[0.02] border border-white/5 p-8 rounded-[2rem] relative group/item">
+            <button className="absolute top-6 right-6 p-2 text-text-muted hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-all">
+              <Trash2 size={18} />
             </button>
             
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              
-              {/* Left Column (Inputs) */}
-              <div className="col-span-1 md:col-span-10 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Descrição*</label>
-                    <input type="text" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              {/* Left Column (Specs) */}
+              <div className="lg:col-span-9 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Descrição Comercial*</label>
+                    <input type="text" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Fabricante</label>
-                    <input type="text" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Fabricante / Marca</label>
+                    <input type="text" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all" />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Modelo</label>
-                    <input type="text" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Modelo / Referência</label>
+                    <input type="text" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tipo</label>
-                    <select className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white">
-                      <option value="venda">Venda</option>
-                      <option value="locacao">Locação</option>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Tipo de Transação</label>
+                    <select className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none appearance-none">
+                      <option value="venda">Venda Direta</option>
+                      <option value="locacao">Locação de Ativos</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Descrição Detalhada</label>
-                  <textarea rows={3} className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"></textarea>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Especificação Técnica Avançada</label>
+                  <textarea rows={3} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 outline-none transition-all resize-none" placeholder="Detalhes de performance e conformidade..."></textarea>
                 </div>
 
-                <div className="pt-2">
-                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">Parâmetros Adicionais</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 italic mb-3">Nenhum parâmetro adicional.</p>
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2"><Plus size={12} className="text-primary" /> Parâmetros Adicionais</h4>
                   
-                  <div className="flex items-end space-x-3">
-                    <div className="flex-1">
-                      <label className="block text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 mb-1">Nome do Parâmetro</label>
-                      <input type="text" placeholder="Ex: D.C." className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+                  <div className="flex items-end gap-4">
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Identificador</label>
+                      <input type="text" placeholder="Ex: Voltagem" className="w-full px-4 py-2 bg-background border border-white/10 rounded-xl text-xs text-white outline-none" />
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 mb-1">Valor do Parâmetro</label>
-                      <input type="text" placeholder="Ex: R$ 4.264,00" className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Valor do Atributo</label>
+                      <input type="text" placeholder="Ex: 220V" className="w-full px-4 py-2 bg-background border border-white/10 rounded-xl text-xs text-white outline-none" />
                     </div>
-                    <button className="px-4 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      Adicionar
-                    </button>
+                    <button className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all">Vincular</button>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column (Image) */}
-              <div className="col-span-1 md:col-span-2 flex flex-col items-center">
-                <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 text-center w-full">Imagem</span>
-                <div className="w-full aspect-square bg-slate-200 dark:bg-slate-700 rounded-md flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 mb-2">
-                  <ImageIcon className="w-8 h-8 text-slate-400 mb-2" />
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Imagem</span>
+              {/* Right Column (Visual) */}
+              <div className="lg:col-span-3 flex flex-col items-center">
+                <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Referência Visual</span>
+                <div className="w-full aspect-square bg-background border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center group/img cursor-pointer hover:border-primary/30 transition-all shadow-inner">
+                  <ImageIcon className="w-10 h-10 text-text-muted group-hover/img:text-primary transition-all group-hover/img:scale-110" />
+                  <span className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-4">Upload Asset</span>
                 </div>
-                <button className="text-xs text-blue-600 dark:text-blue-400 hover:underline">Escolher</button>
+                <button className="mt-4 text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Configurar Imagem</button>
               </div>
-
             </div>
 
             {/* Price Line */}
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Quantidade*</label>
-                <input type="number" defaultValue="1" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 mt-10 pt-10 border-t border-white/5">
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Qtd*</label>
+                <input type="number" defaultValue="1" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Valor Unitário*</label>
-                <input type="text" placeholder="0,00" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Unitário*</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-xs">R$</span>
+                  <input type="text" placeholder="0,00" className="w-full pl-10 pr-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black" />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Unidade de Medida</label>
-                <input type="text" defaultValue="Unidade" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Unidade</label>
+                <input type="text" defaultValue="Unidade" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Desconto (%)</label>
-                <input type="number" defaultValue="0" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Desconto (%)</label>
+                <input type="number" defaultValue="0" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm text-white font-black text-emerald-400" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Subtotal</label>
-                <div className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm font-semibold text-slate-900 dark:text-white">
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Soma Parcial</label>
+                <div className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm font-black text-primary flex items-center">
                   R$ 0,00
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Step 4: Logistics & Terms */}
+        <section className="space-y-8 border-t border-white/5 pt-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                  <Truck size={18} />
+                </div>
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Engenharia Logística</h3>
+              </div>
+              <div className="flex items-center gap-4 bg-white/[0.02] p-6 rounded-2xl border border-white/5">
+                <div className="flex-1 space-y-1">
+                  <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Incoterm de Frete*</label>
+                  <select className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-xs text-white appearance-none">
+                    <option value="cif">CIF (Pago pelo Remetente)</option>
+                    <option value="fob">FOB (Pago pelo Destinatário)</option>
+                  </select>
+                </div>
+                <div className="flex-1 space-y-1">
+                  <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Custo Logístico (R$)</label>
+                  <input type="text" placeholder="R$ 0,00" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-xs text-white font-black" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-primary/5 border border-primary/10 rounded-[2rem] p-8 flex flex-col justify-center items-end text-right">
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">Valuation Total da Oferta</span>
+              <span className="text-4xl font-black text-white tracking-tighter">R$ 0,00</span>
+              <div className="mt-4 flex items-center gap-2 text-[10px] text-text-muted font-bold uppercase tracking-widest">
+                <ShieldCheck size={14} className="text-emerald-400" /> Fiscalmente auditado
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <Clock size={18} />
+              </div>
+              <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Cláusulas e Condições Comerciais</h3>
+            </div>
             
-          </div>
-          
-          <div className="mt-4 flex items-center space-x-3">
-             <button className="flex items-center px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-              <span className="mr-2">📚</span> Do Catálogo
-            </button>
-            <button className="flex items-center px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-              <Plus className="w-4 h-4 mr-2" /> Manual
-            </button>
-          </div>
-        </div>
-
-        {/* Frete & Totais */}
-        <div className="border-t border-slate-200 dark:border-slate-700 pt-6 flex flex-col md:flex-row justify-between items-end bg-slate-50 dark:bg-slate-800/30 p-6 rounded-lg">
-          <div className="flex items-center space-x-4 w-full md:w-auto mb-4 md:mb-0">
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Frete*</label>
-              <select className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white min-w-[150px]">
-                <option value="cif">CIF (Pago pelo Remetente)</option>
-                <option value="fob">FOB (Pago pelo Destinatário)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Valor do Frete</label>
-              <input type="text" placeholder="R$ 0,00" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[
+                { label: 'Fluxo de Faturamento', val: 'Realizado diretamente pela fábrica.' },
+                { label: 'Plano de Treinamento', val: 'Capacitação técnica por especialistas do BidFlow.' },
+                { label: 'Condições de Liquidação', val: 'À vista via transferência estratégica.' },
+                { label: 'Janela de Entrega', val: 'Até 30 dias após a homologação do pedido.' },
+                { label: 'Garantia de Ativos', val: '12 meses contra defeitos de orquestração.' },
+                { label: 'Suporte Pós-Venda', val: 'Assistência dedicada 24/7 via canal Platinum.' },
+              ].map((term, i) => (
+                <div key={i} className="space-y-1">
+                  <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">{term.label}</label>
+                  <input type="text" defaultValue={term.val} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-xs text-white focus:border-primary/40 outline-none" />
+                </div>
+              ))}
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Cláusulas de Instalação e Montagem</label>
+                <textarea rows={2} defaultValue="Realizada pela equipe de engenharia do BidFlow, garantindo conformidade e segurança sistêmica." className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-xs text-white focus:border-primary/40 outline-none resize-none"></textarea>
+              </div>
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Observações Estratégicas</label>
+                <textarea rows={3} defaultValue="Nenhuma" className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-xs text-white focus:border-primary/40 outline-none resize-none"></textarea>
+              </div>
             </div>
           </div>
-
-          <div className="text-right">
-            <span className="text-xl font-bold text-slate-900 dark:text-white">Total: R$ 0,00</span>
-          </div>
-        </div>
-
-        {/* Termos Comerciais */}
-        <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-4">Termos Comerciais</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Faturamento</label>
-              <input type="text" defaultValue="Realizado diretamente pela fábrica." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Treinamento</label>
-              <input type="text" defaultValue="Capacitação técnica por especialistas do FR Produtos Médicos." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Condições de Pagamento</label>
-              <input type="text" defaultValue="À vista" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Prazo de Entrega</label>
-              <input type="text" defaultValue="Até 30 dias após a confirmação do pedido de compra." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Garantia (Equipamentos)</label>
-              <input type="text" defaultValue="12 meses a partir da data de emissão da nota fiscal." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Garantia (Acessórios)</label>
-              <input type="text" defaultValue="6 meses, conforme especificações do fabricante." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Instalação</label>
-              <textarea rows={2} defaultValue="Realizada pela equipe técnica da FR Produtos Médicos, garantindo conformidade e segurança." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"></textarea>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Assistência Técnica</label>
-              <textarea rows={2} defaultValue="Disponível com suporte especializado para manutenção e pós garantia." className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"></textarea>
-            </div>
-          </div>
-          
-          <div className="mt-6">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Observações</label>
-            <textarea rows={3} defaultValue="Nenhuma" className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"></textarea>
-          </div>
-        </div>
-
+        </section>
       </div>
 
       {/* Footer */}
-      <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-end space-x-3">
-        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-          Fechar
+      <div className="p-8 border-t border-white/5 bg-white/[0.02] flex items-center justify-end gap-6">
+        <button onClick={onClose} className="px-6 py-3 text-[10px] font-black text-text-muted hover:text-white transition-all uppercase tracking-widest">
+          Cancelar Operação
         </button>
-        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-          Cancelar
-        </button>
-        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors shadow-sm">
-          Criar Proposta
+        <button className="px-10 py-4 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-[10px] tracking-widest">
+          Consolidar Proposta
         </button>
       </div>
-
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, Edit, Trash2, Eye, Plus, Search } from 'lucide-react';
+import { Loader2, Edit, Trash2, Eye, Plus, Search, FileText, ArrowLeft, Printer, Info, Clock, MapPin, Building2, ExternalLink, ShieldCheck, Upload, FileCheck, MessageSquare, Lock, ChevronRight, DollarSign } from 'lucide-react';
 import api from '../lib/axios';
 
 interface Bidding {
@@ -50,9 +50,6 @@ export default function AuctionDetails() {
   
   const [bidding, setBidding] = useState<Bidding | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Status state
   const [currentStatus, setCurrentStatus] = useState('Em análise');
 
   useEffect(() => {
@@ -67,17 +64,12 @@ export default function AuctionDetails() {
 
   const fetchBiddingsList = async () => {
     setLoading(true);
-    setError(null);
     try {
       const res = await api.get('/api/opportunities?type=bidding');
       const data = res.data.data || res.data;
-      if (Array.isArray(data) && data.length > 0) {
-        setBiddingsList(data);
-      } else {
-        setBiddingsList([mockBidding, { ...mockBidding, id: 2, process_number: '002/2026', status: 'Aguardando' }]);
-      }
-    } catch (err: any) {
-      console.log('API indisponível, usando dados de exemplo');
+      if (Array.isArray(data) && data.length > 0) setBiddingsList(data);
+      else setBiddingsList([mockBidding, { ...mockBidding, id: 2, process_number: '002/2026', status: 'Aguardando' }]);
+    } catch (err) {
       setBiddingsList([mockBidding, { ...mockBidding, id: 2, process_number: '002/2026', status: 'Aguardando' }]);
     } finally {
       setLoading(false);
@@ -86,14 +78,12 @@ export default function AuctionDetails() {
 
   const fetchBidding = async (id: string) => {
     setLoading(true);
-    setError(null);
     try {
       const res = await api.get(`/api/opportunities/${id}`);
       const data = res.data.data || res.data;
       setBidding(data);
       setCurrentStatus(data.status || 'Em análise');
-    } catch (err: any) {
-      console.log('API indisponível, usando dados de exemplo');
+    } catch (err) {
       setBidding({ ...mockBidding, id: parseInt(id), process_number: `${id}/2026` });
       setCurrentStatus(mockBidding.status);
     } finally {
@@ -111,124 +101,99 @@ export default function AuctionDetails() {
     return new Date(date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getModalityLabel = (modality: string) => {
-    const labels: Record<string, string> = {
-      'pregão': 'Pregão Eletrônico',
-      'tomada_de_precos': 'Tomada de Preços',
-      'concurso': 'Concurso',
-      'convite': 'Convite',
-      'inexigibilidade': 'Inexigibilidade',
-      'dispensabilidade': 'Dispensa',
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      'Ativa': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      'Em análise': 'bg-primary/10 text-primary border-primary/20',
+      'Aguardando': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+      'Encerrada': 'bg-white/5 text-text-muted border-white/10',
     };
-    return labels[modality.toLowerCase()] || modality;
-  };
-  
-  const handleViewDetails = (id: number) => {
-    setSearchParams({ id: id.toString() });
-  };
-
-  const handleBackToList = () => {
-    setSearchParams({});
+    return styles[status] || 'bg-white/5 text-text-muted border-white/10';
   };
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="p-12 flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-primary opacity-40" />
+        <p className="font-black uppercase tracking-[0.2em] text-[10px] text-text-muted">Interrogando Base Platinum...</p>
       </div>
     );
   }
 
   if (viewMode === 'list') {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto min-h-screen">
-        <div className="flex justify-between items-center pb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Pregões Cadastrados</h1>
-            <p className="text-sm text-slate-500 mt-1">Gerencie e acesse os detalhes de todos os pregões capturados.</p>
+      <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Pregões <span className="text-gradient-gold">Cadastrados</span>
+            </h1>
+            <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
+              <Lock size={12} className="text-primary" />
+              Gestão estratégica e monitoramento de sessões públicas em tempo real.
+            </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#2E75B6] hover:bg-blue-700 text-white rounded font-medium text-sm transition-colors shadow-sm">
+          <button 
+            onClick={() => navigate('/bidding-capture')}
+            className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest"
+          >
             <Plus className="w-4 h-4" />
-            Novo Pregão
+            Nova Oportunidade
           </button>
-        </div>
+        </header>
 
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-            <div className="relative w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <div className="platinum-card overflow-hidden">
+          <div className="p-4 bg-white/[0.01] border-b border-white/5 flex flex-col md:flex-row justify-between gap-4">
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
               <input 
                 type="text" 
-                placeholder="Buscar pregão..." 
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded focus:outline-none focus:border-blue-500 bg-white"
+                placeholder="Identificação do edital..." 
+                className="w-full pl-11 pr-4 py-3 bg-background/50 border border-white/5 rounded-xl text-sm focus:border-primary/30 outline-none transition-all text-white"
               />
             </div>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50 uppercase text-xs font-semibold text-slate-500 border-b border-slate-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white/5 border-b border-white/5">
                 <tr>
-                  <th className="px-6 py-4">Edital / Processo</th>
-                  <th className="px-6 py-4">Órgão</th>
-                  <th className="px-6 py-4">Modalidade</th>
-                  <th className="px-6 py-4">Data da Disputa</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-center">Ações</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Identificação</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Órgão Licitante</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-center">Data da Disputa</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-center">Status</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-white/5">
                 {biddingsList.map((bid) => (
-                  <tr key={bid.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{bid.bidding_metadata?.edital || '-'}</div>
-                      <div className="text-xs text-slate-500">{bid.process_number || '-'}</div>
+                  <tr key={bid.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-6 py-6">
+                      <div className="font-bold text-white group-hover:text-primary transition-colors uppercase">{bid.bidding_metadata?.edital || 'SEM EDITAL'}</div>
+                      <div className="text-[10px] text-text-muted font-mono tracking-wider">{bid.process_number || '-'}</div>
                     </td>
-                    <td className="px-6 py-4 max-w-xs truncate" title={bid.agency}>{bid.agency || '-'}</td>
-                    <td className="px-6 py-4">{getModalityLabel(bid.modality)}</td>
-                    <td className="px-6 py-4">{formatDate(bid.opening_date)} {formatTime(bid.opening_date)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-                        bid.status === 'Ativa' ? 'bg-green-100 text-green-700' :
-                        bid.status === 'Em análise' ? 'bg-blue-100 text-blue-700' :
-                        bid.status === 'Aguardando' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-slate-100 text-slate-700'
-                      }`}>
+                    <td className="px-6 py-6 max-w-xs">
+                      <div className="truncate text-text-secondary italic text-xs" title={bid.agency}>{bid.agency || '-'}</div>
+                      <div className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-1">{bid.modality}</div>
+                    </td>
+                    <td className="px-6 py-6 text-center">
+                      <div className="text-white font-bold">{formatDate(bid.opening_date)}</div>
+                      <div className="text-[10px] text-text-muted font-black">{formatTime(bid.opening_date)}</div>
+                    </td>
+                    <td className="px-6 py-6 text-center">
+                      <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-md border ${getStatusBadge(bid.status)}`}>
                         {bid.status || 'Em análise'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button 
-                          onClick={() => handleViewDetails(bid.id)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="Ver Detalhes"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-slate-600 hover:bg-slate-100 rounded transition-colors"
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button 
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                    <td className="px-6 py-6 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleViewDetails(bid.id)} className="p-2 text-text-muted hover:text-primary transition-all"><Eye size={16} /></button>
+                        <button className="p-2 text-text-muted hover:text-primary transition-all"><Edit size={16} /></button>
+                        <button className="p-2 text-text-muted hover:text-red-400 transition-all"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {biddingsList.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                      Nenhum pregão cadastrado encontrado.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -237,279 +202,188 @@ export default function AuctionDetails() {
     );
   }
 
-  if (error || !bidding) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-slate-500">{error || 'Nenhuma licitação selecionada'}</p>
-        <button 
-          onClick={handleBackToList}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-        >
-          Voltar para a Lista
-        </button>
-      </div>
-    );
-  }
+  if (!bidding) return null;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto bg-white min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-4">
+    <div className="p-8 w-full min-h-screen bg-background space-y-12 text-white">
+      {/* Premium Breadcrumbs & Actions */}
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="space-y-4">
           <button 
             onClick={handleBackToList}
-            className="text-slate-500 hover:text-blue-600 text-sm font-medium transition-colors"
+            className="flex items-center gap-2 text-text-muted hover:text-primary transition-all text-[10px] font-black uppercase tracking-[0.2em]"
           >
-            &larr; Voltar para a Lista
+            <ArrowLeft size={14} /> Voltar ao Painel
           </button>
-          <h1 className="text-2xl font-bold text-slate-800">Detalhes do Pregão</h1>
-        </div>
-        <button className="px-5 py-2 bg-[#2E75B6] hover:bg-blue-700 text-white rounded font-medium text-sm transition-colors shadow-sm">
-          Imprimir
-        </button>
-      </div>
-
-      {/* Informações do Pregão */}
-      <div className="bg-slate-50 p-6 rounded border border-slate-200">
-        <h2 className="text-lg font-bold text-slate-800 mb-6">Informações do Pregão</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-6 text-sm mb-6">
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">Edital:</span>
-            <span className="text-slate-900">{bidding.bidding_metadata?.edital || '00001/2026'}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">Processo:</span>
-            <span className="text-slate-900">{bidding.process_number || '-'}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">Modalidade:</span>
-            <span className="text-slate-900">{getModalityLabel(bidding.modality)}</span>
-          </div>
-
-          <div className="md:col-span-2">
-            <span className="text-slate-500 font-semibold block mb-1">Órgão Comprador:</span>
-            <span className="text-slate-900 uppercase">{bidding.agency || '-'}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">UASG:</span>
-            <span className="text-slate-900">{bidding.bidding_metadata?.uasg || '-'}</span>
-          </div>
-
-          <div className="md:col-span-3">
-            <span className="text-slate-500 font-semibold block mb-1">Local da Disputa:</span>
-            <span className="text-slate-900">{bidding.source_url || '-'}</span>
-          </div>
-
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">Data da Disputa:</span>
-            <span className="text-slate-900">{formatDate(bidding.opening_date)}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 font-semibold block mb-1">Hora da Disputa:</span>
-            <span className="text-slate-900">{formatTime(bidding.opening_date)}</span>
-          </div>
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <span className="text-slate-500 font-semibold block mb-1">Status:</span>
-              <select 
-                value={currentStatus}
-                onChange={(e) => setCurrentStatus(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded px-3 py-1.5 text-sm"
-              >
-                <option value="Em análise">Em análise</option>
-                <option value="Aguardando">Aguardando</option>
-                <option value="Ativa">Ativa</option>
-                <option value="Encerrada">Encerrada</option>
-              </select>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-white">{bidding.title}</h1>
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-text-muted">
+              <span className="flex items-center gap-1.5 text-primary"><ShieldCheck size={14} /> ID: {bidding.process_number}</span>
+              <span className="flex items-center gap-1.5"><Building2 size={14} /> {bidding.modality}</span>
             </div>
-            <button className="px-4 py-1.5 bg-[#002D74] hover:bg-blue-900 text-white rounded text-sm transition-colors">
-              Alterar
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-3 px-6 py-3 bg-surface-elevated/50 text-white font-bold rounded-xl border border-white/10 hover:bg-surface-elevated transition-all text-xs uppercase tracking-widest">
+            <Printer size={16} className="text-primary" />
+            Exportar Dossiê
+          </button>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Details */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="platinum-card p-8 space-y-8">
+            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+              <Info size={18} className="text-primary" />
+              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-white">Análise do Edital</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Órgão Comprador</span>
+                <p className="text-sm font-bold text-white uppercase leading-relaxed">{bidding.agency}</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Valuation Base</span>
+                <p className="text-xl font-black text-primary tracking-tight">{parseFloat(bidding.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Status de Operação</span>
+                <div className="flex items-center gap-3 mt-1">
+                  <select 
+                    value={currentStatus}
+                    onChange={(e) => setCurrentStatus(e.target.value)}
+                    className="bg-background/50 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-primary/40 appearance-none"
+                  >
+                    <option value="Em análise" className="bg-surface">Em análise</option>
+                    <option value="Aguardando" className="bg-surface">Aguardando</option>
+                    <option value="Ativa" className="bg-surface">Ativa</option>
+                    <option value="Encerrada" className="bg-surface">Encerrada</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-white/5 pt-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                  <CalendarIcon size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block">Data Sessão</span>
+                  <p className="text-sm font-bold text-white">{formatDate(bidding.opening_date)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block">Hora H</span>
+                  <p className="text-sm font-bold text-white">{formatTime(bidding.opening_date)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                  <MapPin size={20} />
+                </div>
+                <div className="max-w-[150px]">
+                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block">Portal Público</span>
+                  <a href={`https://${bidding.source_url}`} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-primary truncate block hover:underline">{bidding.source_url}</a>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-2"><AlignLeft size={12} /> Objeto da Contratação</span>
+              <p className="text-sm text-text-secondary leading-relaxed italic bg-white/[0.02] p-4 rounded-xl border border-white/5">{bidding.description}</p>
+            </div>
+          </div>
+
+          {/* Supplier Grid */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 px-2">
+              <DollarSign size={16} className="text-primary" /> Análise de Concorrência e Itens
+            </h3>
+            
+            {[
+              { name: 'AMB DISTRIBUIDORA HOSPITALAR LTDA', valUnit: '5.500,00', fab: 'EMERGO', status: 'Líder' },
+              { name: 'M V R DE SOUZA COMERCIO LTDA', valUnit: '7.700,00', fab: 'CMOS DRAKE', status: 'Qualificada' }
+            ].map((supplier, idx) => (
+              <div key={idx} className="platinum-card overflow-hidden">
+                <div className="bg-white/[0.03] px-6 py-4 flex justify-between items-center border-b border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-primary shadow-platinum-glow"></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{supplier.name}</span>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary italic">{supplier.status}</span>
+                </div>
+                <div className="p-6 overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="text-[9px] font-black uppercase tracking-widest text-text-muted border-b border-white/5">
+                      <tr>
+                        <th className="pb-4">Nº / Descrição</th>
+                        <th className="pb-4">Fabricante</th>
+                        <th className="pb-4 text-right">Unitário</th>
+                        <th className="pb-4 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr>
+                        <td className="py-4 max-w-xs">
+                          <div className="text-xs font-bold text-white truncate">Item 21: DEA - Desfibrilador Externo Automático</div>
+                          <div className="text-[10px] text-text-muted">Qtd: 02 Unidades</div>
+                        </td>
+                        <td className="py-4 text-xs font-mono text-text-secondary uppercase">{supplier.fab}</td>
+                        <td className="py-4 text-right font-black text-white text-sm">R$ {supplier.valUnit}</td>
+                        <td className="py-4 text-right">
+                          <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors">Detalhes</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar Widgets */}
+        <div className="space-y-8">
+          {/* Document widget */}
+          <div className="platinum-card p-6 space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-2">
+              <FileCheck size={14} className="text-primary" /> Repositório Documental
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center border-2 border-dashed border-white/10 rounded-2xl p-8 hover:border-primary/30 transition-all group cursor-pointer">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <Upload size={24} className="text-text-muted group-hover:text-primary transition-colors" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Upload de Edital / Proposta</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-center text-text-muted italic">Nenhum contrato ou empenho anexado até o momento.</p>
+            </div>
+          </div>
+
+          {/* Activity/Notes widget */}
+          <div className="platinum-card p-6 space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-2">
+              <MessageSquare size={14} className="text-primary" /> Pareceres e Observações
+            </h3>
+            <textarea 
+              rows={3} 
+              placeholder="Inserir nota estratégica..."
+              className="w-full bg-background/50 border border-white/10 rounded-xl p-4 text-xs text-white placeholder:text-text-muted focus:border-primary/40 outline-none resize-none transition-all"
+            ></textarea>
+            <button className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all">
+              Registrar Parecer
             </button>
           </div>
         </div>
-
-        <div className="text-sm border-t border-slate-200 pt-6 mt-2">
-          <span className="text-slate-500 font-semibold block mb-2">Objeto:</span>
-          <p className="text-slate-900 leading-relaxed">{bidding.description || 'Sem descrição'}</p>
-        </div>
       </div>
-
-      {/* Documentos de Contratação */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">Documentos de Contratação</h2>
-        
-        <div className="text-center py-6 text-sm text-slate-500">
-          Nenhum documento de contrato, O.S. ou empenho foi anexado a este pregão.
-        </div>
-
-        <div className="border border-slate-200 rounded p-6 bg-white">
-          <h3 className="font-semibold text-slate-800 mb-4 text-sm">Adicionar Novo Arquivo</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nome ou Descrição do Ficheiro</label>
-              <input type="text" placeholder="Ex: Edital, Proposta, etc." className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
-              <p className="text-[10px] text-slate-400 mt-1.5">Se deixar em branco, será usado o nome original.</p>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tipo de Documento</label>
-              <select className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500">
-                <option value="anexo_geral">Anexo Geral</option>
-                <option value="contrato">Contrato</option>
-                <option value="empenho">Empenho</option>
-              </select>
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Selecione o Ficheiro</label>
-            <div className="flex border border-slate-300 rounded overflow-hidden">
-              <label className="bg-blue-50 text-blue-600 px-4 py-2 text-sm cursor-pointer border-r border-slate-300 hover:bg-blue-100 font-medium">
-                Escolher arquivo
-                <input type="file" className="hidden" />
-              </label>
-              <div className="px-4 py-2 text-sm text-slate-400 flex-1 bg-white">
-                Nenhum arquivo escolhido
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button className="px-5 py-2 bg-[#002D74] hover:bg-blue-900 text-white rounded text-sm transition-colors font-medium">
-              Enviar Ficheiro
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Itens e Propostas */}
-      <div className="space-y-6">
-        <h2 className="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">Itens e Propostas</h2>
-        
-        {/* Mocked Tables */}
-        {[
-          { name: 'AMB DISTRIBUIDORA DE MEDICAMENTO E MATERIAIS HOSPITALARES LTDA', valUnit: '5.500,00', valTotal: '11.000,00', fab: 'EMERGO', mod: 'Ambulanc G' },
-          { name: 'M V R DE SOUZA COMERCIO ATACADISTA LTDA', valUnit: '7.700,00', valTotal: '15.400,00', fab: 'CMOS DRAKE', mod: 'ALIVE' },
-          { name: 'MEDICALMED REPRESENTACOES, IMPORTACAO E EXPORTACAO DE PRODUTOS HOSPITALARES LTDA', valUnit: '6.940,67', valTotal: '13.881,34', fab: 'COMEN', mod: 'DEA' }
-        ].map((supplier, idx) => (
-          <div key={idx} className="border border-slate-200 rounded overflow-hidden mb-6">
-            <div className="bg-slate-50 px-5 py-3.5 font-bold text-sm text-slate-800 border-b border-slate-200">
-              {supplier.name}
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-[11px] text-left text-slate-600">
-                <thead className="bg-slate-50/50 uppercase border-b border-slate-200">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Nº</th>
-                    <th className="px-5 py-3 font-semibold">DESCRIÇÃO</th>
-                    <th className="px-5 py-3 font-semibold">FABRICANTE</th>
-                    <th className="px-5 py-3 font-semibold">MODELO</th>
-                    <th className="px-5 py-3 font-semibold">QTD.</th>
-                    <th className="px-5 py-3 font-semibold">VALOR UNIT.</th>
-                    <th className="px-5 py-3 font-semibold">VALOR TOTAL</th>
-                    <th className="px-5 py-3 font-semibold">STATUS</th>
-                    <th className="px-5 py-3 font-semibold">AÇÕES</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="bg-white">
-                    <td className="px-5 py-4">21</td>
-                    <td className="px-5 py-4 max-w-[280px] leading-relaxed">
-                      DEA - Desfibrilador Externo Automatico, Especificacoes Minimas: AUTONOMIA DA BATERIA / AUXILIO RCP / ACESSORIO: 50 A 250 CHOQUES / POSSUI / 1 PAR ELETRODO
-                    </td>
-                    <td className="px-5 py-4">{supplier.fab}</td>
-                    <td className="px-5 py-4">{supplier.mod}</td>
-                    <td className="px-5 py-4">2</td>
-                    <td className="px-5 py-4 whitespace-nowrap">R$ {supplier.valUnit}</td>
-                    <td className="px-5 py-4 whitespace-nowrap font-semibold">R$ {supplier.valTotal}</td>
-                    <td className="px-5 py-4">Classificada</td>
-                    <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <button className="px-3 py-1.5 bg-[#2E75B6] hover:bg-blue-600 text-white rounded font-medium transition-colors">Editar</button>
-                        <button className="px-3 py-1.5 bg-[#EF4444] hover:bg-red-600 text-white rounded font-medium transition-colors">Excluir</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
-
-        <div className="border border-slate-200 rounded p-6 bg-slate-50">
-          <h3 className="font-bold text-slate-800 mb-5 text-sm">Adicionar Nova Proposta de Item</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fornecedor</label>
-              <input type="text" placeholder="Digite o nome do fornecedor" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nº do Lote (Opcional)</label>
-                <input type="text" placeholder="Ex: Lote 01" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nº do Item</label>
-                <input type="text" placeholder="Ex: 1, 2, 3..." className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descrição</label>
-              <input type="text" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fabricante/Marca</label>
-                <input type="text" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Modelo</label>
-                <input type="text" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Quantidade</label>
-                <input type="number" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Valor Unitário (R$)</label>
-                <input type="text" className="w-full border border-slate-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500" />
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button className="px-6 py-2 bg-[#002D74] hover:bg-blue-900 text-white rounded font-medium text-sm transition-colors">
-                Adicionar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Observações e Pareceres */}
-      <div className="space-y-4 pt-4">
-        <h2 className="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">Observações e Pareceres</h2>
-        
-        <div className="border border-slate-200 rounded p-6 bg-slate-50">
-          <h3 className="font-bold text-slate-800 mb-4 text-sm">Adicionar Nova Observação</h3>
-          <textarea 
-            rows={4} 
-            placeholder="Digite seu parecer ou observação aqui..."
-            className="w-full border border-slate-300 rounded p-3 text-sm bg-white resize-y focus:outline-none focus:border-blue-500"
-          ></textarea>
-          <div className="flex justify-end mt-4">
-            <button className="px-6 py-2 bg-[#3B82F6] hover:bg-blue-600 text-white rounded font-medium text-sm transition-colors">
-              Salvar Observação
-            </button>
-          </div>
-        </div>
-
-        <div className="text-center py-8 text-sm text-slate-500">
-          Nenhuma observação registrada.
-        </div>
-      </div>
-
     </div>
   );
 }

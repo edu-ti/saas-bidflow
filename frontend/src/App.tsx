@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Activity } from 'lucide-react';
 import type { Page } from './components/Sidebar';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -24,6 +25,7 @@ import Inventory from './components/inventory/InventoryDashboard';
 import Campaigns from './components/Campaigns';
 import Tasks from './components/Tasks';
 import Reports from './components/Reports';
+import ReportsDashboard from './components/ReportsDashboard';
 import AccountsPayableReceivable from './components/AccountsPayableReceivable';
 import Finance from './components/financial/FinanceDashboard';
 import Admin from './components/Admin';
@@ -54,7 +56,12 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   const apiToken = localStorage.getItem('api_token');
   const isAuthenticated = !!apiToken;
   const storedUser = localStorage.getItem('user');
-  const user = JSON.parse(storedUser || '{}');
+  let user = { is_superadmin: false, email: '' };
+  try {
+    user = JSON.parse(storedUser || '{}');
+  } catch (e) {
+    console.error('Failed to parse user from localStorage', e);
+  }
 
   console.log('[SuperAdminRoute] Auth state:', { 
     isAuthenticated, 
@@ -76,6 +83,84 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Componente Topbar
+function Topbar({ title }: { title?: string }) {
+  const location = useLocation();
+  
+  const getPageTitle = () => {
+    if (title) return title;
+    const path = location.pathname;
+    const titles: Record<string, string> = {
+      '/': 'Dashboard Estratégico',
+      '/dashboard': 'Dashboard Estratégico',
+      '/company': 'Unidade de Negócio',
+      '/users': 'Equipe / Utilizadores',
+      '/reports': 'Relatórios & BI',
+      '/reports-dashboard': 'BI Inteligente',
+      '/sales-funnel': 'Funil de Vendas',
+      '/leads': 'Gestão de Leads',
+      '/clients': 'Base de Clientes',
+      '/products': 'Catálogo de Produtos',
+      '/proposals': 'Propostas de Valor',
+      '/agenda': 'Agenda Integrada',
+      '/bidding-funnel': 'Funil de Licitações',
+      '/bidding-radar': 'Radar de Licitações',
+      '/bidding-monitoring': 'Monitoramento Ativo',
+      '/bidding-capture': 'Captação de Editais',
+      '/auction-details': 'Detalhes do Pregão',
+      '/ai-generator': 'Gerador IA',
+      '/licenses': 'Licenças e Certidões',
+      '/consignment': 'Gestão de Consignação',
+      '/contracts': 'Contratos (CLM)',
+      '/inventory': 'Inventário',
+      '/campaigns': 'Marketing / Campanhas',
+      '/tasks': 'Plano de Ação',
+      '/finance': 'Motor Financeiro',
+      '/accounts-payable-receivable': 'Contas a Pagar / Receber',
+      '/chatbot': 'Construtor de Chatbot',
+      '/conversations': 'Central de Atendimento',
+      '/admin': 'Configurações da Empresa',
+      '/settings': 'Preferências do Sistema',
+    };
+    return titles[path] || 'Dashboard';
+  };
+
+  return (
+    <div className="h-20 bg-background/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40">
+      <div className="flex items-center gap-6">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">
+            <span>Main</span>
+            <span className="w-1 h-1 rounded-full bg-primary/40" />
+            <span className="text-primary/60 italic lowercase">v2.0 Platinum</span>
+          </div>
+          <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
+            {getPageTitle()}
+            <span className="w-px h-4 bg-white/10 mx-1" />
+          </h2>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-6">
+        <div className="hidden md:flex flex-col items-end">
+          <span className="text-[10px] font-black text-primary uppercase tracking-widest">Acesso Seguro</span>
+          <span className="text-xs text-text-secondary font-medium">
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
+          </span>
+        </div>
+        <div className="w-px h-8 bg-white/5" />
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-amber-600 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <button className="relative p-2 bg-surface rounded-full border border-white/10 text-text-muted hover:text-white transition-colors">
+            <Activity size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // Componente wrapper para layout autenticado (com Sidebar)
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -88,14 +173,12 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     navigate('/login');
   };
 
-  // Mapear pathname para page do Sidebar
   const getPageFromPath = (): Page => {
     const path = location.pathname;
-    // Gestão
     if (path === '/company') return 'company';
     if (path === '/users') return 'users';
     if (path === '/reports') return 'reports';
-    // Comercial
+    if (path === '/reports-dashboard') return 'reports-dashboard';
     if (path === '/sales-funnel') return 'sales-funnel';
     if (path === '/leads') return 'leads';
     if (path === '/clients') return 'clients';
@@ -103,38 +186,36 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/ai-generator') return 'ai-generator';
     if (path === '/email-marketing') return 'email-marketing';
     if (path === '/agenda') return 'agenda';
-    // Licitações
     if (path === '/bidding-radar') return 'bidding-radar';
     if (path === '/bidding-monitoring') return 'bidding-monitoring';
     if (path === '/bidding-funnel') return 'bidding-funnel';
     if (path === '/bidding-capture') return 'bidding-capture';
     if (path === '/auction-details') return 'auction-details';
-    // Operacional
     if (path === '/licenses') return 'licenses';
     if (path === '/consignment') return 'consignment';
     if (path === '/contracts') return 'contracts';
     if (path === '/inventory') return 'inventory';
     if (path === '/campaigns') return 'campaigns';
     if (path === '/tasks') return 'tasks';
-    // Estoque
     if (path === '/products') return 'products';
-    // Financeiro
     if (path === '/accounts-payable-receivable') return 'accounts-payable-receivable';
     if (path === '/finance') return 'finance';
-    // Configurações
     if (path === '/admin') return 'admin';
     return 'dashboard';
   };
 
   return (
-    <div className={`min-h-screen flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
+    <div className="min-h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage={getPageFromPath()}
         onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
         onLogout={handleLogout}
       />
-      <div className="flex-1 overflow-auto h-screen">
-        {children}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar />
+        <div className="flex-1 overflow-auto p-6 bg-background">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -143,7 +224,6 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 // Layout do Dashboard - com Sidebar (página inicial)
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem('api_token');
@@ -152,14 +232,17 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className={`min-h-screen flex overflow-hidden ${theme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'}`}>
+    <div className="min-h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage="dashboard"
         onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
         onLogout={handleLogout}
       />
-      <div className="flex-1 overflow-auto h-screen">
-        {children}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar />
+        <div className="flex-1 overflow-auto p-6 bg-background">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -209,6 +292,14 @@ function AppContent() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <Reports />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/reports-dashboard" element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <ReportsDashboard />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />

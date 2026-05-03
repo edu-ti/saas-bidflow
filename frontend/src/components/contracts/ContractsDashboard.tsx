@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, Plus, FileText, Edit, Trash2, Eye, Send, CheckCircle,
   XCircle, Clock, AlertTriangle, Download, Upload, Calendar, X,
-  ChevronRight, Paperclip, User, Building, Truck, Users, DollarSign
+  ChevronRight, Paperclip, User, Building, Truck, Users, DollarSign, ShieldCheck, Zap, BarChart3, Lock, Target, Loader2
 } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import Modal from '../ui/Modal';
 
 type Contract = {
   id: number;
@@ -14,82 +15,21 @@ type Contract = {
   value: number;
   start_date: string;
   end_date: string;
-  payment_terms?: string;
-  renewal_type: string;
-  generated_content?: string;
-  contract_template_id?: number;
   template?: { id: number; name: string; type: string };
-  contractable_id: number;
-  contractable_type: string;
-  contractable?: { name?: string; corporate_name?: string; cnpj?: string; cpf?: string };
-  approvals?: ContractApproval[];
-  addendums?: ContractAddendum[];
-  attachments?: Attachment[];
-  approved_by_user_id?: number;
-  approved_at?: string;
-  signed_at?: string;
-  created_at: string;
+  contractable?: { name?: string; corporate_name?: string };
+  generated_content?: string;
+  approvals?: any[];
   receivables?: any[];
-  payables?: any[];
 };
 
-type ContractApproval = {
-  id: number;
-  role: string;
-  status: string;
-  comments?: string;
-  user?: { name: string };
-  created_at: string;
-};
-
-type ContractAddendum = {
-  id: number;
-  title: string;
-  type: string;
-  old_value?: number;
-  new_value?: number;
-  old_end_date?: string;
-  new_end_date?: string;
-  effective_date: string;
-};
-
-type Attachment = {
-  id: number;
-  file_name: string;
-  file_path: string;
-  type?: string;
-};
-
-type ContractTemplate = {
-  id: number;
-  name: string;
-  type: string;
-  content: string;
-  active: boolean;
-};
-
-type IndividualClient = { id: number; name: string; cpf: string };
-type CompanyClient = { id: number; corporate_name: string; cnpj: string };
-type Supplier = { id: number; name: string; document_number: string };
-type Organization = { id: number; name: string; document_number: string };
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  draft: { label: 'Rascunho', color: 'text-slate-600', bg: 'bg-slate-100' },
-  under_review: { label: 'Em Revisão', color: 'text-amber-600', bg: 'bg-amber-100' },
-  approved: { label: 'Aprovado', color: 'text-blue-600', bg: 'bg-blue-100' },
-  sent_for_signature: { label: 'Enviado para Assinatura', color: 'text-indigo-600', bg: 'bg-indigo-100' },
-  active: { label: 'Ativo', color: 'text-emerald-600', bg: 'bg-emerald-100' },
-  finished: { label: 'Finalizado', color: 'text-slate-500', bg: 'bg-slate-100' },
-  cancelled: { label: 'Cancelado', color: 'text-red-600', bg: 'bg-red-100' },
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  servico: 'Serviço',
-  aluguel: 'Aluguel',
-  compra: 'Compra',
-  parceria: 'Parceria',
-  fornecimento: 'Fornecimento',
-  outros: 'Outros',
+const STATUS_CONFIG: Record<string, { label: string; style: string }> = {
+  draft: { label: 'Rascunho', style: 'bg-white/5 text-text-muted border-white/10' },
+  under_review: { label: 'Em Revisão', style: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  approved: { label: 'Aprovado', style: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  sent_for_signature: { label: 'Em Assinatura', style: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+  active: { label: 'Ativo', style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  finished: { label: 'Finalizado', style: 'bg-white/10 text-white border-white/20' },
+  cancelled: { label: 'Cancelado', style: 'bg-red-500/10 text-red-400 border-red-500/20' },
 };
 
 const TIMELINE_STEPS = [
@@ -97,822 +37,221 @@ const TIMELINE_STEPS = [
   { key: 'under_review', label: 'Revisão', icon: Eye },
   { key: 'approved', label: 'Aprovação', icon: CheckCircle },
   { key: 'sent_for_signature', label: 'Assinatura', icon: Send },
-  { key: 'active', label: 'Execução', icon: CheckCircle },
+  { key: 'active', label: 'Execução', icon: ShieldCheck },
 ];
 
 export default function ContractsDashboard() {
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [individualClients, setIndividualClients] = useState<IndividualClient[]>([]);
-  const [companyClients, setCompanyClients] = useState<CompanyClient[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [detailTab, setDetailTab] = useState<'doc' | 'approvals' | 'finance'>('doc');
-
-  const [formData, setFormData] = useState({
-    contract_template_id: '',
-    contractable_type: '',
-    contractable_id: '',
-    value: '',
-    start_date: '',
-    end_date: '',
-    payment_terms: '',
-    renewal_type: 'manual',
-  });
-
-  const [templateFormData, setTemplateFormData] = useState({
-    name: '',
-    type: 'servico',
-    content: '',
-    active: true,
-  });
 
   const fetchContracts = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (statusFilter) params.append('status', statusFilter);
-      if (typeFilter) params.append('type', typeFilter);
+      const res = await api.get(`/api/contracts?search=${search}&status=${statusFilter}`);
+      setContracts(res.data.data || res.data || []);
+    } catch (err) { toast.error('Erro ao sincronizar contratos'); }
+    finally { setLoading(false); }
+  }, [search, statusFilter]);
 
-      const res = await api.get(`/api/contracts?${params}`);
-      setContracts(res.data.data || res.data);
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro ao carregar contratos');
-    } finally {
-      setLoading(false);
-    }
-  }, [search, statusFilter, typeFilter]);
-
-  const fetchTemplates = async () => {
-    try {
-      const res = await api.get('/api/contract-templates?active=true');
-      setTemplates(res.data.data || res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchEntities = async () => {
-    try {
-      const [icRes, ccRes, supRes, orgRes] = await Promise.all([
-        api.get('/api/individual-clients'),
-        api.get('/api/company-clients'),
-        api.get('/api/suppliers'),
-        api.get('/api/organizations'),
-      ]);
-      setIndividualClients(icRes.data.data || icRes.data);
-      setCompanyClients(ccRes.data.data || ccRes.data);
-      setSuppliers(supRes.data.data || supRes.data);
-      setOrganizations(orgRes.data.data || orgRes.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchContracts();
-    fetchTemplates();
-  }, [fetchContracts]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.post('/api/contracts', formData);
-      toast.success('Contrato criado com sucesso!');
-      setShowModal(false);
-      resetForm();
-      fetchContracts();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Erro ao criar contrato');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTemplateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.post('/api/contract-templates', templateFormData);
-      toast.success('Template criado com sucesso!');
-      setShowTemplateModal(false);
-      setTemplateFormData({ name: '', type: 'servico', content: '', active: true });
-      fetchTemplates();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Erro ao criar template');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (contractId: number, newStatus: string) => {
-    try {
-      await api.patch(`/api/contracts/${contractId}/status`, { status: newStatus });
-      toast.success('Status atualizado!');
-      fetchContracts();
-      if (selectedContract?.id === contractId) {
-        const res = await api.get(`/api/contracts/${contractId}`);
-        setSelectedContract(res.data);
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao atualizar status');
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir este contrato?')) return;
-    try {
-      await api.delete(`/api/contracts/${id}`);
-      toast.success('Contrato excluído!');
-      fetchContracts();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao excluir');
-    }
-  };
+  useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
   const openDetail = async (contract: Contract) => {
     try {
       const res = await api.get(`/api/contracts/${contract.id}`);
       setSelectedContract(res.data);
       setShowDetailModal(true);
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro ao carregar detalhes');
-    }
+    } catch (err) { toast.error('Erro ao carregar dossiê'); }
   };
 
-  const resetForm = () => {
-    setFormData({
-      contract_template_id: '',
-      contractable_type: '',
-      contractable_id: '',
-      value: '',
-      start_date: '',
-      end_date: '',
-      payment_terms: '',
-      renewal_type: 'manual',
-    });
+  const handleStatusChange = async (id: number, status: string) => {
+    try {
+      await api.patch(`/api/contracts/${id}/status`, { status });
+      toast.success('Ciclo de vida atualizado.');
+      fetchContracts();
+      setShowDetailModal(false);
+    } catch (err) { toast.error('Falha na transição de status'); }
   };
 
-  const getClientName = (contract: Contract) => {
-    if (!contract.contractable) return 'N/A';
-    return contract.contractable.name || contract.contractable.corporate_name || 'N/A';
-  };
-
-  const getClientIcon = (contract: Contract) => {
-    const type = contract.contractable_type?.toLowerCase() || '';
-    if (type.includes('individual')) return <Users className="w-4 h-4" />;
-    if (type.includes('company')) return <Building className="w-4 h-4" />;
-    if (type.includes('supplier')) return <Truck className="w-4 h-4" />;
-    return <Building className="w-4 h-4" />;
-  };
-
-  const getCurrentStepIndex = (status: string) => {
-    return TIMELINE_STEPS.findIndex(s => s.key === status);
-  };
+  const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-              Gestão de Contratos
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Gerencie templates, aprovações e ciclo de vida dos contratos
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => { fetchEntities(); setShowTemplateModal(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
-            >
-              <FileText className="w-4 h-4" />
-              Templates
-            </button>
-            <button
-              onClick={() => { fetchEntities(); setShowModal(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Contrato
-            </button>
-          </div>
+    <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Lifecycle & <span className="text-gradient-gold">Contract Management</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
+            <ShieldCheck size={12} className="text-primary" />
+            Governança jurídica, templates dinâmicos e orquestração de assinaturas.
+          </p>
         </div>
-
-        <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 overflow-x-auto">
-          {[
-            { key: '', label: 'Todos' },
-            { key: 'draft', label: 'Rascunhos' },
-            { key: 'under_review', label: 'Pendentes' },
-            { key: 'active', label: 'Ativos' },
-            { key: 'finished', label: 'Finalizados/Expirados' },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setStatusFilter(tab.key)}
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${statusFilter === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+            Templates
+          </button>
+          <button className="px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-[10px] tracking-widest">
+            Novo Contrato
+          </button>
         </div>
+      </header>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar contratos..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                />
-              </div>
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-            >
-              <option value="">Todos os Status</option>
-              {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                <option key={key} value={key}>{config.label}</option>
-              ))}
-            </select>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-            >
-              <option value="">Todos os Tipos</option>
-              {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
+      {/* Tabs Filter */}
+      <div className="flex gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl w-fit overflow-x-auto max-w-full">
+        {[
+          { key: '', label: 'Dossiê Completo' },
+          { key: 'draft', label: 'Rascunhos' },
+          { key: 'under_review', label: 'Em Auditoria' },
+          { key: 'active', label: 'Vigentes' },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setStatusFilter(tab.key)}
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+              statusFilter === tab.key ? 'bg-primary text-background shadow-platinum-glow' : 'text-text-muted hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="platinum-card overflow-hidden">
+        <div className="p-4 bg-white/[0.01] border-b border-white/5">
+          <div className="relative max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Buscar por Nº, Cliente ou Objeto..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-background border border-white/5 rounded-xl text-sm text-white focus:border-primary/30 outline-none transition-all placeholder:text-text-muted"
+            />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50 dark:bg-slate-700/50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Nº Contrato</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Template</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Valor</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Vencimento</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Status</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Ações</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-white/5 border-b border-white/5">
+              <tr>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Nº / Registro</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Contraparte</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Valuation</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Status</th>
+                <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-text-muted"><Loader2 className="animate-spin inline mr-2" /> Indexando Contratos...</td></tr>
+              ) : contracts.map(contract => (
+                <tr key={contract.id} className="hover:bg-white/[0.02] transition-colors group">
+                  <td className="px-6 py-6 font-mono text-xs font-bold text-white uppercase tracking-tighter">
+                    {contract.contract_number}
+                  </td>
+                  <td className="px-6 py-6">
+                    <div className="font-bold text-white uppercase text-xs">
+                      {contract.contractable?.name || contract.contractable?.corporate_name || '-'}
+                    </div>
+                    <div className="text-[10px] text-text-muted font-bold mt-1 uppercase tracking-widest">
+                      {contract.template?.name || 'Venda Direta'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-6">
+                    <div className="flex flex-col">
+                      <span className="text-white font-black">{formatCurrency(contract.value)}</span>
+                      <span className="text-[8px] text-text-muted uppercase tracking-widest font-black italic">Exp. {new Date(contract.end_date).toLocaleDateString()}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-6">
+                    <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${STATUS_CONFIG[contract.status]?.style}`}>
+                      {STATUS_CONFIG[contract.status]?.label || contract.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-6 text-right">
+                    <div className="flex justify-end gap-1">
+                      <button onClick={() => openDetail(contract)} className="p-2 text-text-muted hover:text-primary transition-all"><Eye size={16} /></button>
+                      <button className="p-2 text-text-muted hover:text-primary transition-all"><Edit size={16} /></button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {loading ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">Carregando...</td></tr>
-                ) : contracts.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">Nenhum contrato encontrado</td></tr>
-                ) : (
-                  contracts.map((contract) => (
-                    <tr key={contract.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-sm font-medium text-slate-800 dark:text-slate-100">
-                          {contract.contract_number}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          {getClientIcon(contract)}
-                          <span className="text-slate-700 dark:text-slate-200">{getClientName(contract)}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {contract.template?.name || '—'}
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 dark:text-slate-200 font-medium">
-                        R$ {Number(contract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {contract.end_date ? new Date(contract.end_date).toLocaleDateString() : '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_CONFIG[contract.status]?.bg || 'bg-slate-100'} ${STATUS_CONFIG[contract.status]?.color || 'text-slate-600'}`}>
-                          {STATUS_CONFIG[contract.status]?.label || contract.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button onClick={() => openDetail(contract)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {contract.status === 'draft' && (
-                            <>
-                              <button onClick={() => handleStatusChange(contract.id, 'under_review')} className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded">
-                                <Send className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => handleDelete(contract.id)} className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Novo Contrato</h2>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Template *</label>
-                <select
-                  required
-                  value={formData.contract_template_id}
-                  onChange={(e) => setFormData({ ...formData, contract_template_id: e.target.value })}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                >
-                  <option value="">Selecione...</option>
-                  {templates.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name} ({TYPE_LABELS[t.type] || t.type})</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo de Cliente *</label>
-                  <select
-                    required
-                    value={formData.contractable_type}
-                    onChange={(e) => setFormData({ ...formData, contractable_type: e.target.value, contractable_id: '' })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="individual_client">Pessoa Física</option>
-                    <option value="company_client">Pessoa Jurídica</option>
-                    <option value="supplier">Fornecedor</option>
-                    <option value="organization">Organização</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Cliente *</label>
-                  <select
-                    required
-                    value={formData.contractable_id}
-                    onChange={(e) => setFormData({ ...formData, contractable_id: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  >
-                    <option value="">Selecione...</option>
-                    {formData.contractable_type === 'individual_client' && individualClients.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name} - {c.cpf}</option>
-                    ))}
-                    {formData.contractable_type === 'company_client' && companyClients.map((c) => (
-                      <option key={c.id} value={c.id}>{c.corporate_name} - {c.cnpj}</option>
-                    ))}
-                    {formData.contractable_type === 'supplier' && suppliers.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                    {formData.contractable_type === 'organization' && organizations.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Valor *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={formData.value}
-                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Renovação</label>
-                  <select
-                    value={formData.renewal_type}
-                    onChange={(e) => setFormData({ ...formData, renewal_type: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  >
-                    <option value="manual">Manual</option>
-                    <option value="automatic">Automática</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Data Início *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Data Término *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.end_date}
-                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Condições de Pagamento</label>
-                <textarea
-                  rows={3}
-                  value={formData.payment_terms}
-                  onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-                  placeholder="Ex: 12x de R$ 1.000,00 - ou 10-10-2024: R$ 5.000,00"
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
-                  Cancelar
-                </button>
-                <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                  {loading ? 'Salvando...' : 'Criar Contrato'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showDetailModal && selectedContract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
-              <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  Contrato {selectedContract.contract_number}
-                </h2>
-                <p className="text-sm text-slate-500">{getClientName(selectedContract)}</p>
-              </div>
-              <button onClick={() => setShowDetailModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_CONFIG[selectedContract.status]?.bg} ${STATUS_CONFIG[selectedContract.status]?.color}`}>
-                  {STATUS_CONFIG[selectedContract.status]?.label || selectedContract.status}
-                </span>
-                <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                  R$ {Number(selectedContract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-
-              {/* Detail Tabs */}
-              <div className="flex border-b border-slate-200 dark:border-slate-700">
-                <button
-                  onClick={() => setDetailTab('doc')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'doc' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  Documento
-                </button>
-                <button
-                  onClick={() => setDetailTab('approvals')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'approvals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  Aprovações & Aditivos
-                </button>
-                <button
-                  onClick={() => setDetailTab('finance')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${detailTab === 'finance' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  Financeiro
-                </button>
-              </div>
-
-              {/* Tab Content */}
-              <div className="mt-6">
-                {detailTab === 'doc' && (
-                  <div className="space-y-6">
-                    <div className="relative mb-12">
-                      <div className="flex items-center justify-between">
-                        {TIMELINE_STEPS.map((step, index) => {
-                          const currentIndex = getCurrentStepIndex(selectedContract.status);
-                          const isActive = index <= currentIndex;
-                          const isCurrent = step.key === selectedContract.status;
-                          const Icon = step.icon;
-                          return (
-                            <div key={step.key} className="flex flex-col items-center flex-1 relative z-10">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} ${isCurrent ? 'ring-4 ring-blue-600 opacity-80' : ''}`}>
-                                <Icon className="w-5 h-5" />
-                              </div>
-                              <span className={`text-xs mt-2 text-center ${isActive ? 'text-slate-800 dark:text-slate-100 font-medium' : 'text-slate-400'}`}>
-                                {step.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200 dark:bg-slate-700 -z-0 transform -translate-y-1/2" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Dados do Contrato</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-slate-500">Template:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.template?.name || '—'}</span></div>
-                          <div className="flex justify-between"><span className="text-slate-500">Início:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.start_date ? new Date(selectedContract.start_date).toLocaleDateString() : '—'}</span></div>
-                          <div className="flex justify-between"><span className="text-slate-500">Término:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.end_date ? new Date(selectedContract.end_date).toLocaleDateString() : '—'}</span></div>
-                          <div className="flex justify-between"><span className="text-slate-500">Renovação:</span><span className="text-slate-700 dark:text-slate-200">{selectedContract.renewal_type === 'automatic' ? 'Automática' : 'Manual'}</span></div>
-                          {selectedContract.approved_at && (
-                            <div className="flex justify-between"><span className="text-slate-500">Aprovado em:</span><span className="text-slate-700 dark:text-slate-200">{new Date(selectedContract.approved_at).toLocaleDateString()}</span></div>
-                          )}
+      <Modal isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} title="DOSSIÊ ESTRATÉGICO DE CONTRATO" size="xl">
+        {selectedContract && (
+          <div className="space-y-8 p-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
+              <div className="space-y-2">
+                <span className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Lifecycle Position</span>
+                <div className="flex items-center gap-6 mt-4">
+                  {TIMELINE_STEPS.map((step, i) => {
+                    const steps = ['draft', 'under_review', 'approved', 'sent_for_signature', 'active'];
+                    const currentIdx = steps.indexOf(selectedContract.status);
+                    const isActive = i <= currentIdx;
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-2 relative">
+                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${isActive ? 'border-primary bg-primary/10 text-primary shadow-platinum-glow' : 'border-white/10 text-text-muted'}`}>
+                          <step.icon size={14} />
                         </div>
+                        <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-white' : 'text-text-muted'}`}>{step.label}</span>
                       </div>
-
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 flex flex-col justify-center text-center">
-                        <p className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Valor Total</p>
-                        <p className="text-3xl font-black text-slate-800 dark:text-slate-100">
-                          R$ {Number(selectedContract.value || 0).toLocaleString('pt', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </div>
-
-                    {selectedContract.generated_content && (
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Conteúdo do Contrato</h3>
-                        <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 whitespace-pre-wrap p-4 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 font-serif">
-                          {selectedContract.generated_content}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {detailTab === 'approvals' && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Aprovações</h3>
-                        {selectedContract.approvals && selectedContract.approvals.length > 0 ? (
-                          <div className="space-y-3">
-                            {selectedContract.approvals.map((approval) => (
-                              <div key={approval.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${approval.status === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                                    <User className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 uppercase tracking-wider text-[10px]">{approval.role}</p>
-                                    <p className="text-xs text-slate-500">{approval.user?.name || 'Aguardando...'}</p>
-                                  </div>
-                                </div>
-                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${approval.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : approval.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                                  {approval.status === 'approved' ? 'Aprovado' : approval.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-slate-400">Nenhuma aprovação requerida</p>
-                        )}
-                      </div>
-
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">Histórico de Aditivos</h3>
-                        {selectedContract.addendums && selectedContract.addendums.length > 0 ? (
-                          <div className="space-y-2">
-                            {selectedContract.addendums.map((add) => (
-                              <div key={add.id} className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                <div className="flex justify-between items-start mb-1">
-                                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{add.title}</p>
-                                  <span className="text-[10px] text-slate-400">{new Date(add.effective_date).toLocaleDateString()}</span>
-                                </div>
-                                <div className="text-xs text-slate-500">
-                                  {add.new_value && <p>Novo valor: R$ {Number(add.new_value).toLocaleString('pt')}</p>}
-                                  {add.new_end_date && <p>Nova data fim: {new Date(add.new_end_date).toLocaleDateString()}</p>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-slate-400">Sem aditivos registrados</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {detailTab === 'finance' && (
-                  <div className="space-y-6">
-                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                      <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-emerald-500" />
-                        Parcelas Vinculadas (Contas a Receber)
-                      </h3>
-                      <div className="space-y-3">
-                        {selectedContract.receivables && selectedContract.receivables.length > 0 ? (
-                          <div className="grid grid-cols-1 gap-2">
-                            {selectedContract.receivables.map((r: any) => (
-                              <div key={r.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
-                                <div>
-                                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{r.reference_title}</p>
-                                  <p className="text-xs text-slate-400">Vencimento: {new Date(r.due_date).toLocaleDateString()}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {Number(r.amount).toLocaleString('pt', { minimumFractionDigits: 2 })}</p>
-                                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${r.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                    {r.status === 'Paid' ? 'Pago' : 'Pendente'}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                            <p className="text-sm text-slate-500">As parcelas serão geradas automaticamente quando o contrato for ativado.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
-
-              <div className="flex gap-2 pt-6 border-t border-slate-200 dark:border-slate-700">
-                {selectedContract.status === 'draft' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'under_review')} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm">
-                    <Send className="w-4 h-4" /> Enviar para Revisão
-                  </button>
-                )}
-                {selectedContract.status === 'under_review' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'approved')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
-                    <CheckCircle className="w-4 h-4" /> Aprovar
-                  </button>
-                )}
-                {selectedContract.status === 'approved' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'sent_for_signature')} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-                    <Send className="w-4 h-4" /> Enviar para Assinatura
-                  </button>
-                )}
-                {selectedContract.status === 'sent_for_signature' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'active')} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
-                    <CheckCircle className="w-4 h-4" /> Ativar Contrato
-                  </button>
-                )}
-                {selectedContract.status === 'active' && (
-                  <button onClick={() => handleStatusChange(selectedContract.id, 'finished')} className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm">
-                    <FileText className="w-4 h-4" /> Finalizar
-                  </button>
-                )}
+              <div className="text-right">
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Valuation do Contrato</p>
+                <p className="text-3xl font-black text-white">{formatCurrency(selectedContract.value)}</p>
               </div>
             </div>
-          </div>
-        </div>
-      )}
 
-      {showTemplateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Novo Template</h2>
-              <button onClick={() => setShowTemplateModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
+            <div className="flex gap-4 p-1 bg-white/[0.02] border border-white/5 rounded-2xl w-fit">
+              {['doc', 'approvals', 'finance'].map(t => (
+                <button
+                  key={t}
+                  onClick={() => setDetailTab(t as any)}
+                  className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    detailTab === t ? 'bg-white/10 text-white' : 'text-text-muted hover:text-white'
+                  }`}
+                >
+                  {t === 'doc' ? 'Documento' : t === 'approvals' ? 'Audit Trail' : 'Financeiro'}
+                </button>
+              ))}
             </div>
-            <form onSubmit={handleTemplateSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nome *</label>
-                  <input
-                    type="text"
-                    required
-                    value={templateFormData.name}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo *</label>
-                  <select
-                    required
-                    value={templateFormData.type}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, type: e.target.value })}
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  >
-                    {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
-                    ))}
-                  </select>
-                </div>
+
+            {detailTab === 'doc' && (
+              <div className="platinum-card p-10 bg-white shadow-2xl rounded-[2rem] text-background font-serif text-sm leading-relaxed overflow-y-auto max-h-[400px]">
+                <div className="uppercase font-black text-center mb-8 tracking-[0.2em] border-b-2 border-background/10 pb-4">Instrumento Particular de Contrato</div>
+                {selectedContract.generated_content || 'Aguardando consolidação de conteúdo...'}
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-3">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Conteúdo (HTML/Template) *</label>
-                  <textarea
-                    rows={12}
-                    required
-                    value={templateFormData.content}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, content: e.target.value })}
-                    placeholder="Use placeholders como {{client_name}}, {{client_document}}, {{contract_date}}, etc."
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono text-sm"
-                  />
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Variáveis Dinâmicas</h4>
-                  <div className="space-y-2">
-                    {[
-                      { key: 'client_name', label: 'Nome Cliente' },
-                      { key: 'client_document', label: 'Documento' },
-                      { key: 'cnpj', label: 'CNPJ (Alias)' },
-                      { key: 'client_email', label: 'E-mail' },
-                      { key: 'client_phone', label: 'Telefone' },
-                      { key: 'contract_value', label: 'Valor Extenso' },
-                      { key: 'value', label: 'Valor Bruto' },
-                      { key: 'contract_date', label: 'Data Atual' },
-                    ].map(v => (
-                      <button
-                        key={v.key}
-                        type="button"
-                        onClick={() => {
-                          const tag = `{{${v.key}}}`;
-                          setTemplateFormData(prev => ({ ...prev, content: prev.content + tag }));
-                        }}
-                        className="w-full text-left px-2 py-1.5 text-[11px] bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded hover:border-blue-400 hover:text-blue-500 transition-colors"
-                      >
-                        {v.label} <code className="float-right text-slate-400">{v.key}</code>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-[10px] text-slate-400">Clique para inserir no final do texto.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="active"
-                  checked={templateFormData.active}
-                  onChange={(e) => setTemplateFormData({ ...templateFormData, active: e.target.checked })}
-                  className="rounded border-slate-300"
-                />
-                <label htmlFor="active" className="text-sm text-slate-700 dark:text-slate-300">Template ativo</label>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Placeholders disponíveis:</h4>
-                <div className="text-xs text-blue-700 dark:text-blue-300 grid grid-cols-2 gap-1">
-                  <span>{'{{client_name}}'} - Nome do cliente</span>
-                  <span>{'{{client_document}}'} - CPF-CNPJ</span>
-                  <span>{'{{client_email}}'} - E-mail</span>
-                  <span>{'{{client_phone}}'} - Telefone</span>
-                  <span>{'{{client_address}}'} - Endereço</span>
-                  <span>{'{{contract_date}}'} - Data atual</span>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setShowTemplateModal(false)} className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
-                  Cancelar
+            )}
+
+            <div className="flex justify-end gap-4 pt-6 border-t border-white/5">
+              <button onClick={() => setShowDetailModal(false)} className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest">Fechar</button>
+              {selectedContract.status === 'draft' && (
+                <button onClick={() => handleStatusChange(selectedContract.id, 'under_review')} className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest flex items-center gap-2">
+                  <Send size={14} /> Enviar para Auditoria
                 </button>
-                <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                  {loading ? 'Salvando...' : 'Criar Template'}
+              )}
+              {selectedContract.status === 'active' && (
+                <button className="px-10 py-3 bg-emerald-500 text-background font-black rounded-xl hover:bg-emerald-600 transition-all shadow-platinum-glow text-xs uppercase tracking-widest flex items-center gap-2">
+                  <Download size={14} /> Exportar Assinado
                 </button>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

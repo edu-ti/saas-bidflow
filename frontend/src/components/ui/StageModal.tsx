@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Sparkles, Save, Palette, Type } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 
@@ -19,16 +19,16 @@ type StageModalProps = {
 
 export default function StageModal({ isOpen, onClose, onSaved, stageToEdit }: StageModalProps) {
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#3b82f6');
+  const [color, setColor] = useState('#fbbf24');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (stageToEdit) {
       setName(stageToEdit.name);
-      setColor(stageToEdit.color || '#3b82f6');
+      setColor(stageToEdit.color || '#fbbf24');
     } else {
       setName('');
-      setColor('#3b82f6');
+      setColor('#fbbf24');
     }
   }, [stageToEdit, isOpen]);
 
@@ -41,73 +41,88 @@ export default function StageModal({ isOpen, onClose, onSaved, stageToEdit }: St
     try {
       if (stageToEdit && stageToEdit.id) {
         await api.put(`/api/funnel-stages/${stageToEdit.id}`, { name, color });
-        toast.success('Etapa atualizada com sucesso!');
+        toast.success('Etapa estratégica atualizada!');
       } else {
         await api.post('/api/funnel-stages', { name, color });
-        toast.success('Nova etapa criada!');
+        toast.success('Nova fase configurada no pipeline!');
       }
       onSaved();
       onClose();
     } catch (error) {
       console.error(error);
-      toast.error('Erro ao salvar a etapa.');
+      toast.error('Falha ao sincronizar etapa.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="flex justify-between items-center p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800">
-            {stageToEdit ? 'Editar Etapa' : 'Nova Etapa'}
-          </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-            <X size={24} />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      <div className="bg-background border border-white/10 rounded-2xl shadow-platinum-glow w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="flex justify-between items-center p-8 border-b border-white/5 bg-white/[0.02]">
+          <div className="space-y-1">
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+              <Sparkles size={18} className="text-primary" />
+              {stageToEdit ? 'Refinar Fase' : 'Nova Etapa'}
+            </h2>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-[0.2em]">Configuração de fluxo estratégico</p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-white transition-colors bg-white/5 p-2 rounded-xl border border-white/5">
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Etapa*</label>
+        <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
+              <Type size={12} /> Nome da Etapa
+            </div>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Ex: Proposta Enviada"
+              className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/30"
+              placeholder="Ex: Qualificação Técnica"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cor</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-10 h-10 rounded border-0 cursor-pointer"
-              />
-              <span className="text-sm text-slate-500">{color}</span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
+              <Palette size={12} /> Identificador Visual
+            </div>
+            <div className="flex items-center gap-4 bg-white/[0.02] border border-white/10 p-4 rounded-xl">
+              <div className="relative group">
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-12 h-12 rounded-lg border-0 cursor-pointer bg-transparent"
+                />
+                <div className="absolute inset-0 rounded-lg ring-2 ring-white/10 pointer-events-none" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-black text-white font-mono uppercase tracking-widest">{color}</span>
+                <span className="text-[9px] text-text-muted font-bold uppercase">Cor da Fase no Funil</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50"
+              className="flex-1 px-6 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-6 py-3.5 bg-primary text-background font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-all shadow-platinum-glow flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? 'Salvando...' : 'Salvar Etapa'}
+              <Save size={16} />
+              {loading ? 'Salvando...' : 'Sincronizar'}
             </button>
           </div>
         </form>

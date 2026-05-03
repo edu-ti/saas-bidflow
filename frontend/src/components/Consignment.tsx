@@ -84,19 +84,10 @@ export default function Consignment() {
     setReconcileOpen(true);
   };
 
-  const base = dark ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-900';
+  const base = 'bg-background text-white';
 
   return (
-    <div className={`min-h-screen p-6 lg:p-8 ${base}`}>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-          Gestão de Consignação
-        </h1>
-        <p className={`text-sm mt-1 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Controle de remessas, prestação de contas e fechamento de consignações
-        </p>
-      </div>
+    <div className={`min-h-screen p-8 ${base}`}>
 
       <ConsignmentDashboard
         records={records}

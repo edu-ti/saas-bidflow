@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AlertController;
@@ -38,6 +39,16 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
+    
+    // Reports & BI
+    Route::get('/reports/overview', [ReportController::class, 'overview']);
+    Route::get('/reports/bidding', [ReportController::class, 'bidding']);
+    Route::get('/reports/bidding-funnel', [ReportController::class, 'biddingFunnel']);
+    Route::get('/reports/financial', [ReportController::class, 'financial']);
+    Route::get('/reports/financial-health', [ReportController::class, 'financialHealth']);
+    Route::get('/reports/financial-timeline', [ReportController::class, 'financialTimeline']);
+    Route::get('/reports/team-performance', [ReportController::class, 'teamPerformance']);
+    Route::get('/reports/users', [ReportController::class, 'users']);
     
     Route::middleware('feature:commercial')->group(function () {
         Route::get('/funnel-stages', [FunnelController::class, 'stages']);

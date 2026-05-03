@@ -71,6 +71,11 @@ export const STATUS_COLORS: Record<string, string> = {
   closed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
 };
 
+export const STATUS_COLORS_PLATINUM: Record<string, string> = {
+  active: 'bg-primary/10 text-primary border-primary/20',
+  closed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+};
+
 export function fmt(value: string | number | null) {
   if (!value && value !== 0) return 'R$ 0,00';
   return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

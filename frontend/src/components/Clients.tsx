@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Upload, Save, X, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Save, X, Search, Loader2, Lock, User, Building2, Mail, Phone, MapPin, Hash, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -72,13 +72,13 @@ export default function Clients() {
     try {
       if (activeTab === 'pf') {
         const res = await api.get('/api/individual-clients');
-        setClientsPF(res.data.data);
+        setClientsPF(res.data.data || []);
       } else {
         const res = await api.get('/api/company-clients');
-        setClientsPJ(res.data.data);
+        setClientsPJ(res.data.data || []);
       }
     } catch (error) {
-      toast.error('Erro ao carregar dados');
+      toast.error('Erro ao carregar dados estratégicos');
       console.error(error);
     } finally {
       setLoading(false);
@@ -90,17 +90,16 @@ export default function Clients() {
     try {
       if (isEditing && editingId) {
         await api.put(`/api/individual-clients/${editingId}`, formDataPF);
-        toast.success('Cliente atualizado com sucesso!');
+        toast.success('Perfil atualizado!');
       } else {
         await api.post('/api/individual-clients', formDataPF);
-        toast.success('Cliente criado com sucesso!');
+        toast.success('Perfil registrado!');
       }
       setIsModalOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
-      toast.error(isEditing ? 'Erro ao atualizar cliente' : 'Erro ao criar cliente');
-      console.error(error);
+      toast.error('Erro na operação');
     }
   };
 
@@ -109,17 +108,16 @@ export default function Clients() {
     try {
       if (isEditing && editingId) {
         await api.put(`/api/company-clients/${editingId}`, formDataPJ);
-        toast.success('Cliente atualizado com sucesso!');
+        toast.success('Empresa atualizada!');
       } else {
         await api.post('/api/company-clients', formDataPJ);
-        toast.success('Cliente criado com sucesso!');
+        toast.success('Empresa registrada!');
       }
       setIsModalOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
-      toast.error(isEditing ? 'Erro ao atualizar cliente' : 'Erro ao criar cliente');
-      console.error(error);
+      toast.error('Erro na operação');
     }
   };
 
@@ -158,15 +156,14 @@ export default function Clients() {
 
   const handleDelete = async (id: number) => {
     const endpoint = activeTab === 'pf' ? 'individual-clients' : 'company-clients';
-    if (!confirm(`Tem certeza que deseja eliminar este cliente?`)) return;
+    if (!confirm(`Confirmar exclusão definitiva deste registro?`)) return;
 
     try {
       await api.delete(`/${endpoint}/${id}`);
-      toast.success('Cliente eliminado com sucesso!');
+      toast.success('Registro removido.');
       fetchData();
     } catch (error) {
-      toast.error('Erro ao eliminar cliente');
-      console.error(error);
+      toast.error('Erro ao excluir');
     }
   };
 
@@ -179,22 +176,21 @@ export default function Clients() {
     const endpoint = activeTab === 'pf' ? 'individual-clients/import' : 'company-clients/import';
 
     try {
-      toast.loading('A importar...', { duration: 1000 });
+      toast.loading('Processando base de dados...', { duration: 1500 });
       await api.post(`/${endpoint}`, formDataImport, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      toast.success('Importado com sucesso!');
+      toast.success('Importação concluída!');
       fetchData();
     } catch (error) {
-      toast.error('Erro ao importar');
-      console.error(error);
+      toast.error('Falha na importação');
     }
   };
 
   const searchCNPJ = async () => {
     const cnpj = formDataPJ.cnpj.replace(/\D/g, '');
     if (!cnpj || cnpj.length !== 14) {
-      toast.error('CNPJ inválido. Digite 14 dígitos.');
+      toast.error('CNPJ inválido');
       return;
     }
 
@@ -202,18 +198,15 @@ export default function Clients() {
     try {
       const res = await api.get(`/api/cnpj/${cnpj}`);
       const data = res.data;
-
       setFormDataPJ(prev => ({
         ...prev,
         corporate_name: data.razao_social || prev.corporate_name,
         fantasy_name: data.nome_fantasia || prev.fantasy_name,
-        cnpj: data.cnpj || prev.cnpj,
         address: data.endereco || prev.address,
       }));
-      toast.success('Dados retrievedos com sucesso!');
+      toast.success('Dados validados via RPA');
     } catch (error) {
-      toast.error('Erro ao buscar CNPJ. Verifique o CNPJ e tente novamente.');
-      console.error(error);
+      toast.error('Erro na consulta RPA');
     } finally {
       setSearchingCNPJ(false);
     }
@@ -225,7 +218,7 @@ export default function Clients() {
       : formDataPF.address?.replace(/\D/g, '').slice(0, 8);
     
     if (!cep || cep.length !== 8) {
-      toast.error('CEP inválido. Digite 8 dígitos.');
+      toast.error('CEP inválido');
       return;
     }
 
@@ -233,22 +226,14 @@ export default function Clients() {
     try {
       const res = await api.get(`/api/cep/${cep}`);
       const data = res.data;
-
-      if (isPJ) {
-        setFormDataPJ(prev => ({
-          ...prev,
-          address: `${data.logradouro || ''}, ${data.bairro || ''}, ${data.cidade || ''}-${data.estado}, CEP ${data.cep || cep}`,
-        }));
-      } else {
-        setFormDataPF(prev => ({
-          ...prev,
-          address: `${data.logradouro || ''}, ${data.bairro || ''}, ${data.cidade || ''}-${data.estado}, CEP ${data.cep || cep}`,
-        }));
-      }
-      toast.success('Endereço encontrado!');
+      const fullAddress = `${data.logradouro || ''}, ${data.bairro || ''}, ${data.cidade || ''}-${data.estado}, CEP ${data.cep || cep}`;
+      
+      if (isPJ) setFormDataPJ(prev => ({ ...prev, address: fullAddress }));
+      else setFormDataPF(prev => ({ ...prev, address: fullAddress }));
+      
+      toast.success('Endereço localizado');
     } catch (error) {
-      toast.error('Erro ao buscar CEP.');
-      console.error(error);
+      toast.error('Erro na consulta de CEP');
     } finally {
       setSearchingCEP(false);
     }
@@ -271,426 +256,254 @@ export default function Clients() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Clientes</h1>
-          <p className="text-sm text-slate-500">Gestão de clientes PF e PJ</p>
+    <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Base de <span className="text-gradient-gold">Clientes</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
+            <Lock size={12} className="text-primary" />
+            Gestão de portfólio e conformidade jurídica (PF/PJ).
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors text-sm cursor-pointer">
-            <Upload className="w-4 h-4" />
-            Importar
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-3 px-6 py-3 bg-surface-elevated/50 text-white font-bold rounded-xl border border-white/10 hover:bg-surface-elevated transition-all text-xs uppercase tracking-widest cursor-pointer">
+            <Upload className="w-4 h-4 text-primary" />
+            Bulk Import
             <input type="file" accept=".csv,.xlsx" onChange={handleImport} className="hidden" />
           </label>
           <button
             onClick={openModal}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm"
+            aria-label="Adicionar novo cliente"
+            className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-xs tracking-widest"
           >
             <Plus className="w-4 h-4" />
-            Novo Cliente
+            Novo Registro
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="border-b border-slate-200">
-          <nav className="flex -mb-px">
-            <button
-              onClick={() => setActiveTab('pf')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pf'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              Clientes PF
-            </button>
-            <button
-              onClick={() => setActiveTab('pj')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'pj'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              Clientes PJ
-            </button>
-          </nav>
+      <div className="platinum-card overflow-hidden">
+        <div className="flex border-b border-white/5 bg-white/[0.02]">
+          <button
+            onClick={() => setActiveTab('pf')}
+            className={`flex items-center gap-2 px-8 py-5 text-xs font-black uppercase tracking-widest border-b-2 transition-all ${
+              activeTab === 'pf' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-text-muted hover:text-white'
+            }`}
+          >
+            <User size={14} /> Pessoas Físicas
+          </button>
+          <button
+            onClick={() => setActiveTab('pj')}
+            className={`flex items-center gap-2 px-8 py-5 text-xs font-black uppercase tracking-widest border-b-2 transition-all ${
+              activeTab === 'pj' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-text-muted hover:text-white'
+            }`}
+          >
+            <Building2 size={14} /> Entidades Jurídicas
+          </button>
+        </div>
+
+        <div className="p-4 bg-white/[0.01] border-b border-white/5">
+          <div className="flex gap-4 relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+            <input
+              type="text"
+              placeholder={`Pesquisar na base ${activeTab === 'pf' ? 'PF' : 'PJ'}...`}
+              className="w-full pl-11 pr-4 py-3 bg-background/50 border border-white/5 rounded-xl text-sm focus:border-primary/30 outline-none transition-all text-white"
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-500">A carregar...</div>
-        ) : activeTab === 'pf' ? (
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
-              <tr>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Nome</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">CPF / RG</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Email</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Cargo/Setor</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Telefone</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Endereço</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {clientsPF.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
-                    Nenhum registo encontrado.
-                  </td>
-                </tr>
-              ) : (
-                clientsPF.map(client => (
-                  <tr key={client.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">{client.name}</td>
-                    <td className="px-6 py-4">
-                      {client.cpf && <div>{client.cpf}</div>}
-                      {client.rg && <div className="text-xs text-slate-500">RG: {client.rg}</div>}
-                    </td>
-                    <td className="px-6 py-4">{client.email || '-'}</td>
-                    <td className="px-6 py-4">{client.position || '-'}</td>
-                    <td className="px-6 py-4">{client.phone || '-'}</td>
-                    <td className="px-6 py-4 max-w-xs truncate">{client.address || '-'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEditPF(client)}
-                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(client.id)}
-                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <div className="p-12 space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+            ))}
+          </div>
         ) : (
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
-              <tr>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Razão Social</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Nome Fantasia</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">CNPJ</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Contato</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Email</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Telefone</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs">Endereço</th>
-                <th className="px-6 py-4 font-semibold uppercase text-xs text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {clientsPJ.length === 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white/5 border-b border-white/5">
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-slate-500">
-                    Nenhum registo encontrado.
-                  </td>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Identificação</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">{activeTab === 'pf' ? 'Documentação' : 'CNPJ / Reg.'}</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Contato</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Localidade</th>
+                  <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Ações</th>
                 </tr>
-              ) : (
-                clientsPJ.map(client => (
-                  <tr key={client.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">{client.corporate_name}</td>
-                    <td className="px-6 py-4">{client.fantasy_name || '-'}</td>
-                    <td className="px-6 py-4 font-mono text-xs">{client.cnpj || '-'}</td>
-                    <td className="px-6 py-4">
-                      <div>{client.contact_name || '-'}</div>
-                      {client.contact_position && <div className="text-xs text-slate-500">{client.contact_position}</div>}
-                    </td>
-                    <td className="px-6 py-4">{client.contact_email || '-'}</td>
-                    <td className="px-6 py-4">{client.contact_phone || '-'}</td>
-                    <td className="px-6 py-4 max-w-xs truncate">{client.address || '-'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEditPJ(client)}
-                          className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(client.id)}
-                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {activeTab === 'pf' ? (
+                  clientsPF.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted uppercase text-xs font-bold">Nenhum registro PF localizado</td></tr>
+                  ) : clientsPF.map(client => (
+                    <tr key={client.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="px-6 py-6 font-bold text-white group-hover:text-primary transition-colors">{client.name}</td>
+                      <td className="px-6 py-6 font-mono text-[10px] text-text-secondary">
+                        <div>CPF: {client.cpf || '-'}</div>
+                        <div className="opacity-50">RG: {client.rg || '-'}</div>
+                      </td>
+                      <td className="px-6 py-6 space-y-1">
+                        <div className="flex items-center gap-2 text-xs text-text-secondary"><Mail size={12} className="text-primary/60" /> {client.email || '-'}</div>
+                        <div className="flex items-center gap-2 text-xs text-text-secondary"><Phone size={12} className="text-primary/60" /> {client.phone || '-'}</div>
+                      </td>
+                      <td className="px-6 py-6 text-xs text-text-muted max-w-xs truncate italic">{client.address || '-'}</td>
+                      <td className="px-6 py-6 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-all"><Pencil size={14} /></button>
+                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  clientsPJ.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted uppercase text-xs font-bold">Nenhum registro PJ localizado</td></tr>
+                  ) : clientsPJ.map(client => (
+                    <tr key={client.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="px-6 py-6">
+                        <div className="font-bold text-white group-hover:text-primary transition-colors">{client.corporate_name}</div>
+                        <div className="text-[10px] text-text-muted uppercase tracking-widest">{client.fantasy_name || '-'}</div>
+                      </td>
+                      <td className="px-6 py-6 font-mono text-[10px] text-text-secondary">
+                        <div className="text-primary font-bold">{client.cnpj || '-'}</div>
+                        <div className="opacity-50">IM/IE: {client.municipal_registration || '-'}</div>
+                      </td>
+                      <td className="px-6 py-6 space-y-1">
+                        <div className="font-bold text-xs text-white">{client.contact_name || '-'}</div>
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted uppercase"><Mail size={10} /> {client.contact_email || '-'}</div>
+                      </td>
+                      <td className="px-6 py-6 text-xs text-text-muted max-w-xs truncate italic">{client.address || '-'}</td>
+                      <td className="px-6 py-6 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => handleEditPJ(client)} className="p-2 text-text-muted hover:text-primary transition-all"><Pencil size={14} /></button>
+                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? `Editar Cliente ${activeTab.toUpperCase()}` : `Novo Cliente ${activeTab.toUpperCase()}`}
+        title={isEditing ? `REFINAR REGISTRO ${activeTab.toUpperCase()}` : `NOVA ENTIDADE ${activeTab.toUpperCase()}`}
         size="lg"
       >
         {activeTab === 'pf' ? (
-          <form onSubmit={handleSubmitPF} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Nome *</label>
-                <input
-                  type="text"
-                  value={formDataPF.name}
-                  onChange={e => setFormDataPF({ ...formDataPF, name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nome completo"
-                  required
-                />
+          <form onSubmit={handleSubmitPF} className="space-y-6 p-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Nome Completo *</label>
+                <input type="text" value={formDataPF.name} onChange={e => setFormDataPF({ ...formDataPF, name: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" required />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Cargo / Setor</label>
-                <input
-                  type="text"
-                  value={formDataPF.position}
-                  onChange={e => setFormDataPF({ ...formDataPF, position: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Cargo ou setor"
-                />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Cargo / Qualificação</label>
+                <input type="text" value={formDataPF.position} onChange={e => setFormDataPF({ ...formDataPF, position: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">CPF</label>
-                <input
-                  type="text"
-                  value={formDataPF.cpf}
-                  onChange={e => setFormDataPF({ ...formDataPF, cpf: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="000.000.000-00"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">CPF</label>
+                <input type="text" value={formDataPF.cpf} onChange={e => setFormDataPF({ ...formDataPF, cpf: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">RG</label>
-                <input
-                  type="text"
-                  value={formDataPF.rg}
-                  onChange={e => setFormDataPF({ ...formDataPF, rg: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Número do RG"
-                />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">RG</label>
+                <input type="text" value={formDataPF.rg} onChange={e => setFormDataPF({ ...formDataPF, rg: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                <input
-                  type="email"
-                  value={formDataPF.email}
-                  onChange={e => setFormDataPF({ ...formDataPF, email: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="email@exemplo.com"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Email Principal</label>
+                <input type="email" value={formDataPF.email} onChange={e => setFormDataPF({ ...formDataPF, email: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Telefone</label>
-                <input
-                  type="text"
-                  value={formDataPF.phone}
-                  onChange={e => setFormDataPF({ ...formDataPF, phone: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="(00) 00000-0000"
-                />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Telefone / WhatsApp</label>
+                <input type="text" value={formDataPF.phone} onChange={e => setFormDataPF({ ...formDataPF, phone: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" />
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Endereço</label>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Endereço Estratégico</label>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={formDataPF.address}
-                  onChange={e => setFormDataPF({ ...formDataPF, address: e.target.value })}
-                  className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Endereço completo"
-                />
-                <button
-                  type="button"
-                  onClick={() => searchCEP(false)}
-                  disabled={searchingCEP}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {searchingCEP ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                <input type="text" value={formDataPF.address} onChange={e => setFormDataPF({ ...formDataPF, address: e.target.value })} className="flex-1 px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
+                <button type="button" onClick={() => searchCEP(false)} disabled={searchingCEP} className="px-5 bg-surface-elevated text-primary rounded-xl hover:bg-primary/10 transition-all border border-primary/20">
+                  {searchingCEP ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search size={16} />}
                 </button>
               </div>
             </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 text-sm">
-                <X className="w-4 h-4 inline mr-2" />Cancelar
-              </button>
-              <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm">
-                <Save className="w-4 h-4 inline mr-2" />{isEditing ? 'Salvar' : 'Criar'}
-              </button>
+            <div className="flex justify-end gap-4 pt-4">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest">Descartar</button>
+              <button type="submit" className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest">{isEditing ? 'Atualizar Perfil' : 'Salvar Registro'}</button>
             </div>
           </form>
         ) : (
-          <form onSubmit={handleSubmitPJ} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">CNPJ</label>
+          <form onSubmit={handleSubmitPJ} className="space-y-6 p-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">CNPJ / RPA Validator</label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={formDataPJ.cnpj}
-                    onChange={e => setFormDataPJ({ ...formDataPJ, cnpj: e.target.value })}
-                    className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="00.000.000/0001-00"
-                  />
-                  <button
-                    type="button"
-                    onClick={searchCNPJ}
-                    disabled={searchingCNPJ}
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {searchingCNPJ ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  <input type="text" value={formDataPJ.cnpj} onChange={e => setFormDataPJ({ ...formDataPJ, cnpj: e.target.value })} className="flex-1 px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" placeholder="00.000.000/0001-00" />
+                  <button type="button" onClick={searchCNPJ} disabled={searchingCNPJ} className="px-5 bg-primary text-background rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow">
+                    {searchingCNPJ ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck size={18} />}
                   </button>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Inscrição Municipal</label>
-                <input
-                  type="text"
-                  value={formDataPJ.municipal_registration}
-                  onChange={e => setFormDataPJ({ ...formDataPJ, municipal_registration: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Inscrição municipal"
-                />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Inscrição Municipal</label>
+                <input type="text" value={formDataPJ.municipal_registration} onChange={e => setFormDataPJ({ ...formDataPJ, municipal_registration: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Razão Social *</label>
-                <input
-                  type="text"
-                  value={formDataPJ.corporate_name}
-                  onChange={e => setFormDataPJ({ ...formDataPJ, corporate_name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Razão social completa"
-                  required
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Razão Social *</label>
+                <input type="text" value={formDataPJ.corporate_name} onChange={e => setFormDataPJ({ ...formDataPJ, corporate_name: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" required />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Nome Fantasia</label>
-                <input
-                  type="text"
-                  value={formDataPJ.fantasy_name}
-                  onChange={e => setFormDataPJ({ ...formDataPJ, fantasy_name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nome fantasia"
-                />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Nome Fantasia</label>
+                <input type="text" value={formDataPJ.fantasy_name} onChange={e => setFormDataPJ({ ...formDataPJ, fantasy_name: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Inscrição Estadual</label>
-              <input
-                type="text"
-                value={formDataPJ.state_registration}
-                onChange={e => setFormDataPJ({ ...formDataPJ, state_registration: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Inscrição estadual"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Endereço</label>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Endereço Matriz</label>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={formDataPJ.address}
-                  onChange={e => setFormDataPJ({ ...formDataPJ, address: e.target.value })}
-                  className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Endereço completo"
-                />
-                <button
-                  type="button"
-                  onClick={() => searchCEP(true)}
-                  disabled={searchingCEP}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {searchingCEP ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                <input type="text" value={formDataPJ.address} onChange={e => setFormDataPJ({ ...formDataPJ, address: e.target.value })} className="flex-1 px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
+                <button type="button" onClick={() => searchCEP(true)} disabled={searchingCEP} className="px-5 bg-surface-elevated text-primary rounded-xl hover:bg-primary/10 transition-all border border-primary/20">
+                  {searchingCEP ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search size={16} />}
                 </button>
               </div>
             </div>
-
-            <div className="border-t border-slate-200 pt-4">
-              <p className="text-sm font-medium text-slate-700 mb-3">Dados do Contato</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Nome do Contato</label>
-                  <input
-                    type="text"
-                    value={formDataPJ.contact_name}
-                    onChange={e => setFormDataPJ({ ...formDataPJ, contact_name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nome do contato"
-                  />
+            <div className="border-t border-white/5 pt-6 space-y-6">
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2"><User size={12} /> Key Account / Contato Principal</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Nome Completo</label>
+                  <input type="text" value={formDataPJ.contact_name} onChange={e => setFormDataPJ({ ...formDataPJ, contact_name: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Cargo / Setor</label>
-                  <input
-                    type="text"
-                    value={formDataPJ.contact_position}
-                    onChange={e => setFormDataPJ({ ...formDataPJ, contact_position: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Cargo ou setor"
-                  />
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Cargo / Departamento</label>
+                  <input type="text" value={formDataPJ.contact_position} onChange={e => setFormDataPJ({ ...formDataPJ, contact_position: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                  <input
-                    type="email"
-                    value={formDataPJ.contact_email}
-                    onChange={e => setFormDataPJ({ ...formDataPJ, contact_email: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="email@exemplo.com"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Email de Contato</label>
+                  <input type="email" value={formDataPJ.contact_email} onChange={e => setFormDataPJ({ ...formDataPJ, contact_email: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Telefone</label>
-                  <input
-                    type="text"
-                    value={formDataPJ.contact_phone}
-                    onChange={e => setFormDataPJ({ ...formDataPJ, contact_phone: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="(00) 00000-0000"
-                  />
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Telefone Direto</label>
+                  <input type="text" value={formDataPJ.contact_phone} onChange={e => setFormDataPJ({ ...formDataPJ, contact_phone: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" />
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 text-sm">
-                <X className="w-4 h-4 inline mr-2" />Cancelar
-              </button>
-              <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm">
-                <Save className="w-4 h-4 inline mr-2" />{isEditing ? 'Salvar' : 'Criar'}
-              </button>
+            <div className="flex justify-end gap-4 pt-4">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest">Descartar</button>
+              <button type="submit" className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest">{isEditing ? 'Atualizar Empresa' : 'Salvar Empresa'}</button>
             </div>
           </form>
         )}

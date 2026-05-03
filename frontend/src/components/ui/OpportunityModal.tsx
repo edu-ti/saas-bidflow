@@ -213,87 +213,103 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
-          <h2 className="text-2xl font-bold text-slate-800">
-            {opportunityToEdit ? 'Editar Oportunidade' : 'Criar Oportunidade'}
-          </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      <div className="bg-background border border-white/10 rounded-2xl shadow-platinum-glow w-full max-w-5xl my-8 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+        
+        {/* Header - Platinum Style */}
+        <div className="flex justify-between items-center p-8 border-b border-white/5 bg-white/[0.02] sticky top-0 z-10">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+              <BookOpen size={24} className="text-primary" />
+              {opportunityToEdit ? 'Refinar Oportunidade' : 'Nova Arquitetura de Negócio'}
+            </h2>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-[0.2em]">Configuração de Deal Estratégico Platinum</p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-white transition-colors bg-white/5 p-2 rounded-xl border border-white/5">
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          <form id="opp-form" onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
+          <form id="opp-form" onSubmit={handleSubmit} className="space-y-10">
             
-            {/* Cabeçalho */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-b border-slate-100 pb-6">
-              <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título*</label>
+            {/* Cabeçalho - Dados Primários */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-3 space-y-2">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Título do Projeto*</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                  placeholder="Ex: Expansão de Infraestrutura Network"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Cliente (Organização ou PF)</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Cliente Estratégico</label>
                 <select
                   value={organizationId}
                   onChange={(e) => setOrganizationId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all appearance-none"
                 >
-                  <option value="">Selecione...</option>
+                  <option value="" className="bg-surface">Selecione o Cliente...</option>
                   {organizations.map(org => (
-                    <option key={org.id} value={org.id}>{org.trade_name || org.legal_name}</option>
+                    <option key={org.id} value={org.id} className="bg-surface">{org.trade_name || org.legal_name}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Contato (apenas para Organização)</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Ponto de Contato</label>
                 <select
                   value={contactId}
                   onChange={(e) => setContactId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all appearance-none"
                 >
-                  <option value="">Selecione...</option>
+                  <option value="" className="bg-surface">Vincular Contato...</option>
                   {contacts.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id} className="bg-surface">{c.name}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Encaminhar para (Pré-Proposta)</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Workflow Interno</label>
                 <select
                   value={forwardTo}
                   onChange={(e) => setForwardTo(e.target.value)}
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all appearance-none"
                 >
-                  <option value="">Minha oportunidade</option>
-                  <option value="Equipe Comercial">Equipe Comercial</option>
-                  <option value="Diretoria">Diretoria</option>
+                  <option value="" className="bg-surface">Minha oportunidade</option>
+                  <option value="Equipe Comercial" className="bg-surface">Equipe Comercial</option>
+                  <option value="Diretoria" className="bg-surface">Diretoria</option>
                 </select>
               </div>
             </div>
 
-            {/* Itens Adicionados */}
+            {/* Itens Adicionados - Platinum Card */}
             {items.length > 0 && (
-              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="font-semibold text-slate-800 mb-3">Itens Salvos ({items.length})</h3>
-                <div className="space-y-2">
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden">
+                <div className="px-6 py-4 bg-white/5 border-b border-white/5">
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                    <List size={14} className="text-primary" />
+                    Bill of Materials ({items.length} itens)
+                  </h3>
+                </div>
+                <div className="divide-y divide-white/5">
                   {items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center bg-white p-3 rounded border border-slate-200">
-                      <div>
-                        <span className="font-medium">{item.description}</span>
-                        <span className="text-slate-500 text-sm ml-2">{item.quantity} {item.unit_measure} x R$ {item.unit_price}</span>
+                    <div key={idx} className="flex justify-between items-center p-6 hover:bg-white/[0.01] transition-colors group">
+                      <div className="space-y-1">
+                        <span className="font-bold text-white text-sm group-hover:text-primary transition-colors">{item.description}</span>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-widest">
+                          <span>{item.quantity} {item.unit_measure}</span>
+                          <span className="text-white/20">•</span>
+                          <span>R$ {item.unit_price.toLocaleString('pt-BR')} unit.</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-slate-700">R$ {item.subtotal.toFixed(2)}</span>
-                        <button type="button" onClick={() => removeItem(idx)} className="text-red-500 hover:text-red-700">
-                          <Trash2 size={18} />
+                      <div className="flex items-center gap-8">
+                        <span className="text-lg font-black text-white tracking-tighter">R$ {item.subtotal.toLocaleString('pt-BR')}</span>
+                        <button type="button" onClick={() => removeItem(idx)} className="text-text-muted hover:text-red-400 p-2 bg-white/5 rounded-lg border border-white/5 transition-all">
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
@@ -302,214 +318,228 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
               </div>
             )}
 
-            {/* Novo Item */}
-            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-              <h3 className="font-bold text-lg text-slate-800 mb-4 border-b border-slate-200 pb-2">Novo Item da Oportunidade</h3>
+            {/* Configuração de Item - Platinum Panel */}
+            <div className="platinum-card p-8 space-y-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <Plus size={120} className="text-primary" />
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Descrição*</label>
+              <div className="flex items-center gap-3 border-b border-white/5 pb-6">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Plus size={20} />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em]">Configuração Técnica de Item</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Descrição do Ativo*</label>
                   <input
                     type="text"
                     value={currentItem.description}
                     onChange={(e) => updateCurrentItem('description', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all"
+                    placeholder="Ex: Switch Core 48 Portas PoE"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Fabricante</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Fabricante</label>
                   <input
                     type="text"
                     value={currentItem.manufacturer}
                     onChange={(e) => updateCurrentItem('manufacturer', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all"
                   />
                 </div>
-                <div className="row-span-2 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-lg p-2 bg-white">
-                  <span className="text-xs text-slate-500 mb-1">Imagem</span>
-                  <div className="w-16 h-16 bg-slate-100 flex items-center justify-center rounded mb-2">
-                    <ImageIcon className="text-slate-400" size={24} />
-                  </div>
-                  <button type="button" className="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1 rounded text-slate-700">
-                    Escolher
+                <div className="row-span-2 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl p-6 bg-white/[0.01] hover:border-primary/30 transition-all cursor-pointer group">
+                  <ImageIcon className="text-text-muted group-hover:text-primary transition-all mb-3" size={32} />
+                  <span className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-4">Evidência Visual</span>
+                  <button type="button" className="text-[10px] font-black bg-white/5 hover:bg-primary hover:text-background px-4 py-2 rounded-lg text-white border border-white/10 transition-all uppercase tracking-widest">
+                    Selecionar
                   </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Modelo</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Part Number / Modelo</label>
                   <input
                     type="text"
                     value={currentItem.model}
                     onChange={(e) => updateCurrentItem('model', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Modalidade</label>
                   <select
                     value={currentItem.status}
                     onChange={(e) => updateCurrentItem('status', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2 bg-white"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all appearance-none"
                   >
-                    <option value="Venda">Venda</option>
-                    <option value="Locação">Locação</option>
-                    <option value="Serviço">Serviço</option>
+                    <option value="Venda" className="bg-surface">Venda</option>
+                    <option value="Locação" className="bg-surface">Locação</option>
+                    <option value="Serviço" className="bg-surface">Serviço</option>
                   </select>
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição Detalhada</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Descrição Técnica Detalhada</label>
                 <textarea
                   value={currentItem.detailed_description}
                   onChange={(e) => updateCurrentItem('detailed_description', e.target.value)}
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 min-h-[80px]"
+                  className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all min-h-[100px]"
+                  placeholder="Espeficicações avançadas, SLAs, garantias..."
                 ></textarea>
               </div>
 
-              {/* Parâmetros Adicionais */}
-              <div className="mb-4 bg-white p-4 rounded-md border border-slate-200">
-                <h4 className="text-sm font-bold text-slate-700 mb-2">Parâmetros Adicionais</h4>
-                {currentItem.additional_parameters.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic mb-3">Nenhum parâmetro adicional.</p>
-                ) : (
-                  <div className="mb-3 space-y-2">
-                    {currentItem.additional_parameters.map((param, idx) => (
-                      <div key={idx} className="flex gap-2 items-center text-sm">
-                        <span className="font-semibold bg-slate-100 px-2 py-1 rounded border border-slate-200">{param.name}</span>
-                        <span>:</span>
-                        <span className="bg-slate-50 px-2 py-1 rounded border border-slate-200 flex-1">{param.value}</span>
-                        <button type="button" onClick={() => handleRemoveParameter(idx)} className="text-red-500 hover:text-red-700">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
+              {/* Parâmetros Adicionais - Dark Style */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Settings size={14} className="text-primary" />
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Atributos Customizados</h4>
+                </div>
+                <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/5 space-y-4">
+                  {currentItem.additional_parameters.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                      {currentItem.additional_parameters.map((param, idx) => (
+                        <div key={idx} className="flex gap-3 items-center p-3 bg-white/5 rounded-xl border border-white/5 group">
+                          <div className="font-black text-[9px] text-primary uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">{param.name}</div>
+                          <div className="flex-1 text-[10px] font-bold text-white uppercase truncate">{param.value}</div>
+                          <button type="button" onClick={() => handleRemoveParameter(idx)} className="text-text-muted hover:text-red-400 p-1 transition-all">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-4 items-end">
+                    <div className="flex-1 space-y-2">
+                      <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Chave (Ex: Cor)</label>
+                      <input
+                        type="text"
+                        value={paramName}
+                        onChange={(e) => setParamName(e.target.value)}
+                        className="w-full bg-background/30 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Valor (Ex: Titanium)</label>
+                      <input
+                        type="text"
+                        value={paramValue}
+                        onChange={(e) => setParamValue(e.target.value)}
+                        className="w-full bg-background/30 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddParameter}
+                      className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                    >
+                      Vincular
+                    </button>
                   </div>
-                )}
-                
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Nome do Parâmetro</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: DC"
-                      value={paramName}
-                      onChange={(e) => setParamName(e.target.value)}
-                      className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Valor do Parâmetro</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: R$ 4.264,00 ou Cor Preta"
-                      value={paramValue}
-                      onChange={(e) => setParamValue(e.target.value)}
-                      className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddParameter}
-                    className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-slate-700 text-sm hover:bg-slate-200"
-                  >
-                    Adicionar
-                  </button>
                 </div>
               </div>
 
-              {/* Valores e Quantidades */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade*</label>
+              {/* Valores e Quantidades - Premium Look */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 border-t border-white/5 pt-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Quantidade</label>
                   <input
                     type="number"
                     min="1"
                     value={currentItem.quantity}
                     onChange={(e) => updateCurrentItem('quantity', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor Unitário*</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Unitário (R$)</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
                     value={currentItem.unit_price}
                     onChange={(e) => updateCurrentItem('unit_price', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Unidade de Medida</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Medida</label>
                   <input
                     type="text"
                     value={currentItem.unit_measure}
                     onChange={(e) => updateCurrentItem('unit_measure', e.target.value)}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2"
+                    className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-text-muted/30"
+                    placeholder="Un, Kit, Hectare..."
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Subtotal</label>
-                  <div className="w-full bg-slate-100 border border-slate-200 rounded-md px-3 py-2 font-semibold text-slate-700">
-                    R$ {currentItem.subtotal.toFixed(2)}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest">Subtotal Calculado</label>
+                  <div className="w-full h-[50px] flex items-center px-4 bg-primary/5 border border-primary/20 rounded-xl font-black text-white text-lg tracking-tight">
+                    R$ {currentItem.subtotal.toLocaleString('pt-BR')}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
-                <button type="button" className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 shadow-sm rounded-md text-sm hover:bg-slate-50 text-slate-700">
-                  <BookOpen size={16} /> Do Catálogo
-                </button>
-                <button type="button" className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 shadow-sm rounded-md text-sm hover:bg-slate-50 text-slate-700">
-                  <Plus size={16} /> Manual
+              <div className="flex items-center gap-4 pt-4">
+                <button type="button" className="flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all">
+                  <BookOpen size={16} className="text-primary" /> Do Catálogo
                 </button>
                 <div className="ml-auto">
                   <button 
                     type="button" 
                     onClick={addItemToOpportunity}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+                    className="px-8 py-3.5 bg-primary text-background font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-all shadow-platinum-glow"
                   >
-                    Adicionar Item à Lista
+                    Adicionar Item ao Negócio
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end items-center mb-6">
-              <span className="text-xl font-bold text-slate-800">Total Oportunidade: R$ {totalOpportunity.toFixed(2)}</span>
+            <div className="flex justify-end items-center py-6 border-y border-white/5">
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Total Geral da Oportunidade</span>
+                <span className="text-4xl font-black text-white tracking-tighter shadow-platinum-glow">
+                  R$ {totalOpportunity.toLocaleString('pt-BR')}
+                </span>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Mensagem/Notas Gerais</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Observações Estratégicas</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 min-h-[100px]"
+                className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:border-primary/40 outline-none transition-all min-h-[120px]"
+                placeholder="Notas sobre a concorrência, urgência do cliente, prazos críticos..."
               ></textarea>
             </div>
           </form>
         </div>
 
-        <div className="flex justify-between items-center p-6 border-t border-slate-200 bg-slate-50 sticky bottom-0 z-10">
+        {/* Footer - Platinum Style */}
+        <div className="flex justify-between items-center p-8 border-t border-white/5 bg-white/[0.02] sticky bottom-0 z-10">
           <div>
             {opportunityToEdit && (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-colors"
+                className="px-6 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border border-transparent hover:border-red-500/20"
               >
-                Excluir Oportunidade
+                Encerrar Oportunidade
               </button>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100 font-medium"
+              className="px-8 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
             >
               Cancelar
             </button>
@@ -517,9 +547,10 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
               type="submit"
               form="opp-form"
               disabled={loading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium shadow-sm"
+              className="px-10 py-3.5 bg-primary text-background font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-all shadow-platinum-glow flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? 'Salvando...' : 'Salvar Alterações'}
+              <Save size={16} />
+              {loading ? 'Sincronizando...' : 'Consolidar Negócio'}
             </button>
           </div>
         </div>

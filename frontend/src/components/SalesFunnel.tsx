@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Sparkles, Loader2, FileWarning, Clock, FileText, Plus, Settings, Trash2, Edit2, MoreVertical } from 'lucide-react';
+import { Sparkles, Loader2, FileWarning, Clock, FileText, Plus, Settings, Trash2, Edit2, MoreVertical, Lock } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../lib/axios';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -73,12 +73,11 @@ export default function SalesFunnel() {
       if (res.data && res.data.length > 0) {
         setStages(res.data);
       } else {
-        // Fallback or seed initial stages
         setStages([
-          { id: 1, name: 'Prospectando', color: '#3b82f6' },
-          { id: 2, name: 'Proposta', color: '#a855f7' },
-          { id: 3, name: 'Negociação', color: '#f59e0b' },
-          { id: 4, name: 'Fechado', color: '#10b981' },
+          { id: 1, name: 'Prospectando', color: '#fbbf24' },
+          { id: 2, name: 'Proposta', color: '#fcd34d' },
+          { id: 3, name: 'Negociação', color: '#10b981' },
+          { id: 4, name: 'Fechado', color: '#3b82f6' },
           { id: 5, name: 'Controle de Entrega', color: '#6366f1' },
           { id: 6, name: 'Treinamentos', color: '#8b5cf6' },
           { id: 7, name: 'Pós-venda', color: '#ec4899' },
@@ -96,9 +95,7 @@ export default function SalesFunnel() {
       const newData = res.data.data || res.data;
       setOpportunities(newData);
     } catch (err) {
-      if (!isPolling) {
-        console.error("API Error", err);
-      }
+      if (!isPolling) console.error("API Error", err);
     } finally {
       if (!isPolling) setLoading(false);
     }
@@ -133,10 +130,9 @@ export default function SalesFunnel() {
       await api.patch(`/api/opportunities/${oppId}/move`, {
         funnel_stage_id: newStageId
       });
-      toast.success("Oportunidade movida!");
+      toast.success("Pipeline atualizado com sucesso!");
     } catch (error) {
-      console.error(error);
-      toast.error("Falha ao mover. Revertendo...");
+      toast.error("Erro na sincronização. Revertendo...");
       setOpportunities(previousState);
     } finally {
       setDraggingId(null);
@@ -144,13 +140,13 @@ export default function SalesFunnel() {
   };
 
   const handleDeleteStage = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta etapa?')) return;
+    if (!window.confirm('Excluir esta etapa estratégica?')) return;
     try {
       await api.delete(`/api/funnel-stages/${id}`);
-      toast.success('Etapa excluída!');
+      toast.success('Fase removida.');
       fetchStages();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao excluir etapa.');
+      toast.error(err.response?.data?.message || 'Erro ao remover fase.');
     }
   };
 
@@ -171,72 +167,83 @@ export default function SalesFunnel() {
   };
 
   return (
-    <div className="p-6 h-screen w-full flex flex-col bg-slate-50">
+    <div className="p-8 h-screen w-full flex flex-col bg-background space-y-8 overflow-hidden">
       <Toaster position="top-right" />
       
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Funil de Vendas</h1>
-          <p className="text-slate-500 text-sm">Gerencie suas oportunidades de negócio em etapas customizáveis.</p>
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Pipeline <span className="text-gradient-gold">Estratégico</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
+            <Lock size={12} className="text-primary" />
+            Fluxo comercial monitorado com inteligência de conversão Platinum.
+          </p>
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => {
-              setStageToEdit(null);
-              setIsStageModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm font-medium"
+            onClick={() => { setStageToEdit(null); setIsStageModalOpen(true); }}
+            aria-label="Configurar novas etapas do funil"
+            className="flex items-center gap-3 px-6 py-3 bg-surface-elevated/50 text-white font-bold rounded-xl border border-white/10 hover:bg-surface-elevated transition-all text-xs uppercase tracking-widest"
           >
-            <Settings size={18} />
-            Nova Etapa
+            <Settings size={16} className="text-primary" />
+            Fases
           </button>
           <button 
             onClick={() => handleCreateOpp()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium"
+            aria-label="Criar nova oportunidade comercial"
+            className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest"
           >
-            <Plus size={18} />
-            Criar Oportunidade
+            <Plus size={16} />
+            Novo Deal
           </button>
         </div>
-      </div>
+      </header>
 
       {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="animate-spin text-blue-500 w-10 h-10" />
+        <div className="flex-1 flex gap-6 overflow-hidden">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="min-w-[320px] bg-white/5 rounded-2xl p-4 space-y-4 animate-pulse">
+              <div className="h-6 bg-white/5 rounded w-1/2" />
+              <div className="h-24 bg-white/5 rounded-xl" />
+              <div className="h-24 bg-white/5 rounded-xl" />
+            </div>
+          ))}
         </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex flex-1 gap-4 overflow-x-auto pb-4">
+          <div className="flex flex-1 gap-6 overflow-x-auto pb-6 scrollbar-platinum">
             {stages.map(stage => (
               <Droppable key={stage.id} droppableId={stage.id.toString()}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`min-w-[300px] max-w-[300px] bg-slate-100 rounded-xl p-3 flex flex-col shadow-sm border border-slate-200 transition-colors ${snapshot.isDraggingOver ? 'bg-slate-200' : ''}`}
+                    className={`min-w-[320px] max-w-[320px] bg-surface-elevated/30 rounded-2xl p-4 flex flex-col border border-white/5 transition-all ${snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20 shadow-platinum-glow' : ''}`}
                   >
-                    {/* Column Header */}
-                    <div className="flex items-center gap-2 mb-3 px-1 group">
-                      <span className="w-3 h-3 rounded-full block flex-shrink-0" style={{ backgroundColor: stage.color }}></span>
-                      <h3 className="font-semibold text-slate-800 truncate flex-1">{stage.name}</h3>
-                      <span className="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold">
-                        {opportunities.filter(opp => opp.funnel_stage_id === stage.id).length}
-                      </span>
-                      
-                      {/* Column Actions (visible on hover) */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                        <button onClick={() => handleEditStage(stage)} className="text-slate-400 hover:text-blue-500 p-1" title="Editar Etapa">
-                          <Edit2 size={14} />
-                        </button>
-                        <button onClick={() => handleDeleteStage(stage.id)} className="text-slate-400 hover:text-red-500 p-1" title="Excluir Etapa">
-                          <Trash2 size={14} />
-                        </button>
+                    {/* Stage Header */}
+                    <div className="flex items-center justify-between mb-6 px-1 group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: stage.color }}></div>
+                        <h3 className="font-bold text-white text-sm tracking-tight uppercase">{stage.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-white/5 text-text-muted text-[10px] px-2 py-0.5 rounded-md font-black">
+                          {opportunities.filter(opp => opp.funnel_stage_id === stage.id).length}
+                        </span>
+                        <div className="hidden group-hover:flex items-center gap-1">
+                          <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1 transition-colors" title="Editar">
+                            <Edit2 size={12} />
+                          </button>
+                          <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-red-400 p-1 transition-colors" title="Excluir">
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Draggable Items */}
-                    <div className="flex-1 flex flex-col gap-2 overflow-y-auto min-h-[150px]">
+                    {/* Opportunity Cards */}
+                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto min-h-[200px] scrollbar-hide">
                       {opportunities.filter(opp => opp.funnel_stage_id === stage.id).map((opp, index) => (
                         <Draggable key={opp.id} draggableId={opp.id.toString()} index={index}>
                           {(provided, snapshot) => (
@@ -245,19 +252,35 @@ export default function SalesFunnel() {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               onClick={() => handleEditOpp(opp)}
-                              className={`bg-white p-3.5 rounded-lg shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer ${snapshot.isDragging ? 'shadow-lg rotate-2 z-50' : ''} ${draggingId === opp.id ? 'opacity-50' : ''}`}
+                              className={`bg-background/40 p-5 rounded-xl border border-white/5 hover:border-primary/30 hover:bg-surface-elevated transition-all cursor-pointer group/card ${snapshot.isDragging ? 'shadow-2xl rotate-1 z-50 bg-surface-elevated scale-105 border-primary/50' : ''} ${draggingId === opp.id ? 'opacity-40 grayscale' : ''}`}
                             >
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="font-medium text-slate-800 text-sm leading-snug">{opp.title}</p>
-                              </div>
+                              <div className="space-y-4">
+                                <div className="flex justify-between items-start">
+                                  <p className="font-bold text-white text-sm leading-tight group-hover/card:text-primary transition-colors">{opp.title}</p>
+                                  <MoreVertical size={14} className="text-text-muted opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                                </div>
 
-                              <div className="flex justify-between items-center mt-3 text-xs">
-                                <span className="px-2 py-1 bg-slate-50 border border-slate-100 text-slate-600 rounded-md font-medium">
-                                  {opp.type || 'Nova'}
-                                </span>
-                                <span className="font-bold text-slate-700">
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(opp.value))}
-                                </span>
+                                <div className="flex justify-between items-end">
+                                  <div className="space-y-1">
+                                    <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block">Potencial</span>
+                                    <span className="text-white font-black tracking-tight">
+                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(opp.value))}
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-col items-end gap-1">
+                                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
+                                      {opp.type === 'bidding' ? 'Licitação' : 'Comercial'}
+                                    </span>
+                                    {opp.win_probability && (
+                                      <div className="flex items-center gap-1.5">
+                                        <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                                          <div className="h-full bg-secondary" style={{ width: opp.win_probability }}></div>
+                                        </div>
+                                        <span className="text-[10px] text-text-muted font-bold">{opp.win_probability}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -265,12 +288,12 @@ export default function SalesFunnel() {
                       ))}
                       {provided.placeholder}
                       
-                      {/* Add Opp Button at bottom of column */}
                       <button 
                         onClick={() => handleCreateOpp(stage.id)}
-                        className="mt-2 py-2 flex items-center justify-center gap-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 rounded-md transition-colors text-sm font-medium w-full"
+                        aria-label={`Adicionar deal em ${stage.name}`}
+                        className="mt-2 py-4 flex items-center justify-center gap-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-xl border border-dashed border-white/5 hover:border-primary/30 transition-all text-[10px] font-black uppercase tracking-[0.2em]"
                       >
-                        <Plus size={16} /> Adicionar
+                        <Plus size={14} /> Novo Negócio
                       </button>
                     </div>
                   </div>
@@ -278,16 +301,14 @@ export default function SalesFunnel() {
               </Droppable>
             ))}
             
-            {/* Add Column Placeholder */}
-            <div className="min-w-[300px] max-w-[300px]">
+            {/* New Stage Placeholder */}
+            <div className="min-w-[320px]">
               <button 
-                onClick={() => {
-                  setStageToEdit(null);
-                  setIsStageModalOpen(true);
-                }}
-                className="w-full h-[50px] border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all font-medium gap-2"
+                onClick={() => { setStageToEdit(null); setIsStageModalOpen(true); }}
+                aria-label="Adicionar nova fase estratégica"
+                className="w-full h-16 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all font-black gap-3 text-xs uppercase tracking-widest"
               >
-                <Plus size={20} /> Adicionar Etapa
+                <Plus size={18} /> Adicionar Fase
               </button>
             </div>
           </div>

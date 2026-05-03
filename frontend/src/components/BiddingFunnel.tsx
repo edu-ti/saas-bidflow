@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Filter, Sparkles, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Filter, Sparkles, AlertCircle, Lock, ShieldCheck, Zap, TrendingUp, DollarSign, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -33,14 +33,14 @@ interface FunnelStage {
 }
 
 const defaultStages = [
-  { id: 1, name: 'Identificada', color: '#3b82f6', order: 1 },
-  { id: 2, name: 'Análise', color: '#8b5cf6', order: 2 },
-  { id: 3, name: 'Preparação', color: '#a855f7', order: 3 },
-  { id: 4, name: 'Apresentação', color: '#f59e0b', order: 4 },
-  { id: 5, name: 'Homologação', color: '#f97316', order: 5 },
-  { id: 6, name: 'Recurso', color: '#eab308', order: 6 },
-  { id: 7, name: 'Adjudicação', color: '#10b981', order: 7 },
-  { id: 8, name: 'Perdida', color: '#ef4444', order: 8 },
+  { id: 1, name: 'Identificada', color: '#fbbf24', order: 1 }, // Amber Gold
+  { id: 2, name: 'Análise Técnica', color: '#3b82f6', order: 2 }, // Blue
+  { id: 3, name: 'Preparação', color: '#8b5cf6', order: 3 }, // Violet
+  { id: 4, name: 'Apresentação', color: '#f59e0b', order: 4 }, // Amber
+  { id: 5, name: 'Homologação', color: '#10b981', order: 5 }, // Emerald
+  { id: 6, name: 'Recurso', color: '#f97316', order: 6 }, // Orange
+  { id: 7, name: 'Adjudicação', color: '#0ea5e9', order: 7 }, // Sky
+  { id: 8, name: 'Perdida', color: '#ef4444', order: 8 }, // Red
 ];
 
 export default function BiddingFunnel() {
@@ -69,9 +69,9 @@ export default function BiddingFunnel() {
   const fetchData = async () => {
     try {
       const res = await api.get('/api/opportunities?type=bidding');
-      setBiddings(res.data.data || res.data);
+      setBiddings(res.data.data || res.data || []);
     } catch (error) {
-      console.error(error);
+      toast.error('Erro na sincronização do pipeline');
     } finally {
       setLoading(false);
     }
@@ -82,17 +82,16 @@ export default function BiddingFunnel() {
     try {
       if (isEditing && editingId) {
         await api.put(`/api/opportunities/${editingId}`, { ...formData, type: 'bidding' });
-        toast.success('Licitação atualizada!');
+        toast.success('Pipeline atualizado!');
       } else {
         await api.post('/api/opportunities', { ...formData, type: 'bidding' });
-        toast.success('Licitação criada!');
+        toast.success('Nova oportunidade integrada!');
       }
       setIsModalOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
-      toast.error(isEditing ? 'Erro ao atualizar' : 'Erro ao criar');
-      console.error(error);
+      toast.error('Falha na operação estratégica');
     }
   };
 
@@ -114,14 +113,13 @@ export default function BiddingFunnel() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Eliminar esta licitação?')) return;
+    if (!confirm('Confirmar exclusão definitiva do processo?')) return;
     try {
       await api.delete(`/api/opportunities/${id}`);
-      toast.success('Licitação eliminada!');
+      toast.success('Oportunidade removida.');
       fetchData();
     } catch (error) {
-      toast.error('Erro ao eliminar');
-      console.error(error);
+      toast.error('Falha na exclusão');
     }
   };
 
@@ -132,11 +130,6 @@ export default function BiddingFunnel() {
     });
     setEditingId(null);
     setIsEditing(false);
-  };
-
-  const openModal = () => {
-    resetForm();
-    setIsModalOpen(true);
   };
 
   const onDragEnd = async (result: DropResult) => {
@@ -150,8 +143,9 @@ export default function BiddingFunnel() {
 
     try {
       await api.patch(`/api/opportunities/${draggableId}/move`, { funnel_stage_id: newStageId });
+      toast.success('Status sincronizado');
     } catch (error) {
-      toast.error('Erro ao mover');
+      toast.error('Erro na movimentação');
       fetchData();
     }
   };
@@ -160,96 +154,138 @@ export default function BiddingFunnel() {
     biddings.filter(b => b.funnel_stage_id === stageId);
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Funil de Licitações</h1>
-          <p className="text-sm text-slate-500">Gestão de oportunidades de licitações</p>
+    <div className="p-8 w-full min-h-screen bg-background space-y-8 text-white">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Pipeline <span className="text-gradient-gold">Licitatório</span>
+          </h1>
+          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2">
+            <ShieldCheck size={12} className="text-primary" />
+            Fluxo estratégico de participação e conformidade jurídica.
+          </p>
         </div>
-<button
-          onClick={openModal}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm"
+        <button
+          onClick={() => { resetForm(); setIsModalOpen(true); }}
+          aria-label="Registrar nova licitação no pipeline"
+          className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-xs tracking-widest"
         >
           <Plus className="w-4 h-4" />
-          Nova Licitação
+          Novo Processo
         </button>
-      </div>
+      </header>
 
       {loading ? (
-        <div className="text-center text-slate-500 p-8">A carregar...</div>
+        <div className="p-20 flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary opacity-40" />
+          <p className="font-black uppercase tracking-[0.3em] text-[10px] text-text-muted">Orquestrando Pipeline...</p>
+        </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-4 overflow-x-auto pb-4">
+          <div className="flex gap-6 overflow-x-auto pb-8 custom-scrollbar">
             {stages.map(stage => (
-              <div key={stage.id} className="flex-shrink-0 w-72">
-                <div
-                  className="px-4 py-3 rounded-t-lg font-semibold text-white text-sm"
-                  style={{ backgroundColor: stage.color }}
-                >
-                  {stage.name} ({getBiddingsByStage(stage.id).length})
+              <div key={stage.id} className="flex-shrink-0 w-80 flex flex-col gap-4">
+                <div className="flex items-center justify-between px-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]" style={{ backgroundColor: stage.color }} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">{stage.name}</span>
+                  </div>
+                  <span className="text-[10px] font-black bg-white/5 px-2 py-1 rounded border border-white/5 text-text-muted">
+                    {getBiddingsByStage(stage.id).length}
+                  </span>
                 </div>
+
                 <Droppable droppableId={String(stage.id)}>
-                  {(provided) => (
+                  {(provided, snapshot) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className="bg-slate-100 rounded-b-lg p-2 min-h-[500px]"
+                      className={`flex-1 rounded-[1.5rem] p-3 min-h-[600px] transition-colors border ${
+                        snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20' : 'bg-white/[0.01] border-white/5'
+                      }`}
                     >
-                      {getBiddingsByStage(stage.id).map((bidding, index) => (
-                        <Draggable key={bidding.id} draggableId={String(bidding.id)} index={index}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="bg-white rounded-lg shadow-sm p-3 mb-2 cursor-grab hover:shadow-md transition-shadow"
-                            >
-                              <div className="font-medium text-sm text-slate-900">{bidding.title}</div>
-                              <div className="text-xs text-slate-500 mt-1">
-                                <div>{bidding.process_number}</div>
-                                <div>{bidding.agency}</div>
-                              </div>
-                              <div className="flex justify-between items-center mt-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium text-slate-600">
-                                    R$ {parseFloat(bidding.value || '0').toLocaleString('pt-BR')}
-                                  </span>
-                                  {bidding.win_probability !== undefined && (
-                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-emerald-100">
-                                      <Sparkles className="w-2.5 h-2.5" />
-                                      {bidding.win_probability}%
+                      <div className="space-y-3">
+                        {getBiddingsByStage(stage.id).map((bidding, index) => (
+                          <Draggable key={bidding.id} draggableId={String(bidding.id)} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`platinum-card p-4 group transition-all ${
+                                  snapshot.isDragging ? 'shadow-platinum-glow-lg border-primary/40 scale-105' : 'hover:border-white/20'
+                                }`}
+                              >
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <h3 className="font-bold text-xs text-white leading-relaxed group-hover:text-primary transition-colors line-clamp-2">
+                                      {bidding.title}
+                                    </h3>
+                                    <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={() => handleEdit(bidding)} className="p-1 text-text-muted hover:text-primary"><Pencil size={12} /></button>
+                                      <button onClick={() => handleDelete(bidding.id)} className="p-1 text-text-muted hover:text-red-400"><Trash2 size={12} /></button>
                                     </div>
-                                  )}
-                                </div>
-                                <div className="flex gap-1">
-                                  {bidding.parsed_items?.resumo && (
-                                    <div className="group relative">
-                                      <button className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors">
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                      </button>
-                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                                        <p className="font-bold border-b border-slate-700 pb-1 mb-1 text-blue-400">Análise de IA</p>
-                                        <p className="mb-2 italic text-slate-300">"{bidding.parsed_items.resumo}"</p>
-                                        <p className="font-bold text-amber-400 mt-1">Documentação:</p>
-                                        <p className="text-slate-300">{bidding.parsed_items.documentacao}</p>
-                                        <p className="font-bold text-red-400 mt-1">Penalidades:</p>
-                                        <p className="text-slate-300">{bidding.parsed_items.penalidades}</p>
-                                      </div>
+                                  </div>
+
+                                  <div className="space-y-1.5 border-t border-white/5 pt-3">
+                                    <div className="flex items-center gap-2 text-[9px] text-text-muted uppercase tracking-widest">
+                                      <Building2 size={10} className="text-primary/60" />
+                                      <span className="truncate">{bidding.agency}</span>
                                     </div>
-                                  )}
-                                  <button onClick={() => handleEdit(bidding)} className="p-1 text-slate-400 hover:text-blue-600">
-                                    <Pencil className="w-3 h-3" />
-                                  </button>
-                                  <button onClick={() => handleDelete(bidding.id)} className="p-1 text-slate-400 hover:text-red-600">
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
+                                    <div className="flex items-center gap-2 text-[9px] text-text-muted font-mono tracking-wider">
+                                      <Lock size={10} className="text-primary/60" />
+                                      {bidding.process_number}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-between items-center pt-1">
+                                    <div className="flex flex-col">
+                                      <span className="text-[10px] font-black text-white">
+                                        R$ {parseFloat(bidding.value || '0').toLocaleString('pt-BR')}
+                                      </span>
+                                      <span className="text-[8px] text-text-muted uppercase tracking-widest font-bold">Valuation Base</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      {bidding.win_probability !== undefined && (
+                                        <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-lg border border-primary/20 text-[9px] font-black uppercase tracking-widest">
+                                          <TrendingUp size={10} />
+                                          {bidding.win_probability}%
+                                        </div>
+                                      )}
+                                      {bidding.parsed_items?.resumo && (
+                                        <div className="group/ai relative">
+                                          <div className="p-1.5 bg-secondary/10 text-secondary rounded-lg border border-secondary/20 animate-pulse">
+                                            <Sparkles size={12} />
+                                          </div>
+                                          <div className="absolute bottom-full right-0 mb-4 w-72 p-6 bg-surface border border-white/10 rounded-2xl shadow-platinum-glow-lg opacity-0 group-hover/ai:opacity-100 pointer-events-none transition-all z-50 transform translate-y-2 group-hover/ai:translate-y-0">
+                                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/5">
+                                              <Zap size={14} className="text-secondary" />
+                                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">Strategic Insights IA</span>
+                                            </div>
+                                            <p className="text-xs text-text-secondary leading-relaxed italic mb-4">"{bidding.parsed_items.resumo}"</p>
+                                            <div className="space-y-3">
+                                              <div>
+                                                <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Documentação:</p>
+                                                <p className="text-[10px] text-text-muted">{bidding.parsed_items.documentacao}</p>
+                                              </div>
+                                              <div>
+                                                <p className="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1">Risco / Penalidades:</p>
+                                                <p className="text-[10px] text-text-muted">{bidding.parsed_items.penalidades}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
                     </div>
                   )}
                 </Droppable>
@@ -259,53 +295,30 @@ export default function BiddingFunnel() {
         </DragDropContext>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'Editar Licitação' : 'Nova Licitação'} size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Título *</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-              placeholder="Título da licitação"
-              required
-            />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'REFINAR PROCESSO LICITATÓRIO' : 'INTEGRAR NOVA LICITAÇÃO'} size="lg">
+        <form onSubmit={handleSubmit} className="space-y-6 p-2">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Objeto da Licitação *</label>
+            <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white transition-all" placeholder="Título completo do edital" required />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Número do Processo</label>
-              <input
-                type="text"
-                value={formData.process_number}
-                onChange={e => setFormData({ ...formData, process_number: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-                placeholder="000/2024"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Número do Processo / Edital</label>
+              <input type="text" value={formData.process_number} onChange={e => setFormData({ ...formData, process_number: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-mono" placeholder="000/2024" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Órgão</label>
-              <input
-                type="text"
-                value={formData.agency}
-                onChange={e => setFormData({ ...formData, agency: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-                placeholder="Órgão executor"
-              />
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Órgão Licitante</label>
+              <input type="text" value={formData.agency} onChange={e => setFormData({ ...formData, agency: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" placeholder="Prefeitura, Ministério, etc." />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Modalidade</label>
-              <select
-                value={formData.modality}
-                onChange={e => setFormData({ ...formData, modality: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-              >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Modalidade Jurídica</label>
+              <select value={formData.modality} onChange={e => setFormData({ ...formData, modality: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white appearance-none">
                 <option value="">Selecione</option>
-                <option value="pregão">Pregão</option>
+                <option value="pregão">Pregão Eletrônico</option>
                 <option value="tomada_de_precos">Tomada de Preços</option>
                 <option value="concurso">Concurso</option>
                 <option value="convite">Convite</option>
@@ -313,36 +326,23 @@ export default function BiddingFunnel() {
                 <option value="dispensabilidade">Dispensa</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Data de Abertura</label>
-              <input
-                type="datetime-local"
-                value={formData.opening_date}
-                onChange={e => setFormData({ ...formData, opening_date: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-              />
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Data de Disputa</label>
+              <input type="datetime-local" value={formData.opening_date} onChange={e => setFormData({ ...formData, opening_date: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Valor Estimado (R$)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.value}
-                onChange={e => setFormData({ ...formData, value: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-                placeholder="0.00"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Valuation Estimado (R$)</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-sm">R$</div>
+                <input type="number" step="0.01" value={formData.value} onChange={e => setFormData({ ...formData, value: e.target.value })} className="w-full pl-12 pr-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white font-black" placeholder="0.00" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Estágio</label>
-              <select
-                value={formData.funnel_stage_id}
-                onChange={e => setFormData({ ...formData, funnel_stage_id: parseInt(e.target.value) })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-              >
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Estágio do Pipeline</label>
+              <select value={formData.funnel_stage_id} onChange={e => setFormData({ ...formData, funnel_stage_id: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white appearance-none">
                 {stages.map(stage => (
                   <option key={stage.id} value={stage.id}>{stage.name}</option>
                 ))}
@@ -350,33 +350,14 @@ export default function BiddingFunnel() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Descrição</label>
-            <textarea
-              value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm"
-              rows={3}
-              placeholder="Descrição da licitação"
-            />
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Notas Estratégicas</label>
+            <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-3 bg-background border border-white/10 rounded-xl text-sm focus:border-primary/40 outline-none text-white resize-none" rows={3} placeholder="Resumo do objeto e observações técnicas..." />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="px-6 py-2.5 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 text-sm"
-            >
-              <X className="w-4 h-4 inline mr-2" />
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm"
-            >
-              <Save className="w-4 h-4 inline mr-2" />
-              {isEditing ? 'Salvar' : 'Criar'}
-            </button>
+          <div className="flex justify-end gap-4 pt-4">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-3 text-text-muted font-bold hover:text-white transition-all text-xs uppercase tracking-widest">Descartar</button>
+            <button type="submit" className="px-10 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow text-xs uppercase tracking-widest">{isEditing ? 'Atualizar Pipeline' : 'Confirmar Integração'}</button>
           </div>
         </form>
       </Modal>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Eye, Edit, Copy, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Eye, Edit, Copy, Trash2, ChevronLeft, ChevronRight, Lock, DollarSign, FileText, User } from 'lucide-react';
 
 interface ProposalData {
   id: string;
@@ -24,90 +24,91 @@ const mockProposals: ProposalData[] = [
 export default function ProposalsTable({ onCreateClick }: { onCreateClick: () => void }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Enviada': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'Negociando': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-      case 'Rascunho': return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
-      case 'Aceita': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'Rejeitada': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-      default: return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
+      case 'Enviada': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'Negociando': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'Rascunho': return 'bg-white/5 text-text-muted border-white/10';
+      case 'Aceita': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Rejeitada': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      default: return 'bg-white/5 text-text-muted border-white/10';
     }
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
-      
-      {/* Header & Controls */}
-      <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 dark:bg-slate-800/50">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white">Propostas</h2>
+    <div className="platinum-card overflow-hidden animate-in fade-in duration-700">
+      <div className="p-8 bg-white/[0.01] border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="space-y-1">
+          <h2 className="text-xl font-black text-white uppercase tracking-[0.2em]">Registro de Propostas</h2>
+          <p className="text-[10px] text-text-muted font-black uppercase tracking-widest italic">Base de documentos comerciais formalizados</p>
+        </div>
         
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="relative flex-1 md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
             <input
               type="text"
-              placeholder="Pesquisar..."
+              placeholder="Pesquisar por cliente ou número..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white"
+              className="w-full pl-11 pr-4 py-3 bg-background/50 border border-white/5 rounded-xl text-sm focus:border-primary/30 outline-none transition-all text-white placeholder:text-text-muted"
             />
           </div>
           <button 
             onClick={onCreateClick}
-            className="flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm whitespace-nowrap"
+            aria-label="Iniciar nova proposta de valor"
+            className="flex items-center gap-3 px-6 py-3 bg-primary text-background font-black rounded-xl hover:bg-primary-hover transition-all shadow-platinum-glow uppercase text-xs tracking-widest whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Criar Nova
+            <Plus className="w-4 h-4" />
+            Gerar Proposta
           </button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-          <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-800/50 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-white/5 border-b border-white/5">
             <tr>
-              <th className="px-6 py-4 font-semibold">Nº</th>
-              <th className="px-6 py-4 font-semibold">Data</th>
-              <th className="px-6 py-4 font-semibold">Cliente</th>
-              <th className="px-6 py-4 font-semibold">Contato do Cliente</th>
-              <th className="px-6 py-4 font-semibold">CNPJ/CPF</th>
-              <th className="px-6 py-4 font-semibold">Valor</th>
-              <th className="px-6 py-4 font-semibold text-center">Status</th>
-              <th className="px-6 py-4 font-semibold">Etapa do Funil</th>
-              <th className="px-6 py-4 font-semibold text-center">Ações</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Documentação</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Cliente / Contato</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">CNPJ / CPF</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted">Valor Total</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-center">Status</th>
+              <th className="px-6 py-5 font-black uppercase text-[10px] tracking-[0.2em] text-text-muted text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+          <tbody className="divide-y divide-white/5">
             {mockProposals.map((proposal) => (
-              <tr key={proposal.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{proposal.number}</td>
-                <td className="px-6 py-4">{proposal.date}</td>
-                <td className="px-6 py-4">{proposal.client}</td>
-                <td className="px-6 py-4">{proposal.contact}</td>
-                <td className="px-6 py-4">{proposal.document}</td>
-                <td className="px-6 py-4 font-medium">{proposal.value}</td>
-                <td className="px-6 py-4 text-center">
-                  <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${getStatusColor(proposal.status)}`}>
+              <tr key={proposal.id} className="hover:bg-white/[0.02] transition-colors group">
+                <td className="px-6 py-6">
+                  <div className="font-bold text-white group-hover:text-primary transition-colors uppercase tracking-tight">#{proposal.number}</div>
+                  <div className="text-[10px] text-text-muted font-bold mt-1">{proposal.date}</div>
+                </td>
+                <td className="px-6 py-6 space-y-1">
+                  <div className="font-bold text-xs text-white uppercase">{proposal.client}</div>
+                  <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                    <User size={10} className="text-primary/60" />
+                    {proposal.contact !== 'N/A' ? proposal.contact : 'Direto'}
+                  </div>
+                </td>
+                <td className="px-6 py-6 font-mono text-[10px] text-text-secondary">{proposal.document}</td>
+                <td className="px-6 py-6">
+                  <div className="flex flex-col">
+                    <span className="text-white font-black tracking-tight">{proposal.value}</span>
+                    <span className="text-[8px] text-text-muted uppercase font-black tracking-widest">{proposal.funnelStage}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-6 text-center">
+                  <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${getStatusStyle(proposal.status)}`}>
                     {proposal.status}
                   </span>
                 </td>
-                <td className="px-6 py-4">{proposal.funnelStage}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-center space-x-3">
-                    <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors" title="Visualizar">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors" title="Editar">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors" title="Duplicar">
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    <button className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Excluir">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                <td className="px-6 py-6 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <button className="p-2 text-text-muted hover:text-primary transition-all" title="Visualizar"><Eye size={16} /></button>
+                    <button className="p-2 text-text-muted hover:text-primary transition-all" title="Editar"><Edit size={16} /></button>
+                    <button className="p-2 text-text-muted hover:text-primary transition-all" title="Duplicar"><Copy size={16} /></button>
+                    <button className="p-2 text-text-muted hover:text-red-400 transition-all" title="Excluir"><Trash2 size={16} /></button>
                   </div>
                 </td>
               </tr>
@@ -116,24 +117,22 @@ export default function ProposalsTable({ onCreateClick }: { onCreateClick: () =>
         </table>
       </div>
 
-      {/* Pagination (Mocked) */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-        <div className="text-sm text-slate-500 dark:text-slate-400">
-          Mostrando <span className="font-medium text-slate-900 dark:text-white">5</span> de <span className="font-medium text-slate-900 dark:text-white">107</span> propostas
+      <div className="p-6 bg-white/[0.01] border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+          Exibindo <span className="text-white">05</span> de <span className="text-white">107</span> documentos estratégicos
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors">
-            <ChevronLeft className="w-4 h-4" />
+        <div className="flex items-center gap-4">
+          <button className="p-2 text-text-muted hover:text-primary border border-white/5 rounded-lg hover:bg-white/5 transition-all">
+            <ChevronLeft size={16} />
           </button>
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300 px-2">
-            Página 1 de 22
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">
+            Pág. 01 / 22
           </span>
-          <button className="p-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <ChevronRight className="w-4 h-4" />
+          <button className="p-2 text-text-muted hover:text-primary border border-white/5 rounded-lg hover:bg-white/5 transition-all">
+            <ChevronRight size={16} />
           </button>
         </div>
       </div>
-
     </div>
   );
 }

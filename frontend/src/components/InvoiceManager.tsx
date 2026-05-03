@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Send, XCircle, Plus, Loader2, Search } from 'lucide-react';
+import { FileText, Send, XCircle, Plus, Loader2, Search, Zap, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
-import { useTheme } from '../context/ThemeContext';
 
 interface Invoice {
   id: number;
@@ -19,10 +18,10 @@ interface Invoice {
 }
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  draft:      { label: 'Rascunho',   cls: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300' },
-  sent:       { label: 'Transmitida',cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-  authorized: { label: 'Autorizada', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
-  cancelled:  { label: 'Cancelada',  cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  draft:      { label: 'Rascunho',   cls: 'bg-white/5 text-text-muted border-white/10' },
+  sent:       { label: 'Transmitida',cls: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  authorized: { label: 'Autorizada', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  cancelled:  { label: 'Cancelada',  cls: 'bg-red-500/10 text-red-400 border-red-500/20' },
 };
 
 function fmt(v: string | number) {
@@ -30,8 +29,6 @@ function fmt(v: string | number) {
 }
 
 export default function InvoiceManager() {
-  const { theme } = useTheme();
-  const dark = theme === 'dark';
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -48,7 +45,7 @@ export default function InvoiceManager() {
       if (filterType) params.type = filterType;
       const r = await api.get('/api/financial/invoices', { params });
       setInvoices(r.data.data ?? []);
-    } catch { toast.error('Erro ao carregar notas'); }
+    } catch { toast.error('Erro ao sincronizar repositório fiscal'); }
     finally { setLoading(false); }
   }, [search, filterType]);
 
@@ -59,96 +56,113 @@ export default function InvoiceManager() {
     setSaving(true);
     try {
       await api.post('/api/financial/invoices', { ...form, total_value: Number(form.total_value), items_json: JSON.parse(form.items_json || '[]') });
-      toast.success('Nota fiscal criada!');
+      toast.success('Documento fiscal emitido!');
       setModalOpen(false);
       fetchData();
-    } catch { toast.error('Erro ao criar nota'); }
+    } catch { toast.error('Falha na emissão da nota'); }
     finally { setSaving(false); }
   };
 
   const handleTransmit = async (id: number) => {
-    if (!confirm('Transmitir esta NF-e?')) return;
+    if (!confirm('Iniciar transmissão para SEFAZ?')) return;
     try {
       await api.post(`/api/financial/invoices/${id}/transmit`);
-      toast.success('Nota transmitida!');
+      toast.success('Transmissão concluída com sucesso!');
       fetchData();
-    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro na transmissão'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro crítico na transmissão'); }
   };
 
   const handleCancel = async (id: number) => {
-    if (!confirm('Cancelar esta NF-e?')) return;
+    if (!confirm('Solicitar cancelamento desta NF-e?')) return;
     try {
       await api.post(`/api/financial/invoices/${id}/cancel`);
-      toast.success('Nota cancelada!');
+      toast.success('Nota cancelada no repositório fiscal.');
       fetchData();
-    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro ao cancelar'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro ao processar cancelamento'); }
   };
 
-  const card = dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200';
-  const input = dark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-300 text-slate-900';
-  const sub = dark ? 'text-slate-400' : 'text-slate-500';
-  const th = dark ? 'bg-slate-700/60 text-slate-300' : 'bg-slate-50 text-slate-600';
-  const tr = dark ? 'border-slate-700 hover:bg-slate-700/40' : 'border-slate-100 hover:bg-slate-50/60';
-
   return (
-    <div>
-      {/* Filter bar */}
-      <div className={`rounded-xl border p-4 mb-6 flex flex-col sm:flex-row gap-3 items-center ${card}`}>
+    <div className="space-y-6">
+      {/* Platinum Filter Bar */}
+      <div className="platinum-card p-5 flex flex-col sm:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${sub}`} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por número ou destinatário..."
-            className={`w-full pl-9 pr-4 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${input}`} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+          <input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            placeholder="Localizar por número, chave ou destinatário..."
+            className="w-full pl-11 pr-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl text-sm text-white focus:border-primary/40 focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/30" 
+          />
         </div>
-        <select value={filterType} onChange={e => setFilterType(e.target.value)} className={`px-4 py-2.5 rounded-lg border text-sm ${input}`}>
-          <option value="">Todos os tipos</option>
-          <option value="output">Saída</option>
-          <option value="input">Entrada</option>
+        <select 
+          value={filterType} 
+          onChange={e => setFilterType(e.target.value)} 
+          className="px-6 py-3 bg-white/[0.02] border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white focus:border-primary/40 outline-none transition-all appearance-none min-w-[180px]"
+        >
+          <option value="" className="bg-surface">Todas as Operações</option>
+          <option value="output" className="bg-surface">Fluxo de Saída</option>
+          <option value="input" className="bg-surface">Fluxo de Entrada</option>
         </select>
-        <button onClick={() => { setForm({ type:'output', number:'', total_value:'', recipient_name:'', recipient_document:'', notes:'', items_json:'[]' }); setModalOpen(true); }}
-          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl text-sm whitespace-nowrap shadow-lg shadow-blue-500/20">
-          <Plus className="w-4 h-4 inline mr-1" />Nova NF-e
+        <button 
+          onClick={() => { setForm({ type:'output', number:'', total_value:'', recipient_name:'', recipient_document:'', notes:'', items_json:'[]' }); setModalOpen(true); }}
+          className="px-8 py-3.5 bg-primary text-background font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-primary-hover transition-all shadow-platinum-glow flex items-center gap-2"
+        >
+          <Plus size={14} /> Nova NF-e
         </button>
       </div>
 
-      {/* Table */}
-      <div className={`rounded-xl border overflow-hidden ${card}`}>
+      {/* Platinum Table */}
+      <div className="platinum-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>
+          <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Consultando Ledger Fiscal...</span>
+          </div>
         ) : invoices.length === 0 ? (
-          <div className={`py-20 text-center ${sub}`}><FileText className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>Nenhuma nota fiscal</p></div>
+          <div className="py-24 text-center space-y-4 opacity-30">
+            <FileText className="w-16 h-16 mx-auto text-text-muted" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Nenhum registro encontrado</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className={th}>
-                <th className="px-4 py-3 text-left text-xs uppercase font-semibold">Número</th>
-                <th className="px-4 py-3 text-left text-xs uppercase font-semibold">Tipo</th>
-                <th className="px-4 py-3 text-left text-xs uppercase font-semibold">Destinatário</th>
-                <th className="px-4 py-3 text-left text-xs uppercase font-semibold">Valor</th>
-                <th className="px-4 py-3 text-left text-xs uppercase font-semibold">Status</th>
-                <th className="px-4 py-3 text-right text-xs uppercase font-semibold">Ações</th>
-              </tr></thead>
-              <tbody className={dark ? 'divide-y divide-slate-700' : 'divide-y divide-slate-100'}>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5">
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Identificador</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Natureza</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Destinatário</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Valor Operacional</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">Integridade</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-black text-text-muted uppercase tracking-widest">Ações Estratégicas</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
                 {invoices.map(inv => (
-                  <tr key={inv.id} className={`transition-colors ${tr}`}>
-                    <td className="px-4 py-3 font-mono text-xs">{inv.number || `#${inv.id}`}</td>
-                    <td className="px-4 py-3">{inv.type === 'output' ? '📤 Saída' : '📥 Entrada'}</td>
-                    <td className="px-4 py-3 font-medium">{inv.recipient_name || '-'}</td>
-                    <td className="px-4 py-3 font-semibold text-blue-500">{fmt(inv.total_value)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_MAP[inv.status]?.cls}`}>
+                  <tr key={inv.id} className="hover:bg-white/[0.01] transition-colors group">
+                    <td className="px-6 py-5 font-mono text-xs text-white/80 group-hover:text-primary transition-colors">{inv.number || `#${inv.id}`}</td>
+                    <td className="px-6 py-5">
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        {inv.type === 'output' ? <Zap size={10} className="text-emerald-400" /> : <ShieldCheck size={10} className="text-blue-400" />}
+                        {inv.type === 'output' ? 'Saída' : 'Entrada'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 font-bold text-white text-sm">{inv.recipient_name || '-'}</td>
+                    <td className="px-6 py-5 font-black text-white text-sm">{fmt(inv.total_value)}</td>
+                    <td className="px-6 py-5">
+                      <span className={`inline-flex px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${STATUS_MAP[inv.status]?.cls}`}>
                         {STATUS_MAP[inv.status]?.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="px-6 py-5">
+                      <div className="flex items-center justify-end gap-3">
                         {inv.status === 'draft' && (
-                          <button onClick={() => handleTransmit(inv.id)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium flex items-center gap-1">
-                            <Send className="w-3 h-3" />Transmitir
+                          <button onClick={() => handleTransmit(inv.id)} className="px-4 py-2 bg-primary hover:bg-primary-hover text-background text-[10px] font-black rounded-lg transition-all flex items-center gap-2 uppercase tracking-widest">
+                            <Send className="w-3 h-3" /> Transmitir
                           </button>
                         )}
                         {['sent','authorized'].includes(inv.status) && (
-                          <button onClick={() => handleCancel(inv.id)} className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-500 text-xs rounded-lg font-medium flex items-center gap-1">
-                            <XCircle className="w-3 h-3" />Cancelar
+                          <button onClick={() => handleCancel(inv.id)} className="px-4 py-2 bg-white/5 hover:bg-red-500/10 text-red-400 border border-white/10 hover:border-red-500/20 text-[10px] font-black rounded-lg transition-all flex items-center gap-2 uppercase tracking-widest">
+                            <XCircle className="w-3 h-3" /> Cancelar
                           </button>
                         )}
                       </div>
@@ -161,44 +175,47 @@ export default function InvoiceManager() {
         )}
       </div>
 
-      {/* Create Modal */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nova Nota Fiscal" size="lg">
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>Tipo *</label>
-              <select value={form.type} onChange={e => setForm({...form, type: e.target.value as 'input'|'output'})} className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`}>
-                <option value="output">Saída (Venda)</option>
-                <option value="input">Entrada (Compra)</option>
+      {/* Create Modal - Styled via props / global styles if applicable */}
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nova Emissão Fiscal" size="lg">
+        <form onSubmit={handleCreate} className="space-y-6 p-2">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Natureza da Operação*</label>
+              <select value={form.type} onChange={e => setForm({...form, type: e.target.value as 'input'|'output'})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 appearance-none">
+                <option value="output" className="bg-surface">Saída (Venda/Serviço)</option>
+                <option value="input" className="bg-surface">Entrada (Compra/Estorno)</option>
               </select>
             </div>
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>Número</label>
-              <input value={form.number} onChange={e => setForm({...form, number: e.target.value})} placeholder="Auto" className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`} />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Número (Referência)</label>
+              <input value={form.number} onChange={e => setForm({...form, number: e.target.value})} placeholder="Numeração Automática" className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>Destinatário</label>
-              <input value={form.recipient_name} onChange={e => setForm({...form, recipient_name: e.target.value})} className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`} />
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest">Razão Social / Destinatário</label>
+              <input value={form.recipient_name} onChange={e => setForm({...form, recipient_name: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
             </div>
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>CPF/CNPJ</label>
-              <input value={form.recipient_document} onChange={e => setForm({...form, recipient_document: e.target.value})} className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`} />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest">CPF / CNPJ</label>
+              <input value={form.recipient_document} onChange={e => setForm({...form, recipient_document: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
             </div>
           </div>
-          <div>
-            <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>Valor Total *</label>
-            <input type="number" step="0.01" required value={form.total_value} onChange={e => setForm({...form, total_value: e.target.value})} className={`w-full px-3 py-2.5 rounded-lg border text-sm ${input}`} />
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-primary uppercase tracking-widest">Valor Total da Operação*</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-xs">R$</span>
+              <input type="number" step="0.01" required value={form.total_value} onChange={e => setForm({...form, total_value: e.target.value})} className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none focus:border-primary/40" />
+            </div>
           </div>
-          <div>
-            <label className={`block text-sm font-medium mb-1 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>Observações</label>
-            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={2} className={`w-full px-3 py-2.5 rounded-lg border text-sm resize-none ${input}`} />
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-primary uppercase tracking-widest">Observações Tributárias</label>
+            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={3} className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/40 resize-none" />
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setModalOpen(false)} className={`px-4 py-2 rounded-lg text-sm font-medium border ${dark ? 'border-slate-600 text-slate-300' : 'border-slate-300 text-slate-600'}`}>Cancelar</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold disabled:opacity-60 flex items-center gap-1.5">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}Criar Nota
+          <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
+            <button type="button" onClick={() => setModalOpen(false)} className="px-8 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/5 transition-all">Cancelar</button>
+            <button type="submit" disabled={saving} className="px-10 py-3 bg-primary hover:bg-primary-hover text-background rounded-xl text-[10px] font-black uppercase tracking-widest shadow-platinum-glow flex items-center gap-2 transition-all disabled:opacity-50">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Consolidar Emissão
             </button>
           </div>
         </form>
