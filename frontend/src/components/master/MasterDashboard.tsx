@@ -1,9 +1,30 @@
 import React from 'react';
-import { Building2, Users, DollarSign, Activity, Zap, Globe, ShieldCheck, Sparkles, TrendingUp, BarChart3, ArrowUpRight, Upload, Camera } from 'lucide-react';
+import { 
+  Building2, Users, DollarSign, Activity, Zap, Globe, ShieldCheck, 
+  Sparkles, TrendingUp, BarChart3, ArrowUpRight, Upload, Camera, 
+  AlertTriangle 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../../lib/axios';
 
 export default function MasterDashboard() {
   const [logo, setLogo] = React.useState<string>(localStorage.getItem('company_logo') || '');
+  const [stats, setStats] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/api/master/stats');
+        setStats(response.data);
+      } catch (err) {
+        toast.error('Erro ao carregar métricas globais.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,6 +41,13 @@ export default function MasterDashboard() {
     }
   };
 
+  const cards = [
+    { title: 'Total de Empresas', value: stats?.total_companies?.value || '0', sub: 'empresas na base', icon: Building2, color: 'primary', trend: stats?.total_companies?.trend || '0%' },
+    { title: 'Total de Usuários', value: stats?.total_users?.value || '0', sub: 'em toda a plataforma', icon: Users, color: 'accent', trend: stats?.total_users?.trend || '0%' },
+    { title: 'MRR Atual', value: stats?.mrr?.value || 'R$ 0,00', sub: 'Receita recorrente', icon: DollarSign, color: 'emerald', trend: stats?.mrr?.trend || '0%' },
+    { title: 'Novos Leads (30d)', value: stats?.new_companies_30d?.value || '0', sub: 'últimos 30 dias', icon: TrendingUp, color: 'amber', trend: stats?.new_companies_30d?.trend || '0%' }
+  ];
+
   return (
     <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shrink-0">
@@ -35,20 +63,28 @@ export default function MasterDashboard() {
         <div className="flex items-center gap-5 bg-surface-elevated/20 border border-border-subtle/30 p-5 rounded-2xl shadow-inner-platinum backdrop-blur-md">
            <div className="flex flex-col items-end gap-1">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary italic">Status Global</span>
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">Sistema Nominal</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">{stats?.infrastructure?.status || 'Sistema Nominal'}</span>
            </div>
            <div className="w-px h-10 bg-border-subtle/30" />
            <Zap className="text-primary w-6 h-6 animate-pulse shadow-platinum-glow-sm" />
         </div>
       </header>
 
+      {/* Alerta de Inadimplência se houver */}
+      {stats?.overdue_count > 0 && (
+        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-6 shadow-platinum-glow-sm animate-pulse">
+           <div className="p-3 bg-red-500/20 rounded-xl">
+              <AlertTriangle className="text-red-500" size={24} />
+           </div>
+           <div>
+              <h4 className="text-sm font-black text-red-500 uppercase tracking-widest">Alerta de Inadimplência</h4>
+              <p className="text-xs text-text-secondary font-medium">Existem **{stats.overdue_count} empresas** com status suspenso ou atrasado. Verifique a lista de tenants.</p>
+           </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {[
-          { title: 'Total de Empresas', value: '1.240', sub: 'empresas ativas', icon: Building2, color: 'primary', trend: '+12%' },
-          { title: 'Total de Usuários', value: '48.902', sub: 'em toda a plataforma', icon: Users, color: 'accent', trend: '+8.4%' },
-          { title: 'MRR (Estimado)', value: 'R$ 840.500', sub: 'Receita recorrente mensal', icon: DollarSign, color: 'emerald', trend: '+15.2%' },
-          { title: 'Novos Cadastros', value: '154', sub: 'últimos 30 dias', icon: TrendingUp, color: 'amber', trend: '+5.1%' }
-        ].map((card, idx) => (
+        {cards.map((card, idx) => (
           <div key={idx} className="platinum-card p-8 space-y-6 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm group hover:scale-[1.02] transition-all duration-500">
             <div className="flex items-center justify-between">
               <div className={`p-3 bg-${card.color === 'primary' ? 'primary' : card.color === 'emerald' ? 'emerald-500' : card.color === 'amber' ? 'amber-500' : 'accent'}/10 rounded-2xl border border-${card.color === 'primary' ? 'primary' : card.color === 'emerald' ? 'emerald-500' : card.color === 'amber' ? 'amber-500' : 'accent'}/20 shadow-inner-platinum group-hover:scale-110 transition-transform`}>

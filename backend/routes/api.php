@@ -21,6 +21,9 @@ Route::get('/cep/{cep}', [\App\Http\Controllers\ExternalDataController::class, '
 // RPA Webhook (External Robot)
 Route::post('/webhook/rpa/bids', [\App\Http\Controllers\RpaController::class, 'handleBids']);
 
+// Gateway Webhook (Public)
+Route::post('/webhook/payments', [\App\Http\Controllers\SubscriptionWebhookController::class, 'handle']);
+
 Route::get('/user', function (Request $request) {
     $user = $request->user();
     $company = $user->company;
@@ -40,6 +43,11 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Billing & Subscriptions
+    Route::get('/billing/info', [\App\Http\Controllers\BillingController::class, 'getInfo']);
+    Route::get('/billing/portal', [\App\Http\Controllers\BillingController::class, 'getPortalUrl']);
+
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/system/queue-health', [DashboardController::class, 'queueHealth']);
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs']);
@@ -265,6 +273,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
 
 // Master SuperAdmin Routes
 Route::middleware(['auth:sanctum', 'throttle:api', \App\Http\Middleware\SuperAdminMiddleware::class])->prefix('master')->group(function () {
+    Route::get('/stats', [\App\Http\Controllers\Master\MasterDashboardController::class, 'stats']);
     Route::get('/tenants', [\App\Http\Controllers\Master\TenantManagementController::class, 'index']);
     Route::post('/tenants', [\App\Http\Controllers\Master\TenantManagementController::class, 'store']);
     Route::put('/tenants/{tenant_id}', [\App\Http\Controllers\Master\TenantManagementController::class, 'update']);

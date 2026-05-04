@@ -17,8 +17,8 @@ class CheckTenantStatus
     {
         $user = $request->user();
 
-        // Ignora checagem para rotas master ou super admins
-        if ($user && $user->is_superadmin && $request->is('api/master/*')) {
+        // Ignora checagem para rotas master, super admins ou rotas de faturamento (para permitir pagamento)
+        if ($user && ($user->is_superadmin && $request->is('api/master/*')) || $request->is('api/billing/*')) {
             return $next($request);
         }
 
