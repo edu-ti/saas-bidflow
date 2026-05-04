@@ -102,4 +102,64 @@ class ReportController extends Controller
 
         return response()->json($suppliers);
     }
+
+    public function export(Request $request)
+    {
+        $type = $request->get('type', 'pdf');
+        $tab = $request->get('tab', 'overview');
+
+        if ($tab === 'overview') {
+            $data = $this->reportService->getOverview($request);
+        } elseif ($tab === 'bidding') {
+            $data = $this->reportService->getBiddingMetrics($request);
+        } elseif ($tab === 'sales') {
+            $data = $this->reportService->getSalesMetrics($request);
+        } elseif ($tab === 'suppliers') {
+            $data = $this->reportService->getSupplierPerformance($request);
+        } elseif ($tab === 'team') {
+            $data = $this->reportService->getTeamPerformance($request);
+        } else {
+            $data = [];
+        }
+
+        if ($type === 'excel') {
+            return $this->exportCsv($data, $tab);
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.export', ['data' => $data, 'tab' => $tab])->setPaper('a4', 'landscape');
+        return $pdf->download("relatorio_{$tab}.pdf");
+    }
+
+    private function exportCsv($data, $tab)
+    {
+        $filename = "relatorio_{$tab}.csv";
+        
+        ob_start();
+        $handle = fopen('php://output', 'w');
+        
+        // Add BOM for UTF-8 Excel compatibility
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        if (is_array($data) && count($data) > 0) {
+             if (isset($data[0]) && is_array($data[0])) {
+                 fputcsv($handle, array_keys($data[0]), ';');
+                 foreach ($data as $row) {
+                     fputcsv($handle, array_values($row), ';');
+                 }
+             } else {
+                 fputcsv($handle, array_keys($data), ';');
+                 fputcsv($handle, array_values($data), ';');
+             }
+        } else {
+            fputcsv($handle, ['Nenhum dado encontrado'], ';');
+        }
+
+        fclose($handle);
+        $csv = ob_get_clean();
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }

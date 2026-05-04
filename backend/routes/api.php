@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::apiResource('roles', \App\Http\Controllers\RoleController::class);
     
     // Reports & BI
+    Route::get('/reports/export', [ReportController::class, 'export']);
     Route::get('/reports/overview', [ReportController::class, 'overview']);
     Route::get('/reports/bidding', [ReportController::class, 'bidding']);
     Route::get('/reports/bidding-funnel', [ReportController::class, 'biddingFunnel']);

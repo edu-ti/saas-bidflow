@@ -73,12 +73,35 @@ export default function ReportsDashboard() {
 
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
-  const handleExport = (type: 'pdf' | 'excel') => {
-    toast.loading(`Exportando Visão ${activeTab.toUpperCase()} para ${type.toUpperCase()}...`, { duration: 2000 });
-    setTimeout(() => {
-      if (type === 'pdf') window.print();
-      toast.success('Arquivo exportado com sucesso!');
-    }, 2000);
+  const handleExport = async (type: 'pdf' | 'excel') => {
+    const loadingToast = toast.loading(`Exportando Visão ${activeTab.toUpperCase()} para ${type.toUpperCase()}...`);
+    try {
+      const params = new URLSearchParams({
+        type,
+        tab: activeTab,
+        month: month.toString(),
+        year: year.toString(),
+      });
+      if (userId) params.append('user_id', userId.toString());
+      if (supplierId) params.append('supplier_id', supplierId.toString());
+      if (uf) params.append('uf', uf);
+
+      const response = await api.get(`/api/reports/export?${params.toString()}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `relatorio_${activeTab}_${month}_${year}.${type === 'pdf' ? 'pdf' : 'csv'}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      
+      toast.success('Arquivo exportado com sucesso!', { id: loadingToast });
+    } catch (error) {
+      toast.error('Erro ao exportar arquivo', { id: loadingToast });
+    }
   };
 
   return (
