@@ -67,12 +67,39 @@ class ReportController extends Controller
         return response()->json($performance);
     }
 
+    public function sales(Request $request)
+    {
+        $metrics = $this->reportService->getSalesMetrics($request);
+        return response()->json($metrics);
+    }
+
+    public function suppliers(Request $request)
+    {
+        $performance = $this->reportService->getSupplierPerformance($request);
+        return response()->json($performance);
+    }
+
+    public function lossAnalysis(Request $request)
+    {
+        $analysis = $this->reportService->getLossAnalysis($request);
+        return response()->json($analysis);
+    }
+
     public function users(Request $request)
     {
         $users = \App\Models\User::where('company_id', Auth::user()->company_id)
-            ->select('id', 'name', 'email', 'role')
+            ->select('id', 'name', 'email')
             ->get();
 
         return response()->json($users);
+    }
+
+    public function availableSuppliers(Request $request)
+    {
+        $suppliers = \App\Models\Supplier::where('company_id', Auth::user()->company_id)
+            ->select('id', 'name')
+            ->get();
+
+        return response()->json($suppliers);
     }
 }

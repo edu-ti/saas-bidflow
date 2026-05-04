@@ -9,6 +9,8 @@ use App\Models\AccountsReceivable;
 use App\Models\AccountsPayable;
 use App\Models\BiddingAlert;
 use App\Models\User;
+use App\Models\Goal;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -18,6 +20,7 @@ class ReportService
     public function getOverview(Request $request): array
     {
         $companyId = Auth::user()->company_id;
+        $filters = $this->getFilters($request);
         $dateRange = $this->getDateRange($request->get('period', 'month'));
 
         $wonStageIds = FunnelStage::where('company_id', $companyId)
@@ -25,47 +28,78 @@ class ReportService
             ->pluck('id')
             ->toArray();
 
-        $opportunitiesQuery = Opportunity::where('company_id', $companyId)
+        $query = Opportunity::where('company_id', $companyId)
             ->whereBetween('created_at', $dateRange);
 
-        $wonOpportunities = (clone $opportunitiesQuery)
-            ->whereIn('funnel_stage_id', $wonStageIds)
-            ->count();
+        $this->applyFilters($query, $filters);
 
-        $totalOpportunities = (clone $opportunitiesQuery)->count();
+        $totalOpportunities = (clone $query)->count();
+        $wonOpportunities = (clone $query)->whereIn('funnel_stage_id', $wonStageIds)->count();
         
         $conversionRate = $totalOpportunities > 0 
             ? round(($wonOpportunities / $totalOpportunities) * 100, 1) 
             : 0;
 
-        $contracts = Contract::where('company_id', $companyId)
-            ->where('status', 'active')
-            ->whereBetween('created_at', $dateRange);
+        $contractsQuery = Contract::where('company_id', $companyId)
+            ->where('status', 'active');
+        
+        // Note: Contracts might need more complex filtering if linked to UF/Suppliers
+        $newContracts = (clone $contractsQuery)->whereBetween('created_at', $dateRange)->count();
+        $revenue = (clone $contractsQuery)->sum('value');
 
-        $newContracts = $contracts->count();
-
-        $activeContracts = Contract::where('company_id', $companyId)
-            ->where('status', 'active')
-            ->where('start_date', '<=', now())
-            ->where(function ($q) {
-                $q->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
-            })
-            ->sum('value');
+        // Crossing with Goals
+        $goals = $this->getGoals($companyId, $filters, $request);
 
         return [
-            'revenue' => $activeContracts,
+            'revenue' => $revenue,
+            'target_revenue' => $goals['target_revenue'],
             'win_rate' => $conversionRate,
             'new_contracts' => $newContracts,
+            'target_wins' => $goals['target_wins'],
             'total_opportunities' => $totalOpportunities,
             'won_opportunities' => $wonOpportunities,
+            'revenue_progress' => $goals['target_revenue'] > 0 ? round(($revenue / $goals['target_revenue']) * 100, 1) : 0,
+            'wins_progress' => $goals['target_wins'] > 0 ? round(($wonOpportunities / $goals['target_wins']) * 100, 1) : 0,
+        ];
+    }
+
+    public function getSalesMetrics(Request $request): array
+    {
+        $companyId = Auth::user()->company_id;
+        $filters = $this->getFilters($request);
+        $dateRange = $this->getDateRange($request->get('period', 'month'));
+
+        $query = Opportunity::where('company_id', $companyId)
+            ->where('type', 'sales')
+            ->whereBetween('created_at', $dateRange);
+
+        $this->applyFilters($query, $filters);
+
+        $total = $query->count();
+        $revenue = $query->sum('value');
+        
+        $wonStageIds = FunnelStage::where('company_id', $companyId)
+            ->where('is_final_win', true)
+            ->pluck('id')
+            ->toArray();
+
+        $wonCount = (clone $query)->whereIn('funnel_stage_id', $wonStageIds)->count();
+        $wonValue = (clone $query)->whereIn('funnel_stage_id', $wonStageIds)->sum('value');
+
+        return [
+            'total_proposals' => $total,
+            'total_value' => $revenue,
+            'won_count' => $wonCount,
+            'won_value' => $wonValue,
+            'ticket_medio' => $wonCount > 0 ? round($wonValue / $wonCount, 2) : 0,
+            'conversion_rate' => $total > 0 ? round(($wonCount / $total) * 100, 1) : 0
         ];
     }
 
     public function getBiddingMetrics(Request $request): array
     {
         $companyId = Auth::user()->company_id;
-        $userId = $request->get('user_id');
+        $filters = $this->getFilters($request);
         $dateRange = $this->getDateRange($request->get('period', 'month'));
 
         $wonStageIds = FunnelStage::where('company_id', $companyId)
@@ -82,187 +116,31 @@ class ReportService
             ->where('type', 'bidding')
             ->whereBetween('created_at', $dateRange);
 
-        if ($userId) {
-            $query->where('user_id', $userId);
-        }
+        $this->applyFilters($query, $filters);
 
         $total = $query->count();
         $totalValue = $query->sum('value');
 
-        $won = (clone $query)
-            ->whereIn('funnel_stage_id', $wonStageIds)
-            ->count();
+        $won = (clone $query)->whereIn('funnel_stage_id', $wonStageIds)->count();
+        $wonValue = (clone $query)->whereIn('funnel_stage_id', $wonStageIds)->sum('value');
+        $lost = (clone $query)->whereIn('funnel_stage_id', $lossStageIds)->count();
 
-        $wonValue = (clone $query)
-            ->whereIn('funnel_stage_id', $wonStageIds)
-            ->sum('value');
-
-        $lost = (clone $query)
-            ->whereIn('funnel_stage_id', $lossStageIds)
-            ->count();
-
-        $capturedAlerts = BiddingAlert::where('company_id', $companyId)
-            ->whereBetween('created_at', $dateRange)
-            ->count();
-
-        $qualifiedOpportunities = Opportunity::where('company_id', $companyId)
-            ->where('type', 'bidding')
-            ->whereNotNull('opportunity_id')
-            ->whereBetween('created_at', $dateRange)
-            ->count();
-
-        $winRate = ($won + $lost) > 0
-            ? round(($won / ($won + $lost)) * 100, 1)
-            : 0;
+        $winRate = ($won + $lost) > 0 ? round(($won / ($won + $lost)) * 100, 1) : 0;
 
         return [
             'total' => $total,
             'won' => $won,
             'lost' => $lost,
-            'pending' => $total - $won - $lost,
             'total_value' => $totalValue,
             'won_value' => $wonValue,
             'win_rate' => $winRate,
-            'captured_alerts' => $capturedAlerts,
-            'qualified_opportunities' => $qualifiedOpportunities,
         ];
     }
 
-    public function getBiddingFunnel(Request $request): array
+    public function getSupplierPerformance(Request $request): array
     {
         $companyId = Auth::user()->company_id;
-        $userId = $request->get('user_id');
-        $dateRange = $this->getDateRange($request->get('period', 'month'));
-
-        $stages = FunnelStage::where('company_id', $companyId)
-            ->orderBy('order')
-            ->get();
-
-        $funnelData = [];
-        foreach ($stages as $stage) {
-            $query = Opportunity::where('company_id', $companyId)
-                ->where('funnel_stage_id', $stage->id)
-                ->whereBetween('created_at', $dateRange);
-
-            if ($userId) {
-                $query->where('user_id', $userId);
-            }
-
-            $count = $query->count();
-            $value = $query->sum('value');
-
-            $funnelData[] = [
-                'stage' => $stage->name,
-                'count' => $count,
-                'value' => $value,
-                'probability' => $stage->probability,
-                'color' => $stage->color,
-                'is_win' => $stage->is_final_win,
-                'is_loss' => $stage->is_final_loss,
-            ];
-        }
-
-        return $funnelData;
-    }
-
-    public function getFinancialHealth(Request $request): array
-    {
-        $companyId = Auth::user()->company_id;
-        $dateRange = $this->getDateRange($request->get('period', 'month'));
-
-        $receivables = AccountsReceivable::where('company_id', $companyId)
-            ->whereBetween('due_date', $dateRange);
-
-        $totalReceivable = (clone $receivables)->sum('amount');
-        $paidReceivable = (clone $receivables)->where('status', 'Paid')->sum('amount');
-        $overdueReceivable = (clone $receivables)->where('status', 'Overdue')->sum('amount');
-        $pendingReceivable = (clone $receivables)->where('status', 'Pending')->sum('amount');
-
-        $payables = AccountsPayable::where('company_id', $companyId)
-            ->whereBetween('due_date', $dateRange);
-
-        $totalPayable = (clone $payables)->sum('amount');
-        $paidPayable = (clone $payables)->where('status', 'Paid')->sum('amount');
-        $pendingPayable = (clone $payables)->where('status', 'Pending')->sum('amount');
-
-        $mrr = Contract::where('company_id', $companyId)
-            ->where('status', 'active')
-            ->where('start_date', '<=', now())
-            ->where(function ($q) {
-                $q->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
-            })
-            ->sum('value');
-
-        $defaultRate = $totalReceivable > 0 
-            ? round(($overdueReceivable / $totalReceivable) * 100, 1) 
-            : 0;
-
-        return [
-            'total_receivable' => $totalReceivable,
-            'paid_receivable' => $paidReceivable,
-            'overdue_receivable' => $overdueReceivable,
-            'pending_receivable' => $pendingReceivable,
-            'total_payable' => $totalPayable,
-            'paid_payable' => $paidPayable,
-            'pending_payable' => $pendingPayable,
-            'mrr' => $mrr,
-            'default_rate' => $defaultRate,
-            'net_position' => $totalReceivable - $totalPayable,
-        ];
-    }
-
-    public function getFinancialTimeline(Request $request): array
-    {
-        $companyId = Auth::user()->company_id;
-        $period = $request->get('period', 'month');
-        $dateRange = $this->getDateRange($period);
-
-        $receivablesByMonth = AccountsReceivable::where('company_id', $companyId)
-            ->selectRaw('DATE_FORMAT(due_date, "%Y-%m") as month')
-            ->selectRaw('SUM(CASE WHEN status = "Paid" THEN amount ELSE 0 END) as received')
-            ->selectRaw('SUM(CASE WHEN status IN ("Pending", "Overdue") THEN amount ELSE 0 END) as pending')
-            ->whereBetween('due_date', $dateRange)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $payablesByMonth = AccountsPayable::where('company_id', $companyId)
-            ->selectRaw('DATE_FORMAT(due_date, "%Y-%m") as month')
-            ->selectRaw('SUM(CASE WHEN status = "Paid" THEN amount ELSE 0 END) as paid')
-            ->selectRaw('SUM(CASE WHEN status = "Pending" THEN amount ELSE 0 END) as pending')
-            ->whereBetween('due_date', $dateRange)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $timeline = [];
-        $monthKeys = $receivablesByMonth->pluck('month')
-            ->merge($payablesByMonth->pluck('month'))
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
-
-        foreach ($monthKeys as $month) {
-            $recvData = $receivablesByMonth->firstWhere('month', $month);
-            $payData = $payablesByMonth->firstWhere('month', $month);
-
-            $timeline[] = [
-                'month' => $month,
-                'received' => $recvData?->received ?? 0,
-                'pending_receivable' => $recvData?->pending ?? 0,
-                'paid' => $payData?->paid ?? 0,
-                'pending_payable' => $payData?->pending ?? 0,
-            ];
-        }
-
-        return $timeline;
-    }
-
-    public function getTeamPerformance(Request $request): array
-    {
-        $companyId = Auth::user()->company_id;
+        $filters = $this->getFilters($request);
         $dateRange = $this->getDateRange($request->get('period', 'month'));
 
         $wonStageIds = FunnelStage::where('company_id', $companyId)
@@ -270,46 +148,103 @@ class ReportService
             ->pluck('id')
             ->toArray();
 
-        $users = User::where('company_id', $companyId)->get();
+        $query = Opportunity::where('company_id', $companyId)
+            ->whereNotNull('supplier_id')
+            ->whereBetween('opportunities.created_at', $dateRange)
+            ->join('suppliers', 'opportunities.supplier_id', '=', 'suppliers.id')
+            ->select('suppliers.name as supplier_name', 'suppliers.id as supplier_id')
+            ->selectRaw('COUNT(*) as total_opps')
+            ->selectRaw('SUM(CASE WHEN funnel_stage_id IN ('.implode(',', $wonStageIds).') THEN 1 ELSE 0 END) as wins')
+            ->selectRaw('SUM(CASE WHEN funnel_stage_id IN ('.implode(',', $wonStageIds).') THEN value ELSE 0 END) as revenue')
+            ->groupBy('suppliers.id', 'suppliers.name');
 
-        $performance = [];
-        foreach ($users as $user) {
-            $wonValue = Opportunity::where('company_id', $companyId)
-                ->where('user_id', $user->id)
-                ->whereIn('funnel_stage_id', $wonStageIds)
-                ->whereBetween('created_at', $dateRange)
-                ->sum('value');
-
-            $wonCount = Opportunity::where('company_id', $companyId)
-                ->where('user_id', $user->id)
-                ->whereIn('funnel_stage_id', $wonStageIds)
-                ->whereBetween('created_at', $dateRange)
-                ->count();
-
-            $totalValue = Opportunity::where('company_id', $companyId)
-                ->where('user_id', $user->id)
-                ->whereBetween('created_at', $dateRange)
-                ->sum('value');
-
-            $performance[] = [
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'won_count' => $wonCount,
-                'total_value' => $totalValue,
-                'won_value' => $wonValue,
-                'win_rate' => $totalValue > 0 ? round(($wonValue / $totalValue) * 100, 1) : 0,
-            ];
+        if ($filters['uf']) {
+            $query->where('suppliers.state', $filters['uf']);
+        }
+        
+        if ($filters['supplier_id']) {
+            $query->where('suppliers.id', $filters['supplier_id']);
         }
 
-        usort($performance, fn($a, $b) => $b['won_value'] - $a['won_value']);
+        return $query->get()->toArray();
+    }
 
-        return $performance;
+    public function getLossAnalysis(Request $request): array
+    {
+        $companyId = Auth::user()->company_id;
+        $filters = $this->getFilters($request);
+        $dateRange = $this->getDateRange($request->get('period', 'month'));
+
+        $lossStageIds = FunnelStage::where('company_id', $companyId)
+            ->where('is_final_loss', true)
+            ->pluck('id')
+            ->toArray();
+
+        $query = Opportunity::where('company_id', $companyId)
+            ->whereIn('funnel_stage_id', $lossStageIds)
+            ->whereBetween('created_at', $dateRange)
+            ->select('loss_reason', DB::raw('count(*) as count'))
+            ->groupBy('loss_reason');
+
+        $this->applyFilters($query, $filters);
+
+        return $query->get()->toArray();
+    }
+
+    protected function applyFilters($query, array $filters)
+    {
+        if ($filters['user_id']) {
+            $query->where('user_id', $filters['user_id']);
+        }
+        if ($filters['supplier_id']) {
+            $query->where('supplier_id', $filters['supplier_id']);
+        }
+        if ($filters['uf']) {
+            $query->join('organizations', 'opportunities.organization_id', '=', 'organizations.id')
+                  ->where('organizations.address_data->uf', $filters['uf']);
+        }
+    }
+
+    protected function getFilters(Request $request): array
+    {
+        return [
+            'user_id' => $request->get('user_id'),
+            'supplier_id' => $request->get('supplier_id'),
+            'uf' => $request->get('uf'),
+            'month' => $request->get('month', now()->month),
+            'year' => $request->get('year', now()->year),
+        ];
+    }
+
+    protected function getGoals(int $companyId, array $filters, Request $request): array
+    {
+        $goalQuery = Goal::where('company_id', $companyId)
+            ->where('month', $filters['month'])
+            ->where('year', $filters['year']);
+
+        if ($filters['user_id']) {
+            $goalQuery->where('goal_type', 'user')->where('target_id', $filters['user_id']);
+        } elseif ($filters['supplier_id']) {
+            $goalQuery->where('goal_type', 'supplier')->where('target_id', $filters['supplier_id']);
+        } else {
+            $goalQuery->where('goal_type', 'global');
+        }
+
+        if ($filters['uf']) {
+            $goalQuery->where('uf', $filters['uf']);
+        }
+
+        $goal = $goalQuery->first();
+
+        return [
+            'target_revenue' => $goal?->target_revenue ?? 0,
+            'target_wins' => $goal?->target_wins ?? 0,
+        ];
     }
 
     protected function getDateRange(string $period): array
     {
         $now = now();
-        
         return match ($period) {
             'month' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
             '30days' => [$now->copy()->subDays(30), $now],

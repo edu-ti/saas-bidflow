@@ -60,11 +60,16 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::get('/reports/overview', [ReportController::class, 'overview']);
     Route::get('/reports/bidding', [ReportController::class, 'bidding']);
     Route::get('/reports/bidding-funnel', [ReportController::class, 'biddingFunnel']);
+    Route::get('/reports/sales', [ReportController::class, 'sales']);
+    Route::get('/reports/suppliers', [ReportController::class, 'suppliers']);
+    Route::get('/reports/loss-analysis', [ReportController::class, 'lossAnalysis']);
     Route::get('/reports/financial', [ReportController::class, 'financial']);
     Route::get('/reports/financial-health', [ReportController::class, 'financialHealth']);
     Route::get('/reports/financial-timeline', [ReportController::class, 'financialTimeline']);
     Route::get('/reports/team-performance', [ReportController::class, 'teamPerformance']);
     Route::get('/reports/users', [ReportController::class, 'users']);
+    Route::get('/reports/available-suppliers', [ReportController::class, 'availableSuppliers']);
+    Route::post('/goals', [\App\Http\Controllers\GoalController::class, 'store']);
     
     Route::middleware('feature:commercial')->group(function () {
         Route::get('/funnel-stages', [FunnelController::class, 'stages']);

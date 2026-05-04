@@ -58,7 +58,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   const [companyLogo, setCompanyLogo] = useState<string>(localStorage.getItem('company_logo') || '');
   const storedUser = localStorage.getItem('user');
   let user = { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, is_admin: false, role_id: null, permissions: null, allowed_modules: [] };
-  
+
   try {
     const parsed = storedUser ? JSON.parse(storedUser) : null;
     if (parsed) user = { ...user, ...parsed };
@@ -76,9 +76,9 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   const hasPermission = (module?: string, page?: string, action: string = 'view') => {
     // 1. Admin/SuperAdmin Bypass
     if (user.is_superadmin || user.is_admin || !user.role_id) return true;
-    
+
     // 2. Check Role Permissions (3-level granularity)
-    if (!user.permissions || !module || !page) return true; 
+    if (!user.permissions || !module || !page) return true;
     return user.permissions[module]?.[page]?.[action] === true;
   };
 
@@ -122,8 +122,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} />, permissionModule: 'management', permissionPage: 'dashboard' },
         { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} />, permissionModule: 'management', permissionPage: 'settings' },
         { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} />, permissionModule: 'management', permissionPage: 'users' },
-        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} />, permissionModule: 'management', permissionPage: 'reports' },
-        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} />, permissionModule: 'management', permissionPage: 'reports' },
+        { key: 'reports-dashboard', name: 'Relatórios & BI', icon: <TrendingUp size={18} />, permissionModule: 'management', permissionPage: 'reports' },
+        { key: 'reports', name: 'BI Inteligente', icon: <BarChart3 size={18} />, permissionModule: 'management', permissionPage: 'reports' },
         { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} />, permissionModule: 'management', permissionPage: 'settings' },
         ...(user.is_superadmin ? [{ key: 'master' as Page, name: 'Painel Master', icon: <Lock size={18} /> }] : [])
       ]
@@ -195,10 +195,10 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
             </button>
             <div className="w-full flex justify-center py-2">
               {companyLogo ? (
-                <img 
-                  src={companyLogo} 
-                  alt="Logo" 
-                  className="h-28 w-auto max-w-[180px] object-contain animate-in fade-in zoom-in duration-700" 
+                <img
+                  src={companyLogo}
+                  alt="Logo"
+                  className="h-28 w-auto max-w-[180px] object-contain animate-in fade-in zoom-in duration-700"
                 />
               ) : (
                 <div className="space-y-1 flex flex-col items-center">
@@ -220,10 +220,10 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
               <Menu size={24} />
             </button>
             {companyLogo ? (
-              <img 
-                src={companyLogo} 
-                alt="Logo" 
-                className="w-12 h-12 object-contain rounded-lg bg-white/5 p-1 border border-border-subtle/30 animate-in fade-in zoom-in duration-500" 
+              <img
+                src={companyLogo}
+                alt="Logo"
+                className="w-12 h-12 object-contain rounded-lg bg-white/5 p-1 border border-border-subtle/30 animate-in fade-in zoom-in duration-500"
               />
             ) : (
               <div className="w-2.5 h-8 bg-gradient-to-b from-[#2563eb] to-[#14b8a6] rounded-full shadow-platinum-glow animate-pulse" />
@@ -235,10 +235,10 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       <nav className="flex-1 py-6 px-4 space-y-8 overflow-y-auto scrollbar-platinum scroll-smooth">
         {menuGroups.map((group, gIndex) => {
           const isLocked = !hasModule(group.requiredModule);
-          
+
           // Filter items based on permission
           const visibleItems = group.items.filter(item => hasPermission(item.permissionModule, item.permissionPage, 'view'));
-          
+
           if (visibleItems.length === 0) return null;
 
           return (
