@@ -70,24 +70,30 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Helper para verificar permissão no frontend
-const hasPermission = (permission?: string, action: string = 'view') => {
+// Helper para verificar permissão no frontend (Atualizado para 3 níveis)
+const hasPermission = (module?: string, page?: string, action: string = 'view') => {
   const storedUser = localStorage.getItem('user');
   if (!storedUser) return false;
   
   try {
     const user = JSON.parse(storedUser);
     if (user.is_superadmin || user.is_admin || !user.role_id) return true;
-    if (!user.permissions || !permission) return true; 
-    return user.permissions[permission]?.[action] === true;
+    if (!user.permissions || !module || !page) return true; 
+    
+    // Suporte ao formato antigo (fallback) se necessário, mas focado no novo
+    if (typeof user.permissions[module] === 'object') {
+       return user.permissions[module]?.[page]?.[action] === true;
+    }
+    
+    return false;
   } catch {
     return false;
   }
 };
 
 // Componente para rotas com permissão específica
-function PermissionRoute({ children, permission }: { children: React.ReactNode, permission: string }) {
-  if (!hasPermission(permission, 'view')) {
+function PermissionRoute({ children, module, page }: { children: React.ReactNode, module: string, page: string }) {
+  if (!hasPermission(module, page, 'view')) {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -291,7 +297,7 @@ function AppContent() {
 
         <Route path="/company" element={
           <ProtectedRoute>
-            <PermissionRoute permission="admin">
+            <PermissionRoute module="admin" page="settings">
               <AuthenticatedLayout>
                 <Company />
               </AuthenticatedLayout>
@@ -301,7 +307,7 @@ function AppContent() {
 
         <Route path="/users" element={
           <ProtectedRoute>
-            <PermissionRoute permission="users">
+            <PermissionRoute module="admin" page="users">
               <AuthenticatedLayout>
                 <UsersManagement />
               </AuthenticatedLayout>
@@ -311,7 +317,7 @@ function AppContent() {
 
         <Route path="/reports" element={
           <ProtectedRoute>
-            <PermissionRoute permission="reports">
+            <PermissionRoute module="admin" page="logs">
               <AuthenticatedLayout>
                 <Reports />
               </AuthenticatedLayout>
@@ -321,7 +327,7 @@ function AppContent() {
 
         <Route path="/reports-dashboard" element={
           <ProtectedRoute>
-            <PermissionRoute permission="reports">
+            <PermissionRoute module="admin" page="logs">
               <AuthenticatedLayout>
                 <ReportsDashboard />
               </AuthenticatedLayout>
@@ -332,7 +338,7 @@ function AppContent() {
         {/* Rotas protegidas - Comercial */}
         <Route path="/sales-funnel" element={
           <ProtectedRoute>
-            <PermissionRoute permission="sales_funnel">
+            <PermissionRoute module="commercial" page="opportunities">
               <AuthenticatedLayout>
                 <SalesFunnel />
               </AuthenticatedLayout>
@@ -342,7 +348,7 @@ function AppContent() {
 
         <Route path="/leads" element={
           <ProtectedRoute>
-            <PermissionRoute permission="leads">
+            <PermissionRoute module="commercial" page="opportunities">
               <AuthenticatedLayout>
                 <Leads />
               </AuthenticatedLayout>
@@ -352,7 +358,7 @@ function AppContent() {
 
         <Route path="/clients" element={
           <ProtectedRoute>
-            <PermissionRoute permission="clients">
+            <PermissionRoute module="commercial" page="clients">
               <AuthenticatedLayout>
                 <Clients />
               </AuthenticatedLayout>
@@ -362,7 +368,7 @@ function AppContent() {
 
         <Route path="/proposals" element={
           <ProtectedRoute>
-            <PermissionRoute permission="proposals">
+            <PermissionRoute module="commercial" page="proposals">
               <AuthenticatedLayout>
                 <Proposals />
               </AuthenticatedLayout>
@@ -372,7 +378,7 @@ function AppContent() {
 
         <Route path="/email-marketing" element={
           <ProtectedRoute>
-            <PermissionRoute permission="marketing">
+            <PermissionRoute module="marketing" page="campaigns">
               <AuthenticatedLayout>
                 <EmailMarketing />
               </AuthenticatedLayout>
@@ -382,7 +388,7 @@ function AppContent() {
 
         <Route path="/agenda" element={
           <ProtectedRoute>
-            <PermissionRoute permission="leads">
+            <PermissionRoute module="commercial" page="opportunities">
               <AuthenticatedLayout>
                 <Agenda />
               </AuthenticatedLayout>
@@ -393,7 +399,7 @@ function AppContent() {
         {/* Rotas protegidas - Licitações */}
         <Route path="/bidding-radar" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_radar">
+            <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <BiddingRadar />
               </AuthenticatedLayout>
@@ -403,7 +409,7 @@ function AppContent() {
 
         <Route path="/bidding-monitoring" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_radar">
+            <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <BiddingMonitoring />
               </AuthenticatedLayout>
@@ -413,7 +419,7 @@ function AppContent() {
 
         <Route path="/bidding-funnel" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_funnel">
+            <PermissionRoute module="bidding" page="funnel">
               <AuthenticatedLayout>
                 <BiddingFunnel />
               </AuthenticatedLayout>
@@ -423,7 +429,7 @@ function AppContent() {
 
         <Route path="/bidding-capture" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_capture">
+            <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <BiddingCapture />
               </AuthenticatedLayout>
@@ -433,7 +439,7 @@ function AppContent() {
 
         <Route path="/auction-details" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_radar">
+            <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <AuctionDetails />
               </AuthenticatedLayout>
@@ -443,7 +449,7 @@ function AppContent() {
 
         <Route path="/ai-generator" element={
           <ProtectedRoute>
-            <PermissionRoute permission="bidding_radar">
+            <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <AIGenerator />
               </AuthenticatedLayout>
@@ -454,7 +460,7 @@ function AppContent() {
         {/* Rotas protegidas - Operacional */}
         <Route path="/licenses" element={
           <ProtectedRoute>
-            <PermissionRoute permission="admin">
+            <PermissionRoute module="admin" page="settings">
               <AuthenticatedLayout>
                 <Licenses />
               </AuthenticatedLayout>
@@ -505,7 +511,7 @@ function AppContent() {
 
         <Route path="/campaigns" element={
           <ProtectedRoute>
-            <PermissionRoute permission="marketing">
+            <PermissionRoute module="marketing" page="campaigns">
               <AuthenticatedLayout>
                 <Campaigns />
               </AuthenticatedLayout>
@@ -547,7 +553,7 @@ function AppContent() {
         {/* Rotas protegidas - Configurações */}
         <Route path="/admin" element={
           <ProtectedRoute>
-            <PermissionRoute permission="admin">
+            <PermissionRoute module="admin" page="settings">
               <AuthenticatedLayout>
                 <Admin />
               </AuthenticatedLayout>

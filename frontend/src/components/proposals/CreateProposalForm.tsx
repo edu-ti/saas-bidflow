@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { X, Search, Plus, Image as ImageIcon, Trash2, ShieldCheck, FileText, DollarSign, Clock, Truck, ShieldAlert, Zap, User, Sparkles, ChevronRight, Layout, Calendar } from 'lucide-react';
+import { X, Search, Plus, Image as ImageIcon, Trash2, ShieldCheck, FileText, DollarSign, Clock, Truck, ShieldAlert, Zap, User, Sparkles, ChevronRight, Layout, Calendar, Save, Target } from 'lucide-react';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export default function CreateProposalForm({ onClose }: { onClose: () => void }) {
   const [clientType, setClientType] = useState<'pj' | 'pf'>('pj');
+  const { hasPermission } = usePermissions();
+  const canSave = hasPermission('commercial', 'proposals', 'create');
 
   return (
     <div className="platinum-card overflow-hidden mb-8 animate-in fade-in zoom-in-95 duration-500 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30">
@@ -23,13 +26,15 @@ export default function CreateProposalForm({ onClose }: { onClose: () => void })
           >
             Descartar
           </button>
-          <button 
-            onClick={onClose} 
-            className="btn-primary flex-1 md:flex-none px-10 py-3.5 shadow-platinum-glow uppercase text-[10px] tracking-widest flex items-center justify-center gap-3"
-          >
-            <Sparkles size={14} className="animate-pulse" />
-            Gerar Proposta Final
-          </button>
+          {canSave && (
+            <button 
+              onClick={onClose} 
+              className="btn-primary flex-1 md:flex-none px-10 py-3.5 shadow-platinum-glow uppercase text-[10px] tracking-widest flex items-center justify-center gap-3"
+            >
+              <Sparkles size={14} className="animate-pulse" />
+              Gerar Proposta Final
+            </button>
+          )}
         </div>
       </div>
 
@@ -317,9 +322,11 @@ export default function CreateProposalForm({ onClose }: { onClose: () => void })
         <button onClick={onClose} className="px-10 py-4 text-[10px] font-black text-text-muted hover:text-text-primary transition-all uppercase tracking-[0.4em]">
           Abortar Processo
         </button>
-        <button className="btn-primary px-14 py-5 shadow-platinum-glow uppercase text-[11px] tracking-[0.4em] flex items-center gap-4">
-           <Save size={20} /> Consolidar Engenharia
-        </button>
+        {canSave && (
+          <button className="btn-primary px-14 py-5 shadow-platinum-glow uppercase text-[11px] tracking-[0.4em] flex items-center gap-4">
+             <Save size={20} /> Consolidar Engenharia
+          </button>
+        )}
       </div>
     </div>
   );

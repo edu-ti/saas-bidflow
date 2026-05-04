@@ -34,13 +34,13 @@ interface MenuItem {
   name: string;
   icon: JSX.Element;
   badge?: string;
-  permission?: string;
+  permissionModule?: string;
+  permissionPage?: string;
 }
 
 interface MenuGroup {
   title: string;
   requiredModule?: string;
-  permissionModule?: string;
   items: MenuItem[];
 }
 
@@ -57,7 +57,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
   const [companyLogo, setCompanyLogo] = useState<string>(localStorage.getItem('company_logo') || '');
   const storedUser = localStorage.getItem('user');
-  let user = { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, allowed_modules: [] };
+  let user = { name: 'Usuário', company_id: 'BidFlow', is_superadmin: false, is_admin: false, role_id: null, permissions: null, allowed_modules: [] };
+  
   try {
     const parsed = storedUser ? JSON.parse(storedUser) : null;
     if (parsed) user = { ...user, ...parsed };
@@ -72,14 +73,13 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     return user.allowed_modules.includes(moduleKey);
   };
 
-  const hasPermission = (module?: string, action: string = 'view') => {
+  const hasPermission = (module?: string, page?: string, action: string = 'view') => {
     // 1. Admin/SuperAdmin Bypass
     if (user.is_superadmin || user.is_admin || !user.role_id) return true;
     
-    // 2. Check Role Permissions
-    if (!user.permissions) return false;
-    const perms = user.permissions;
-    return perms[module as string]?.[action] === true;
+    // 2. Check Role Permissions (3-level granularity)
+    if (!user.permissions || !module || !page) return true; 
+    return user.permissions[module]?.[page]?.[action] === true;
   };
 
   useEffect(() => {
@@ -117,14 +117,14 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
 
   const menuGroups: MenuGroup[] = [
     {
-      title: 'Gestão',
+      title: 'Gestão Core',
       items: [
-        { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} />, permission: 'dashboard' },
-        { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} />, permission: 'admin' },
-        { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} />, permission: 'users' },
-        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} />, permission: 'reports' },
-        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} />, permission: 'reports' },
-        { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} />, permission: 'admin' },
+        { key: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={18} />, permissionModule: 'management', permissionPage: 'dashboard' },
+        { key: 'admin', name: 'Configurações Empresa', icon: <Shield size={18} />, permissionModule: 'management', permissionPage: 'settings' },
+        { key: 'users', name: 'Equipe / Utilizadores', icon: <Users size={18} />, permissionModule: 'management', permissionPage: 'users' },
+        { key: 'reports', name: 'Relatórios & BI', icon: <BarChart3 size={18} />, permissionModule: 'management', permissionPage: 'reports' },
+        { key: 'reports-dashboard', name: 'BI Inteligente', icon: <TrendingUp size={18} />, permissionModule: 'management', permissionPage: 'reports' },
+        { key: 'licenses', name: 'Licenças e Certidões', icon: <FileCheck size={18} />, permissionModule: 'management', permissionPage: 'settings' },
         ...(user.is_superadmin ? [{ key: 'master' as Page, name: 'Painel Master', icon: <Lock size={18} /> }] : [])
       ]
     },
@@ -132,49 +132,49 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       title: 'Comercial',
       requiredModule: 'commercial',
       items: [
-        { key: 'clients', name: 'Clientes', icon: <User size={18} />, permission: 'clients' },
-        { key: 'leads', name: 'Leads', icon: <Users size={18} />, permission: 'leads' },
-        { key: 'proposals', name: 'Propostas', icon: <FileText size={18} />, permission: 'proposals' },
-        { key: 'sales-funnel', name: 'Funil de Vendas', icon: <KanbanSquare size={18} />, permission: 'sales_funnel' },
-        { key: 'products', name: 'Catálogo de Produtos', icon: <Package size={18} />, permission: 'inventory' },
-        { key: 'agenda', name: 'Agenda Integrada', icon: <CalendarDays size={18} />, permission: 'leads' },
+        { key: 'clients', name: 'Clientes', icon: <User size={18} />, permissionModule: 'commercial', permissionPage: 'clients' },
+        { key: 'leads', name: 'Leads', icon: <Users size={18} />, permissionModule: 'commercial', permissionPage: 'opportunities' },
+        { key: 'proposals', name: 'Propostas', icon: <FileText size={18} />, permissionModule: 'commercial', permissionPage: 'proposals' },
+        { key: 'sales-funnel', name: 'Funil de Vendas', icon: <KanbanSquare size={18} />, permissionModule: 'commercial', permissionPage: 'opportunities' },
+        { key: 'products', name: 'Catálogo de Produtos', icon: <Package size={18} />, permissionModule: 'inventory', permissionPage: 'inventory' },
+        { key: 'agenda', name: 'Agenda Integrada', icon: <CalendarDays size={18} />, permissionModule: 'commercial', permissionPage: 'opportunities' },
       ]
     },
     {
       title: 'Licitações RPA',
       requiredModule: 'bidding',
       items: [
-        { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} />, permission: 'bidding_radar' },
-        { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} />, permission: 'bidding_capture' },
-        { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} />, permission: 'bidding_radar' },
-        { key: 'bidding-funnel', name: 'Funil de Licitações', icon: <KanbanSquare size={18} />, permission: 'bidding_funnel' },
-        { key: 'auction-details', name: 'Detalhes do Pregão', icon: <ListTodo size={18} />, permission: 'bidding_radar' },
-        { key: 'ai-generator', name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 'Pro', permission: 'bidding_radar' },
+        { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
+        { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
+        { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} />, permissionModule: 'bidding', permissionPage: 'monitoring' },
+        { key: 'bidding-funnel', name: 'Funil de Licitações', icon: <KanbanSquare size={18} />, permissionModule: 'bidding', permissionPage: 'funnel' },
+        { key: 'auction-details', name: 'Detalhes do Pregão', icon: <ListTodo size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
+        { key: 'ai-generator', name: 'Gerador IA', icon: <Sparkles size={18} />, badge: 'Pro', permissionModule: 'bidding', permissionPage: 'radar' },
       ]
     },
     {
       title: 'Financeiro',
       requiredModule: 'financial',
       items: [
-        { key: 'finance', name: 'Motor Financeiro', icon: <Wallet size={18} />, permission: 'finance' },
-        { key: 'accounts-payable-receivable', name: 'Contas Pagar/Receber', icon: <CreditCard size={18} />, permission: 'accounts' },
-        { key: 'contracts', name: 'Contratos (CLM)', icon: <Briefcase size={18} />, permission: 'contracts' },
+        { key: 'finance', name: 'Motor Financeiro', icon: <Wallet size={18} />, permissionModule: 'financial', permissionPage: 'cashflow' },
+        { key: 'accounts-payable-receivable', name: 'Contas Pagar/Receber', icon: <CreditCard size={18} />, permissionModule: 'financial', permissionPage: 'billing' },
+        { key: 'contracts', name: 'Contratos (CLM)', icon: <Briefcase size={18} />, permissionModule: 'financial', permissionPage: 'billing' },
       ]
     },
     {
       title: 'Ativos e Estoque',
       items: [
-        { key: 'inventory', name: 'Inventário', icon: <Boxes size={18} />, permission: 'inventory' },
-        { key: 'consignment', name: 'Gestão de Consignação', icon: <Handshake size={18} />, permission: 'inventory' },
+        { key: 'inventory', name: 'Inventário', icon: <Boxes size={18} />, permissionModule: 'inventory', permissionPage: 'inventory' },
+        { key: 'consignment', name: 'Gestão de Consignação', icon: <Handshake size={18} />, permissionModule: 'inventory', permissionPage: 'consignments' },
       ]
     },
     {
       title: 'Módulos Adicionais',
       items: [
-        { key: 'campaigns', name: 'Marketing / Campanhas', icon: <Send size={18} />, permission: 'marketing' },
-        { key: 'email-marketing', name: 'E-mail Marketing', icon: <Mail size={18} />, permission: 'marketing' },
-        { key: 'chatbot', name: 'Construtor de Chatbot', icon: <Bot size={18} />, permission: 'chatbot' },
-        { key: 'conversations', name: 'Central de Atendimento', icon: <MessageCircle size={18} />, permission: 'chatbot' },
+        { key: 'campaigns', name: 'Marketing / Campanhas', icon: <Send size={18} />, permissionModule: 'marketing', permissionPage: 'campaigns' },
+        { key: 'email-marketing', name: 'E-mail Marketing', icon: <Mail size={18} />, permissionModule: 'marketing', permissionPage: 'campaigns' },
+        { key: 'chatbot', name: 'Construtor de Chatbot', icon: <Bot size={18} />, permissionModule: 'marketing', permissionPage: 'automations' },
+        { key: 'conversations', name: 'Central de Atendimento', icon: <MessageCircle size={18} />, permissionModule: 'marketing', permissionPage: 'automations' },
         { key: 'settings', name: 'Preferências', icon: <Settings size={18} /> },
       ]
     }
@@ -237,7 +237,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
           const isLocked = !hasModule(group.requiredModule);
           
           // Filter items based on permission
-          const visibleItems = group.items.filter(item => hasPermission(item.permission, 'view'));
+          const visibleItems = group.items.filter(item => hasPermission(item.permissionModule, item.permissionPage, 'view'));
           
           if (visibleItems.length === 0) return null;
 

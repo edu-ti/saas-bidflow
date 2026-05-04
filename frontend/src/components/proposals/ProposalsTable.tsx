@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Plus, Eye, Edit, Copy, Trash2, ChevronLeft, ChevronRight, Lock, DollarSign, FileText, User, Layout, Briefcase, Target, ShieldCheck } from 'lucide-react';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface ProposalData {
   id: string;
@@ -23,6 +24,7 @@ const mockProposals: ProposalData[] = [
 
 export default function ProposalsTable({ onCreateClick }: { onCreateClick: () => void }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const { hasPermission } = usePermissions();
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -57,13 +59,15 @@ export default function ProposalsTable({ onCreateClick }: { onCreateClick: () =>
               className="w-full pl-12 pr-4 py-3.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
-          <button 
-            onClick={onCreateClick}
-            className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest whitespace-nowrap"
-          >
-            <Plus className="w-5 h-5" />
-            Gerar Proposta Neural
-          </button>
+          {hasPermission('commercial', 'proposals', 'create') && (
+            <button 
+              onClick={onCreateClick}
+              className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" />
+              Gerar Proposta Neural
+            </button>
+          )}
         </div>
       </div>
 
@@ -109,9 +113,13 @@ export default function ProposalsTable({ onCreateClick }: { onCreateClick: () =>
                 <td className="px-8 py-8 text-right">
                   <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
                     <button className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Visualizar"><Eye size={18} /></button>
-                    <button className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Editar"><Edit size={18} /></button>
+                    {hasPermission('commercial', 'proposals', 'edit') && (
+                      <button className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Editar"><Edit size={18} /></button>
+                    )}
                     <button className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Duplicar"><Copy size={18} /></button>
-                    <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all shadow-inner-platinum" title="Excluir"><Trash2 size={18} /></button>
+                    {hasPermission('commercial', 'proposals', 'delete') && (
+                      <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all shadow-inner-platinum" title="Excluir"><Trash2 size={18} /></button>
+                    )}
                   </div>
                 </td>
               </tr>

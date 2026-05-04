@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import api from '../lib/axios';
 import { 
   User, Mail, Shield, ShieldCheck, Plus, Search, Loader2, 
   Edit2, Trash2, Zap, Lock, Settings, Users, Key,
   Check, X, AlertCircle, Save, BarChart3, KanbanSquare, 
   Radar, Activity, Wallet, CreditCard, Briefcase, Boxes, 
-  Bot, MessageSquare, FileText, Send, Database
+  Bot, MessageSquare, FileText, Send, Database, Target, DollarSign
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -25,38 +25,70 @@ interface Role {
 }
 
 const MODULES = [
-  // Gestão
-  { id: 'dashboard', label: 'Dashboard Geral', icon: Zap },
-  { id: 'reports', label: 'Relatórios & BI', icon: BarChart3 },
-  
-  // Comercial
-  { id: 'leads', label: 'Gestão de Leads', icon: Users },
-  { id: 'clients', label: 'Base de Clientes', icon: User },
-  { id: 'proposals', label: 'Propostas de Valor', icon: FileText },
-  { id: 'sales_funnel', label: 'Funil de Vendas', icon: KanbanSquare },
-  
-  // Licitações
-  { id: 'bidding_radar', label: 'Radar de Licitações', icon: Radar },
-  { id: 'bidding_capture', label: 'Captação de Editais', icon: Activity },
-  { id: 'bidding_funnel', label: 'Funil de Licitações', icon: KanbanSquare },
-  
-  // Operacional/Financeiro
-  { id: 'finance', label: 'Motor Financeiro', icon: Wallet },
-  { id: 'accounts', label: 'Contas Pagar/Receber', icon: CreditCard },
-  { id: 'contracts', label: 'Gestão de Contratos', icon: Briefcase },
-  
-  // Estoque/Adicionais
-  { id: 'inventory', label: 'Inventário de Estoque', icon: Boxes },
-  { id: 'marketing', label: 'Marketing / Campanhas', icon: Send },
-  { id: 'chatbot', label: 'Chatbot Architect', icon: Bot },
-  
-  // Configurações
-  { id: 'admin', label: 'Configurações Empresa', icon: Settings },
-  { id: 'users', label: 'Equipe e Perfis', icon: Lock },
+  { 
+    id: 'management', 
+    label: 'Gestão Core', 
+    icon: Database,
+    pages: [
+      { id: 'dashboard', label: 'Dashboard Estratégico' },
+      { id: 'settings', label: 'Configurações da Empresa' },
+      { id: 'users', label: 'Equipe / Utilizadores' },
+      { id: 'reports', label: 'Relatórios & BI' },
+    ]
+  },
+  { 
+    id: 'commercial', 
+    label: 'Comercial', 
+    icon: Briefcase,
+    pages: [
+      { id: 'leads', label: 'Gestão de Leads' },
+      { id: 'opportunities', label: 'Oportunidades (CRM)' },
+      { id: 'proposals', label: 'Gerador de Propostas' },
+      { id: 'clients', label: 'Base de Clientes' }
+    ]
+  },
+  { 
+    id: 'bidding', 
+    label: 'Licitações & Radar', 
+    icon: Target,
+    pages: [
+      { id: 'radar', label: 'Radar de Editais' },
+      { id: 'monitoring', label: 'Monitoramento' },
+      { id: 'funnel', label: 'Funil de Lances' }
+    ]
+  },
+  { 
+    id: 'financial', 
+    label: 'Inteligência Financeira', 
+    icon: DollarSign,
+    pages: [
+      { id: 'cashflow', label: 'Fluxo de Caixa' },
+      { id: 'billing', label: 'Faturamento' },
+      { id: 'tax', label: 'Gestão Fiscal' }
+    ]
+  },
+  { 
+    id: 'inventory', 
+    label: 'Operacional', 
+    icon: Boxes,
+    pages: [
+      { id: 'inventory', label: 'Inventário de Estoque' },
+      { id: 'consignments', label: 'Consignações' },
+    ]
+  },
+  { 
+    id: 'marketing', 
+    label: 'Marketing Neural', 
+    icon: Zap,
+    pages: [
+      { id: 'campaigns', label: 'Campanhas de Email' },
+      { id: 'automations', label: 'Automações' }
+    ]
+  },
 ];
 
 const ACTIONS = [
-  { id: 'view', label: 'Visualizar' },
+  { id: 'view', label: 'Ver' },
   { id: 'create', label: 'Criar' },
   { id: 'edit', label: 'Editar' },
   { id: 'delete', label: 'Excluir' },
@@ -73,8 +105,11 @@ export default function UsersManagement() {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [roleForm, setRoleForm] = useState({
     name: '',
-    permissions: {} as Record<string, Record<string, boolean>>
+    permissions: {} as any
   });
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const allowedModules = currentUser.allowed_modules || [];
 
   const fetchData = async () => {
     setLoading(true);
@@ -108,24 +143,48 @@ export default function UsersManagement() {
       // Initialize permissions
       const initialPerms: any = {};
       MODULES.forEach(m => {
-        initialPerms[m.id] = { view: false, create: false, edit: false, delete: false };
+        initialPerms[m.id] = {};
+        m.pages.forEach(p => {
+          initialPerms[m.id][p.id] = { view: false, create: false, edit: false, delete: false };
+        });
       });
       setRoleForm({ name: '', permissions: initialPerms });
     }
     setShowRoleModal(true);
   };
 
-  const togglePermission = (moduleId: string, actionId: string) => {
-    setRoleForm(prev => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions,
-        [moduleId]: {
-          ...(prev.permissions[moduleId] || {}),
-          [actionId]: !prev.permissions[moduleId]?.[actionId]
-        }
-      }
-    }));
+  const togglePermission = (moduleId: string, pageId: string, actionId: string) => {
+    setRoleForm(prev => {
+      const newPerms = { ...prev.permissions };
+      if (!newPerms[moduleId]) newPerms[moduleId] = {};
+      if (!newPerms[moduleId][pageId]) newPerms[moduleId][pageId] = {};
+      
+      newPerms[moduleId][pageId] = {
+        ...newPerms[moduleId][pageId],
+        [actionId]: !newPerms[moduleId][pageId][actionId]
+      };
+
+      return { ...prev, permissions: newPerms };
+    });
+  };
+
+  const toggleAllPagePermissions = (moduleId: string, pageId: string) => {
+    setRoleForm(prev => {
+      const newPerms = { ...prev.permissions };
+      if (!newPerms[moduleId]) newPerms[moduleId] = {};
+      
+      const currentPage = newPerms[moduleId][pageId] || {};
+      const isAllChecked = ACTIONS.every(a => currentPage[a.id]);
+      
+      newPerms[moduleId][pageId] = {
+        view: !isAllChecked,
+        create: !isAllChecked,
+        edit: !isAllChecked,
+        delete: !isAllChecked
+      };
+
+      return { ...prev, permissions: newPerms };
+    });
   };
 
   const handleSaveRole = async (e: React.FormEvent) => {
@@ -311,33 +370,56 @@ export default function UsersManagement() {
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-surface-elevated/50 border-b border-border-subtle">
-                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Módulo do Ecossistema</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted">Recurso / Página</th>
+                        <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted text-center">Acesso Total</th>
                         {ACTIONS.map(a => (
                           <th key={a.id} className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-text-muted text-center">{a.label}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border-subtle/20">
-                      {MODULES.map(mod => (
-                        <tr key={mod.id} className="hover:bg-primary/5 transition-colors">
-                          <td className="px-8 py-5">
-                            <div className="flex items-center gap-4">
-                              <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><mod.icon size={16} /></div>
-                              <span className="text-xs font-black uppercase tracking-widest text-text-primary">{mod.label}</span>
-                            </div>
-                          </td>
-                          {ACTIONS.map(action => (
-                            <td key={action.id} className="px-6 py-5 text-center">
-                              <button 
-                                type="button"
-                                onClick={() => togglePermission(mod.id, action.id)}
-                                className={`w-12 h-6 rounded-full relative transition-all duration-300 ${roleForm.permissions[mod.id]?.[action.id] ? 'bg-primary' : 'bg-surface-elevated border border-border-subtle'}`}
-                              >
-                                <div className={`absolute top-1 w-4 h-4 rounded-full transition-all duration-300 ${roleForm.permissions[mod.id]?.[action.id] ? 'left-7 bg-white shadow-platinum-glow' : 'left-1 bg-text-muted/40'}`} />
-                              </button>
+                      {MODULES.filter(m => m.id === 'management' || allowedModules.includes(m.id)).map(mod => (
+                        <Fragment key={mod.id}>
+                          <tr className="bg-surface-elevated/40">
+                            <td colSpan={6} className="px-8 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-primary/10 rounded-lg text-primary"><mod.icon size={12} /></div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{mod.label}</span>
+                              </div>
                             </td>
+                          </tr>
+                          {mod.pages.map(page => (
+                            <tr key={page.id} className="hover:bg-primary/5 transition-colors border-b border-border-subtle/10">
+                              <td className="px-10 py-4">
+                                <span className="text-xs font-bold text-text-primary pl-4 border-l-2 border-primary/20">{page.label}</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <button 
+                                  type="button"
+                                  onClick={() => toggleAllPagePermissions(mod.id, page.id)}
+                                  className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
+                                    ACTIONS.every(a => roleForm.permissions[mod.id]?.[page.id]?.[a.id])
+                                    ? 'bg-primary text-white shadow-platinum-glow'
+                                    : 'bg-surface-elevated text-text-muted border border-border-subtle'
+                                  }`}
+                                >
+                                  Full Access
+                                </button>
+                              </td>
+                              {ACTIONS.map(action => (
+                                <td key={action.id} className="px-6 py-4 text-center">
+                                  <button 
+                                    type="button"
+                                    onClick={() => togglePermission(mod.id, page.id, action.id)}
+                                    className={`w-10 h-5 rounded-full relative transition-all duration-300 ${roleForm.permissions[mod.id]?.[page.id]?.[action.id] ? 'bg-primary' : 'bg-surface-elevated border border-border-subtle'}`}
+                                  >
+                                    <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full transition-all duration-300 ${roleForm.permissions[mod.id]?.[page.id]?.[action.id] ? 'left-6 bg-white shadow-platinum-glow' : 'left-0.5 bg-text-muted/40'}`} />
+                                  </button>
+                                </td>
+                              ))}
+                            </tr>
                           ))}
-                        </tr>
+                        </Fragment>
                       ))}
                     </tbody>
                   </table>

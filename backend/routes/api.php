@@ -63,12 +63,12 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
         Route::put('/funnel-stages/{id}', [FunnelController::class, 'update']);
         Route::delete('/funnel-stages/{id}', [FunnelController::class, 'destroy']);
         
-        Route::get('/opportunities', [OpportunityController::class, 'index'])->middleware('permission:commercial,view');
-        Route::post('/opportunities', [OpportunityController::class, 'store'])->middleware('permission:commercial,create');
-        Route::get('/opportunities/{id}', [OpportunityController::class, 'show'])->middleware('permission:commercial,view');
-        Route::put('/opportunities/{id}', [OpportunityController::class, 'update'])->middleware('permission:commercial,edit');
-        Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy'])->middleware('permission:commercial,delete');
-        Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move'])->middleware('permission:commercial,edit');
+        Route::get('/opportunities', [OpportunityController::class, 'index'])->middleware('permission:commercial,opportunities,view');
+        Route::post('/opportunities', [OpportunityController::class, 'store'])->middleware('permission:commercial,opportunities,create');
+        Route::get('/opportunities/{id}', [OpportunityController::class, 'show'])->middleware('permission:commercial,opportunities,view');
+        Route::put('/opportunities/{id}', [OpportunityController::class, 'update'])->middleware('permission:commercial,opportunities,edit');
+        Route::delete('/opportunities/{id}', [OpportunityController::class, 'destroy'])->middleware('permission:commercial,opportunities,delete');
+        Route::patch('/opportunities/{id}/move', [OpportunityController::class, 'move'])->middleware('permission:commercial,opportunities,edit');
         Route::post('/opportunities/{id}/ai-insights', [OpportunityController::class, 'updateInsights']);
         Route::post('/opportunities/{id}/attachments', [OpportunityController::class, 'uploadAttachment']);
         
@@ -89,7 +89,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(func
     Route::post('/organizations', [CompanyManagementController::class, 'organizationStore']);
     Route::get('/organizations/{id}', [CompanyManagementController::class, 'organizationShow']);
     Route::middleware('feature:commercial')->group(function () {
-        Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::post('/proposals', [ProposalController::class, 'store'])->middleware('permission:commercial,proposals,create');
         Route::post('/proposals/{id}/generate-pdf', [ProposalController::class, 'generatePdf']);
         
         // CRM & Agenda migrations
