@@ -17,7 +17,7 @@ export type Page =
   // Comercial
   | 'sales-funnel' | 'leads' | 'clients' | 'proposals' | 'ai-generator' | 'email-marketing' | 'agenda'
   // Licitações
-  | 'bidding-radar' | 'bidding-monitoring' | 'bidding-capture' | 'auction-details' | 'bidding-funnel'
+  | 'bidding-hub' | 'bidding-search' | 'bidding-bulletin' | 'bidding-manage' | 'documents' | 'legal-consultant' | 'chat-monitor' | 'chat-monitor-settings' | 'market-analysis' | 'competitor-analysis' | 'bidding-radar' | 'bidding-monitoring' | 'bidding-capture' | 'auction-details' | 'bidding-funnel'
   // Operacional
   | 'licenses' | 'consignment' | 'contracts'
   // Estoque
@@ -144,6 +144,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
       title: 'Licitações RPA',
       requiredModule: 'bidding',
       items: [
+        { key: 'bidding-hub', name: 'Hub de Licitações', icon: <LayoutDashboard size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
         { key: 'bidding-radar', name: 'Radar de Licitações', icon: <Radar size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
         { key: 'bidding-capture', name: 'Captura de Editais', icon: <Activity size={18} />, permissionModule: 'bidding', permissionPage: 'radar' },
         { key: 'bidding-monitoring', name: 'Monitoramento', icon: <FileSearch size={18} />, permissionModule: 'bidding', permissionPage: 'monitoring' },

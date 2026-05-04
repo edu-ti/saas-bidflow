@@ -17,6 +17,16 @@ import AIGenerator from './components/AIGenerator';
 import BiddingMonitoring from './components/BiddingMonitoring';
 import BiddingCapture from './components/BiddingCapture';
 import BiddingFunnel from './components/BiddingFunnel';
+import BiddingHub from './components/BiddingHub';
+import BiddingSearch from './components/BiddingSearch';
+import BiddingBulletin from './components/BiddingBulletin';
+import ManageBiddings from './components/ManageBiddings';
+import ManageDocuments from './components/ManageDocuments';
+import LegalConsultant from './components/LegalConsultant';
+import ChatMonitor from './components/ChatMonitor';
+import ChatMonitorSettings from './components/ChatMonitorSettings';
+import MarketAnalysis from './components/MarketAnalysis';
+import CompetitorAnalysis from './components/CompetitorAnalysis';
 import AuctionDetails from './components/AuctionDetails';
 import Licenses from './components/Licenses';
 import Consignment from './components/Consignment';
@@ -120,6 +130,16 @@ function Topbar({ title }: { title?: string }) {
       '/proposals': 'Propostas de Valor',
       '/agenda': 'Agenda Integrada',
       '/bidding-funnel': 'Funil de Licitações',
+      '/bidding-hub': 'Hub de Licitações',
+      '/bidding-search': 'Encontrar Licitações',
+      '/bidding-bulletin': 'Boletim de Licitações',
+      '/bidding-manage': 'Gerenciar Licitações',
+      '/documents': 'Gerenciar Documentos',
+      '/legal-consultant': 'Consultor Jurídico',
+      '/chat-monitor': 'Monitorar Chat',
+      '/chat-monitor-settings': 'Configurações Monitoramento',
+      '/market-analysis': 'Análise de Mercado',
+      '/competitor-analysis': 'Análise de Concorrentes',
       '/bidding-radar': 'Radar de Licitações',
       '/bidding-monitoring': 'Monitoramento Ativo',
       '/bidding-capture': 'Captação de Editais',
@@ -202,6 +222,16 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/ai-generator') return 'ai-generator';
     if (path === '/email-marketing') return 'email-marketing';
     if (path === '/agenda') return 'agenda';
+    if (path === '/bidding-hub') return 'bidding-hub';
+    if (path === '/bidding-search') return 'bidding-search';
+    if (path === '/bidding-bulletin') return 'bidding-bulletin';
+    if (path === '/bidding-manage') return 'bidding-manage';
+    if (path === '/documents') return 'documents';
+    if (path === '/legal-consultant') return 'legal-consultant';
+    if (path === '/chat-monitor') return 'chat-monitor';
+    if (path === '/chat-monitor-settings') return 'chat-monitor-settings';
+    if (path === '/market-analysis') return 'market-analysis';
+    if (path === '/competitor-analysis') return 'competitor-analysis';
     if (path === '/bidding-radar') return 'bidding-radar';
     if (path === '/bidding-monitoring') return 'bidding-monitoring';
     if (path === '/bidding-funnel') return 'bidding-funnel';
@@ -397,6 +427,106 @@ function AppContent() {
         } />
 
         {/* Rotas protegidas - Licitações */}
+        <Route path="/bidding-hub" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <BiddingHub />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/bidding-search" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <BiddingSearch />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/bidding-bulletin" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <BiddingBulletin />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/bidding-manage" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <ManageBiddings />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/documents" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <ManageDocuments />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/legal-consultant" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <LegalConsultant />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/chat-monitor" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <ChatMonitor />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/chat-monitor-settings" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <ChatMonitorSettings />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/market-analysis" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <MarketAnalysis />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/competitor-analysis" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <CompetitorAnalysis />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
         <Route path="/bidding-radar" element={
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="radar">
