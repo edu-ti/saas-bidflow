@@ -81,7 +81,7 @@ export default function CompanySettings() {
     try {
       const response = await api.get('/api/billing/portal');
       if (response.data.url) {
-        window.location.href = response.data.url;
+        window.open(response.data.url, '_blank');
       }
     } catch (err) {
       toast.error('Erro ao acessar o portal de faturamento.');
@@ -291,7 +291,7 @@ export default function CompanySettings() {
                              ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
                              : 'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
                            }`}>
-                              {billing?.status === 'active' ? 'Assinatura Ativa' : 'Pagamento Pendente'}
+                              {billing?.status === 'active' ? 'Ativo' : 'Atrasado'}
                            </div>
                         </div>
                         <button 
@@ -299,9 +299,9 @@ export default function CompanySettings() {
                           className="w-full px-10 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-platinum-glow-sm hover:scale-105 transition-all flex items-center justify-center gap-3"
                         >
                            <Zap size={16} />
-                           Gerenciar Assinatura
+                           Pagar Fatura Atual
                         </button>
-                        <p className="text-[9px] text-text-muted font-black uppercase tracking-tight text-center opacity-40">Processado via Stripe Platinum Security</p>
+                        <p className="text-[9px] text-text-muted font-black uppercase tracking-tight text-center opacity-40">Processado via Asaas Platinum Security</p>
                      </div>
                   </div>
                </div>

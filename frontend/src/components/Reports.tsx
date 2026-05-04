@@ -5,6 +5,9 @@ import {
 } from 'recharts';
 import { Download, Calendar, TrendingUp, TrendingDown, Award, XCircle, Clock, DollarSign, Target, Users, Briefcase, ShoppingCart, BarChart3, Loader2, Sparkles, ChevronRight, PieChart as PieChartIcon, Layout } from 'lucide-react';
 import api from '../lib/axios';
+import toast from 'react-hot-toast';
+
+// Reports Analysis Engine
 
 type BiddingStats = {
   total: number;
@@ -90,6 +93,14 @@ export default function Reports() {
     }
   };
 
+  const handleExport = () => {
+    toast.loading('Compilando dados para exportação BI...', { duration: 2000 });
+    setTimeout(() => {
+      window.print();
+      toast.success('Relatório BI Platinum exportado com sucesso!');
+    }, 2000);
+  };
+
   const PLATINUM_COLORS = ['#6366f1', '#14b8a6', '#8b5cf6', '#3b82f6', '#ec4899', '#f43f5e'];
 
   const formatCurrency = (value: number) => {
@@ -152,7 +163,10 @@ export default function Reports() {
             </select>
           </div>
           
-          <button className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] tracking-widest">
+          <button 
+            onClick={handleExport}
+            className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] tracking-widest"
+          >
             <Download size={14} className="mr-2" /> Exportar BI Platinum
           </button>
         </div>

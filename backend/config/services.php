@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'asaas' => [
+        'key' => env('ASAAS_API_KEY'),
+        'url' => env('ASAAS_ENVIRONMENT') === 'production' 
+            ? 'https://api.asaas.com/v3' 
+            : 'https://sandbox.asaas.com/api/v3',
+        'webhook_token' => env('ASAAS_WEBHOOK_TOKEN'),
+    ],
+
 ];

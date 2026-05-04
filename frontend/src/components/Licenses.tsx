@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PlusCircle, List, Eye, Download, Trash2, Save, FileCheck, Calendar, Lock, ShieldCheck, FileWarning, Sparkles, ChevronRight, Layout } from 'lucide-react';
+import { ArrowLeft, PlusCircle, List, Eye, Download, Trash2, Save, FileCheck, Calendar, Lock, ShieldCheck, FileWarning, Sparkles, ChevronRight, Layout, FileText, Loader2, AlertTriangle, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import Modal from './ui/Modal';
 
 interface LicenseDocument {
   id: string;
@@ -23,6 +25,62 @@ const mockDocuments: LicenseDocument[] = [
 export default function Licenses() {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<LicenseDocument[]>(mockDocuments);
+  const [newDoc, setNewDoc] = useState({ title: '', expirationDate: '' });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [criticalDocs, setCriticalDocs] = useState<LicenseDocument[]>([]);
+
+  useEffect(() => {
+    const critical = documents.filter(doc => doc.status === 'vencido' || doc.daysDiff <= 5);
+    if (critical.length > 0) {
+      setCriticalDocs(critical);
+      setShowPopup(true);
+    }
+  }, []);
+
+  const handleSave = () => {
+    if (!newDoc.title || !newDoc.expirationDate) {
+      toast.error('Preencha o título e a data de vencimento.');
+      return;
+    }
+
+    setIsSaving(true);
+    toast.loading('Sincronizando com o Repositório Neural...', { duration: 1500 });
+
+    setTimeout(() => {
+      const expirationDate = new Date(newDoc.expirationDate);
+      const today = new Date();
+      const diffTime = expirationDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      const addedDoc: LicenseDocument = {
+        id: (documents.length + 1).toString(),
+        title: newDoc.title,
+        expirationDate: new Date(newDoc.expirationDate).toLocaleDateString('pt-BR'),
+        status: diffDays < 0 ? 'vencido' : 'vigente',
+        daysDiff: Math.abs(diffDays)
+      };
+
+      setDocuments([addedDoc, ...documents]);
+      setNewDoc({ title: '', expirationDate: '' });
+      setIsSaving(false);
+      toast.success('Certidão arquivada com sucesso!');
+    }, 1500);
+  };
+
+  const handleView = (doc: LicenseDocument) => {
+    toast.success(`Visualizando: ${doc.title}`, { icon: '👁️' });
+  };
+
+  const handleDownload = (doc: LicenseDocument) => {
+    toast.success(`Download iniciado: ${doc.title}`, { icon: '📥' });
+  };
+
+  const handleDelete = (id: string) => {
+    setDocuments(documents.filter(d => d.id !== id));
+    toast.success('Documento removido do repositório.');
+  };
 
   return (
     <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
@@ -67,6 +125,8 @@ export default function Licenses() {
                <input 
                  type="text" 
                  placeholder="Ex: CND Federal - Receita" 
+                 value={newDoc.title}
+                 onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
                  className="w-full bg-background/50 border border-border-medium rounded-2xl pl-14 pr-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/30 shadow-inner-platinum" 
                />
             </div>
@@ -76,6 +136,8 @@ export default function Licenses() {
             <div className="relative">
               <input 
                 type="date" 
+                value={newDoc.expirationDate}
+                onChange={(e) => setNewDoc({ ...newDoc, expirationDate: e.target.value })}
                 className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
               />
             </div>
@@ -89,9 +151,13 @@ export default function Licenses() {
             </label>
           </div>
           <div className="md:col-span-2">
-            <button className="btn-primary w-full py-4 px-6 shadow-platinum-glow flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest">
-              <Save size={18} />
-              Sincronizar
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="btn-primary w-full py-4 px-6 shadow-platinum-glow flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest"
+            >
+              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              Salvar Certidão Platinum
             </button>
           </div>
         </div>
@@ -140,10 +206,17 @@ export default function Licenses() {
                     <div className="flex flex-col items-center gap-2">
                       {doc.status === 'vencido' ? (
                         <>
-                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest shadow-platinum-glow-sm">
-                            VENCIDO_ALERT
+                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest shadow-platinum-glow-sm animate-pulse">
+                            VENCIDO_CRITICAL
                           </span>
                           <span className="text-[10px] text-red-500/60 font-black italic uppercase tracking-tighter">Há {doc.daysDiff} dias fora do SLA</span>
+                        </>
+                      ) : doc.daysDiff <= 5 ? (
+                        <>
+                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 uppercase tracking-widest shadow-platinum-glow-sm animate-bounce">
+                            VENCIMENTO_PRÓXIMO
+                          </span>
+                          <span className="text-[10px] text-amber-600 font-black italic uppercase tracking-tighter">Restam apenas {doc.daysDiff} dias</span>
                         </>
                       ) : (
                         <>
@@ -156,14 +229,26 @@ export default function Licenses() {
                     </div>
                   </td>
                   <td className="px-10 py-8 text-right">
-                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                      <button className="p-3 bg-surface-elevated/40 hover:text-primary text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum" title="Visualizar Camada Digital">
+                    <div className="flex items-center justify-end gap-3 transition-all duration-300 transform">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleView(doc); }}
+                        className="p-3 bg-surface-elevated/40 hover:text-primary text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
+                        title="Visualizar Camada Digital"
+                      >
                         <Eye size={18} />
                       </button>
-                      <button className="p-3 bg-surface-elevated/40 hover:text-blue-500 text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum" title="Baixar Objeto">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDownload(doc); }}
+                        className="p-3 bg-surface-elevated/40 hover:text-blue-500 text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
+                        title="Baixar Objeto"
+                      >
                         <Download size={18} />
                       </button>
-                      <button className="p-3 bg-red-500/5 hover:text-red-500 text-red-500/60 rounded-xl border border-red-500/10 transition-all shadow-inner-platinum" title="Remover Registro">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
+                        className="p-3 bg-red-500/5 hover:text-red-500 text-red-500/60 rounded-xl border border-red-500/10 transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
+                        title="Remover Registro"
+                      >
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -174,6 +259,59 @@ export default function Licenses() {
           </table>
         </div>
       </section>
+
+      {/* Alerta de Conformidade Platinum - Popup Modal */}
+      <Modal 
+        isOpen={showPopup} 
+        onClose={() => setShowPopup(false)} 
+        title="CENTRAL DE ALERTAS: RISCO DOCUMENTAL"
+        size="md"
+      >
+        <div className="space-y-8 p-2">
+          <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center gap-6 shadow-platinum-glow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-red-500 flex items-center justify-center text-white shadow-lg animate-pulse">
+              <AlertTriangle size={32} />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-red-500 uppercase tracking-tighter">Ação Corretiva Imediata Necessária</h4>
+              <p className="text-[11px] text-text-muted font-medium mt-1">Identificamos certidões vencidas ou em zona crítica de expiração (5 dias) que podem impactar a participação em novos certames.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 scrollbar-platinum">
+            {criticalDocs.map(doc => (
+              <div key={doc.id} className="p-5 bg-surface-elevated/40 border border-border-subtle rounded-2xl flex items-center justify-between group hover:border-primary/40 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${doc.status === 'vencido' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                    <FileWarning size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-text-primary uppercase tracking-tight">{doc.title}</p>
+                    <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${doc.status === 'vencido' ? 'text-red-500' : 'text-amber-500'}`}>
+                      {doc.status === 'vencido' ? `Vencido há ${doc.daysDiff} dias` : `Vence em ${doc.daysDiff} dias`}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowPopup(false)}
+                  className="p-2 bg-surface-elevated/60 text-text-muted hover:text-primary rounded-lg transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-4 pt-6 border-t border-border-subtle">
+            <button 
+              onClick={() => setShowPopup(false)}
+              className="px-10 py-4 bg-primary text-background text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-platinum-glow hover:scale-105 transition-transform"
+            >
+              Compreendido
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'document', 'domain', 'plan_id', 'addons', 'status'])]
+#[Fillable(['name', 'document', 'domain', 'plan_id', 'addons', 'status', 'asaas_customer_id', 'asaas_subscription_id'])]
 class Company extends Model
 {
     use HasFactory;

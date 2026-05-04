@@ -23,6 +23,7 @@ Route::post('/webhook/rpa/bids', [\App\Http\Controllers\RpaController::class, 'h
 
 // Gateway Webhook (Public)
 Route::post('/webhook/payments', [\App\Http\Controllers\SubscriptionWebhookController::class, 'handle']);
+Route::post('/webhook/asaas', [\App\Http\Controllers\AsaasWebhookController::class, 'handle']);
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();

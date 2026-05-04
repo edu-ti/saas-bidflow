@@ -8,6 +8,7 @@ import {
   Award, Calendar, Users, Filter, ShieldCheck, Zap, BarChart3, ChevronRight, Lock, Loader2, FileText, Clock, FileBarChart, PieChart as PieChartIcon
 } from 'lucide-react';
 import api from '../lib/axios';
+import toast from 'react-hot-toast';
 
 type PeriodFilter = 'month' | '30days' | 'year' | 'custom';
 
@@ -60,6 +61,14 @@ export default function ReportsDashboard() {
 
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
+  const handleExportPDF = () => {
+    toast.loading('Gerando Relatório PDF Platinum...', { duration: 2500 });
+    setTimeout(() => {
+      window.print();
+      toast.success('Relatório PDF gerado com sucesso!');
+    }, 2500);
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-56 gap-8 animate-in fade-in duration-700">
       <div className="relative">
@@ -83,7 +92,10 @@ export default function ReportsDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-4 bg-surface-elevated/20 border border-border-subtle p-2.5 rounded-2xl shadow-platinum-glow-sm backdrop-blur-md">
-          <button className="btn-primary py-3 px-8 text-[10px] tracking-widest shadow-platinum-glow">
+          <button 
+            onClick={handleExportPDF}
+            className="btn-primary py-3 px-8 text-[10px] tracking-widest shadow-platinum-glow"
+          >
             Exportar Relatório PDF
           </button>
         </div>
