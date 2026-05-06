@@ -1,0 +1,7 @@
+# Place SSL certificates here after generating with Let's Encrypt/Certbot
+# Files needed:
+# - fullchain.pem
+# - privkey.pem
+#
+# To generate with Certbot:
+# certbot --nginx -d yourdomain.com
