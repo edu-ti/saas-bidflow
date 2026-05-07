@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['company_id', 'name', 'email', 'phone', 'status', 'source', 'temperature'])]
+#[Fillable(['name', 'email', 'phone', 'status', 'source', 'temperature'])]
 class Lead extends Model
 {
     use SoftDeletes, BelongsToTenant;
+
+    protected $guarded = ['id', 'company_id'];
 
     public function company()
     {

@@ -11,8 +11,10 @@ class BankAccount extends Model
     use SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
-        'company_id', 'bank_name', 'agency', 'number', 'current_balance', 'active',
+        'bank_name', 'agency', 'number', 'current_balance', 'active',
     ];
+
+    protected $guarded = ['id', 'company_id'];
 
     protected function casts(): array
     {

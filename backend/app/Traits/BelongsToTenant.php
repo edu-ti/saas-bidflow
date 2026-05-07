@@ -1,25 +1,25 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Traits;
 
 use App\Models\Scopes\TenantScope;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 trait BelongsToTenant
 {
-    /**
-     * Boot the trait to apply the global scope.
-     */
     protected static function bootBelongsToTenant(): void
     {
         static::addGlobalScope(new TenantScope());
 
         static::creating(function ($model) {
-            if (! app()->runningInConsole() && Auth::hasUser()) {
-                $model->company_id = Auth::user()->company_id;
+            if (app()->bound('current_tenant_id') && is_null($model->company_id)) {
+                $model->company_id = app('current_tenant_id');
             }
         });
+    }
+
+    public static function withoutTenant(): Builder
+    {
+        return static::withoutGlobalScope(TenantScope::class);
     }
 }

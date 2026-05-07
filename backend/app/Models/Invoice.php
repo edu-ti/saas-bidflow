@@ -11,10 +11,12 @@ class Invoice extends Model
     use SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
-        'company_id', 'type', 'status', 'number', 'series', 'access_key',
+        'type', 'status', 'number', 'series', 'access_key',
         'xml_path', 'danfe_path', 'total_value', 'items_json',
         'recipient_name', 'recipient_document', 'notes', 'authorized_at',
     ];
+
+    protected $guarded = ['id', 'company_id'];
 
     protected function casts(): array
     {

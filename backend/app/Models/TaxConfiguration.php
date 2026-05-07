@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TaxConfiguration extends Model
 {
-    use SoftDeletes, BelongsToTenant;
+    use SoftDeletes;
 
     protected $fillable = [
         'company_id', 'regime_especial', 'aliquota_padrao', 'certificado_path',

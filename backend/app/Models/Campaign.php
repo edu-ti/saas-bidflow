@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'company_id',
     'name',
     'channel',
     'status',
@@ -24,6 +23,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Campaign extends Model
 {
     use SoftDeletes, BelongsToTenant;
+
+    protected $guarded = ['id', 'company_id'];
 
     protected function casts(): array
     {

@@ -1,0 +1,25 @@
+# Downloads do robô RPA
+downloads/
+*.pdf
+*.xlsx
+*.csv
+*.zip
+
+# Logs
+*.log
+logs/
+
+# Python cache
+_pycache_/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Chromedriver / browser artifacts
+chromedriver
+geckodriver
+*.crdownload

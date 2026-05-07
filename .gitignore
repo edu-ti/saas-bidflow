@@ -56,6 +56,18 @@ ENV/
 *.sublime-project
 *.sublime-workspace
 
+# RPA downloads
+rpa/downloads/
+
+# Docker SSL certificates (nunca commitar)
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.key
+docker/nginx/ssl/*.crt
+
+# Backup files
+*.bak
+*.backup
+
 # Docker
 *.pid
 *.sock

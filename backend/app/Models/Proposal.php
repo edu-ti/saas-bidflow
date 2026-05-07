@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'company_id',
     'opportunity_id',
     'status',
     'total_value',
@@ -18,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Proposal extends Model
 {
+    protected $guarded = ['id', 'company_id'];
     use SoftDeletes, BelongsToTenant;
 
     protected function casts(): array

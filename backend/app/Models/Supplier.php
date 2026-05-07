@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'company_id',
     'name',
     'document_number',
     'state',
@@ -23,6 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Supplier extends Model
 {
     use SoftDeletes, BelongsToTenant;
+
+    protected $guarded = ['id', 'company_id'];
 
     protected function casts(): array
     {

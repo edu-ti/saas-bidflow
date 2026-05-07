@@ -18,8 +18,8 @@ RUN pip install --no-cache-dir \
 
 WORKDIR /app
 
-COPY bidflow_rpa_robot.py /app/
-COPY requirements.txt /app/
+COPY ../rpa/bidflow_rpa_robot.py /app/
+COPY ../rpa/requirements.txt /app/
 
 RUN mkdir -p /app/downloads
 

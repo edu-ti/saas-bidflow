@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['company_id', 'organization_id', 'individual_client_id', 'opportunity_id', 'contract_id', 'reference_title', 'amount', 'due_date', 'payment_date', 'status'])]
+#[Fillable(['organization_id', 'individual_client_id', 'opportunity_id', 'contract_id', 'reference_title', 'amount', 'due_date', 'payment_date', 'status'])]
 class AccountsReceivable extends Model
 {
     use SoftDeletes, BelongsToTenant;
+
+    protected $guarded = ['id', 'company_id'];
 
     protected function casts(): array
     {

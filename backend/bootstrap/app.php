@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
             'tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
             'permission' => \App\Http\Middleware\CheckUserPermission::class,
+            'master.panel' => \App\Http\Middleware\MasterPanelMiddleware::class,
+            'tenant' => \App\Http\Middleware\TenantMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

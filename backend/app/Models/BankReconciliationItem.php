@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class BankReconciliationItem extends Model
 {
+    use BelongsToTenant;
     protected $fillable = [
         'reconciliation_id', 'transaction_date', 'amount', 'description',
         'fitid', 'type', 'payable_id', 'receivable_id', 'match_status',

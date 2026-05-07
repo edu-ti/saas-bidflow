@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { usePanel } from '../contexts/PanelContext';
 import { LayoutDashboard, Building2, LogOut, Shield, Activity, Sun, Moon, ChevronRight, Zap, Target, ShieldCheck, Globe, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -8,6 +9,13 @@ export default function MasterLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { isMaster } = usePanel();
+
+  React.useEffect(() => {
+    if (!isMaster) {
+      navigate('/unauthorized');
+    }
+  }, [isMaster, navigate]);
   const [isExpanded, setIsExpanded] = React.useState(true);
   const companyLogo = localStorage.getItem('company_logo') || '';
 

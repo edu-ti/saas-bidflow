@@ -49,6 +49,9 @@ import TenantList from './components/master/TenantList';
 import PlansManagement from './components/master/PlansManagement';
 import SystemHealth from './components/master/SystemHealth';
 import LandingPage from './pages/LandingPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
+import MasterGuard from './guards/MasterGuard';
+import TenantGuard from './guards/TenantGuard';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Componente para rotas protegidas
@@ -316,12 +319,17 @@ function AppContent() {
         {/* Rota pública - Login */}
         <Route path="/login" element={<Login />} />
 
+        {/* Rota de acesso negado */}
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
         {/* Dashboard - Página inicial com Sidebar */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
+            <TenantGuard>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            </TenantGuard>
           </ProtectedRoute>
         } />
 
@@ -723,9 +731,9 @@ function AppContent() {
 
         {/* Master Routes (Super Admin) */}
         <Route path="/master" element={
-          <SuperAdminRoute>
+          <MasterGuard>
             <MasterLayout />
-          </SuperAdminRoute>
+          </MasterGuard>
         }>
           <Route path="dashboard" element={<MasterDashboard />} />
           <Route path="tenants" element={<TenantList />} />

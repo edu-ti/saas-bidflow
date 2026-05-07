@@ -42,7 +42,7 @@ Route::get('/user', function (Request $request) {
     return $userData;
 })->middleware('auth:sanctum');
 
-Route::middleware(['auth:sanctum', 'throttle:api', 'tenant.status'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Billing & Subscriptions
@@ -286,6 +286,21 @@ Route::middleware(['auth:sanctum', 'throttle:api', \App\Http\Middleware\SuperAdm
     Route::put('/tenants/{tenant_id}', [\App\Http\Controllers\Master\TenantManagementController::class, 'update']);
     Route::post('/tenants/{tenant_id}/impersonate', [\App\Http\Controllers\Master\TenantManagementController::class, 'impersonate']);
     Route::get('/system-health', [\App\Http\Controllers\Master\SystemHealthController::class, 'index']);
-    
+
     Route::apiResource('plans', \App\Http\Controllers\Master\PlanController::class);
+});
+
+// Master Panel Routes (using master.panel middleware)
+Route::middleware(['auth:sanctum', 'master.panel'])->prefix('master')->name('master.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Master\MasterDashboardController::class, 'index']);
+    Route::get('/companies', [\App\Http\Controllers\Master\MasterCompanyController::class, 'index']);
+    Route::get('/plans', [\App\Http\Controllers\Master\MasterPlanController::class, 'index']);
+    Route::get('/users', [\App\Http\Controllers\Master\MasterUserController::class, 'index']);
+});
+
+Route::middleware(['auth:sanctum', 'master.panel'])->prefix('admin/master')->name('admin.master.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Master\MasterDashboardController::class, 'index']);
+    Route::get('/companies', [\App\Http\Controllers\Master\MasterCompanyController::class, 'index']);
+    Route::get('/plans', [\App\Http\Controllers\Master\MasterPlanController::class, 'index']);
+    Route::get('/users', [\App\Http\Controllers\Master\MasterUserController::class, 'index']);
 });

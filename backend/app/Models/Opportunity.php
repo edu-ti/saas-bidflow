@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'company_id',
     'title',
     'type',
     'user_id',
@@ -31,6 +30,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Opportunity extends Model
 {
     use HasFactory, SoftDeletes, BelongsToTenant;
+
+    protected $guarded = ['id', 'company_id'];
 
     /**
      * Get the attributes that should be cast.

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class BankBalanceLog extends Model
 {
+    use BelongsToTenant;
     protected $fillable = [
         'bank_account_id', 'previous_balance', 'amount', 'new_balance', 'reference',
     ];

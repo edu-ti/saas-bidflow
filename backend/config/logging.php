@@ -4,6 +4,7 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Monolog\Formatter\JsonFormatter;
 
 return [
 
@@ -54,7 +55,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => ['single', 'structured'],
             'ignore_exceptions' => false,
         ],
 
@@ -71,6 +72,17 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
+        ],
+
+        'structured' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/structured.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'formatter' => JsonFormatter::class,
+            'formatter_with' => [
+                'dateFormat' => 'Y-m-d H:i:s',
+            ],
         ],
 
         'slack' => [

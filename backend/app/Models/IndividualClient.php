@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['company_id', 'name', 'cpf', 'rg', 'birth_date', 'address', 'email', 'phone', 'position'])]
 class IndividualClient extends Model
 {
-    use SoftDeletes, BelongsToTenant;
+    use SoftDeletes;
 
     protected function casts(): array
     {
