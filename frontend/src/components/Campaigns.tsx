@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
+import { Select } from './ui/Select';
 
 interface Campaign {
   id: number;
@@ -22,7 +23,7 @@ interface Campaign {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; style: string; icon: any }> = {
-  draft: { label: 'Rascunho', style: 'bg-surface-elevated/40 text-text-muted border-border-subtle', icon: Clock },
+  draft: { label: 'Rascunho', style: 'bg-bg-secondary/40 text-text-muted border-border-subtle', icon: Clock },
   scheduled: { label: 'Agendada', style: 'bg-amber-500/10 text-amber-500 border-amber-500/20', icon: Clock },
   sending: { label: 'Enviando', style: 'bg-primary/10 text-primary border-primary/20', icon: Zap },
   sent: { label: 'Concluída', style: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20', icon: CheckCircle2 },
@@ -158,8 +159,8 @@ export default function Campaigns() {
       </header>
 
       {/* Listagem */}
-      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md">
-        <div className="p-8 bg-surface-elevated/20 border-b border-border-subtle flex flex-wrap items-center gap-8">
+      <div className="platinum-card overflow-hidden bg-bg-secondary/10 backdrop-blur-md">
+        <div className="p-8 bg-bg-secondary/20 border-b border-border-subtle flex flex-wrap items-center gap-8">
           <div className="relative flex-1 min-w-[300px] group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
             <input
@@ -170,25 +171,26 @@ export default function Campaigns() {
               className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
-          <div className="flex items-center gap-4 bg-surface-elevated/30 p-2 rounded-2xl border border-border-subtle shadow-platinum-glow-sm">
+          <div className="flex items-center gap-4 bg-bg-secondary/30 p-2 rounded-2xl border border-border-subtle shadow-platinum-glow-sm relative z-20">
             <Filter size={18} className="ml-2 text-primary" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 outline-none cursor-pointer text-text-primary"
-            >
-              <option value="" className="bg-surface">Todos os Status</option>
-              {Object.keys(STATUS_CONFIG).map(key => (
-                <option key={key} value={key} className="bg-surface">{STATUS_CONFIG[key].label.toUpperCase()}</option>
-              ))}
-            </select>
+            <div className="w-48">
+              <Select
+                value={filterStatus}
+                onChange={setFilterStatus}
+                options={[
+                  { value: '', label: 'Todos os Status' },
+                  ...Object.keys(STATUS_CONFIG).map(key => ({ value: key, label: STATUS_CONFIG[key].label.toUpperCase() }))
+                ]}
+                className="bg-transparent border-none shadow-none"
+              />
+            </div>
           </div>
         </div>
 
         <div className="overflow-x-auto scrollbar-platinum">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-surface-elevated/30 border-b border-border-subtle">
+              <tr className="bg-bg-secondary/30 border-b border-border-subtle">
                 <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Campanha</th>
                 <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Público</th>
                 <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Status</th>
@@ -203,7 +205,7 @@ export default function Campaigns() {
                 <tr><td colSpan={5} className="px-10 py-32 text-center text-[10px] font-black uppercase tracking-widest text-text-muted opacity-40">Nenhuma campanha orquestrada</td></tr>
               ) : (
                 campaigns.map(campaign => (
-                  <tr key={campaign.id} className="hover:bg-surface-elevated/20 transition-all border-b border-border-subtle/20 group">
+                  <tr key={campaign.id} className="hover:bg-bg-secondary/20 transition-all border-b border-border-subtle/20 group">
                     <td className="px-10 py-8">
                       <div className="font-black text-text-primary group-hover:text-primary transition-colors uppercase tracking-tight text-sm">{campaign.name}</div>
                       <div className="text-[10px] text-text-muted font-black mt-2 uppercase tracking-widest opacity-60">{campaign.subject}</div>
@@ -235,7 +237,7 @@ export default function Campaigns() {
                         {campaign.status === 'draft' && (
                           <button onClick={() => handleSend(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 text-primary transition-all" title="Disparar Agora"><Send size={18} /></button>
                         )}
-                        <button onClick={() => handleOpenModal(campaign)} className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl hover:bg-primary/10 text-text-muted transition-all"><Settings size={18} /></button>
+                        <button onClick={() => handleOpenModal(campaign)} className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-xl hover:bg-primary/10 text-text-muted transition-all"><Settings size={18} /></button>
                         <button onClick={() => handleDelete(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 transition-all"><Trash2 size={18} /></button>
                       </div>
                     </td>
@@ -249,14 +251,14 @@ export default function Campaigns() {
 
       {/* Modal Criador */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-xl p-6 animate-in fade-in duration-500">
-          <div className="bg-surface-elevated border border-border-subtle rounded-[3rem] shadow-platinum-glow w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle bg-surface-elevated/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xl p-6 animate-in fade-in duration-500">
+          <div className="bg-bg-secondary border border-border-subtle rounded-[3rem] shadow-platinum-glow w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle bg-bg-secondary/40 backdrop-blur-md">
               <div className="space-y-1">
                 <h2 className="text-lg font-black text-text-primary uppercase tracking-[0.4em]">Orquestrador de Campanha</h2>
                 <div className="flex items-center gap-3 text-[10px] text-text-muted font-black uppercase tracking-[0.3em]">Strategic Marketing Dispatch</div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-3 bg-surface-elevated/60 rounded-2xl text-text-muted hover:text-primary transition-all"><X size={24} /></button>
+              <button onClick={() => setShowModal(false)} className="p-3 bg-bg-secondary/60 rounded-2xl text-text-muted hover:text-primary transition-all"><X size={24} /></button>
             </div>
 
             <form onSubmit={handleSave} className="p-10 space-y-8 overflow-y-auto flex-1 scrollbar-platinum">
@@ -330,7 +332,7 @@ export default function Campaigns() {
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2">Corpo do E-mail (HTML)</label>
                 <div className="platinum-card border-border-subtle bg-background/30 rounded-[2rem] overflow-hidden">
                   {/* Basic Toolbar Mock */}
-                  <div className="p-4 border-b border-border-subtle flex gap-4 bg-surface-elevated/40">
+                  <div className="p-4 border-b border-border-subtle flex gap-4 bg-bg-secondary/40">
                     <button type="button" className="p-2 hover:bg-primary/10 rounded-lg text-text-muted font-black">B</button>
                     <button type="button" className="p-2 hover:bg-primary/10 rounded-lg text-text-muted font-black italic">I</button>
                     <button type="button" className="p-2 hover:bg-primary/10 rounded-lg text-text-muted font-black underline">U</button>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Target, Users, Truck, Calendar, DollarSign, Award, MapPin, X, Loader2, Save, ShieldCheck } from 'lucide-react';
 import Modal from './ui/Modal';
+import { Select } from './ui/Select';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 
@@ -67,10 +68,10 @@ export default function GoalSettingsModal({ isOpen, onClose }: GoalSettingsModal
       isOpen={isOpen} 
       onClose={onClose} 
       title="CONFIGURAÇÃO DE METAS ESTRATÉGICAS"
-      size="lg"
+      size="2xl"
     >
-      <div className="space-y-10 p-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="space-y-6 p-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Goal Type Selection */}
           <div className="space-y-4">
             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2 flex items-center gap-2">
@@ -109,14 +110,11 @@ export default function GoalSettingsModal({ isOpen, onClose }: GoalSettingsModal
               <div className="space-y-2 group animate-in slide-in-from-right-4">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Selecionar Vendedor</label>
                 <div className="relative">
-                  <select 
-                    value={targetId || ''} 
-                    onChange={e => setTargetId(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum appearance-none"
-                  >
-                    <option value="" className="bg-surface">Escolha o Colaborador</option>
-                    {users.map(u => <option key={u.id} value={u.id} className="bg-surface">{u.name}</option>)}
-                  </select>
+                  <Select 
+                    value={targetId?.toString() || ''} 
+                    onChange={v => setTargetId(v ? Number(v) : null)}
+                    options={[{ value: '', label: 'Escolha o Colaborador' }, ...users.map(u => ({ value: u.id.toString(), label: u.name }))]}
+                  />
                 </div>
               </div>
             )}
@@ -125,28 +123,22 @@ export default function GoalSettingsModal({ isOpen, onClose }: GoalSettingsModal
               <div className="space-y-6 animate-in slide-in-from-right-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Selecionar Fornecedor</label>
-                  <select 
-                    value={targetId || ''} 
-                    onChange={e => setTargetId(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum appearance-none"
-                  >
-                    <option value="" className="bg-surface">Escolha o Fornecedor</option>
-                    {suppliers.map(s => <option key={s.id} value={s.id} className="bg-surface">{s.name}</option>)}
-                  </select>
+                  <Select 
+                    value={targetId?.toString() || ''} 
+                    onChange={v => setTargetId(v ? Number(v) : null)}
+                    options={[{ value: '', label: 'Escolha o Fornecedor' }, ...suppliers.map(s => ({ value: s.id.toString(), label: s.name }))]}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2 flex items-center gap-2">
                      <MapPin size={12} className="text-primary" />
                      Estado (UF) Específico
                   </label>
-                  <select 
+                  <Select 
                     value={uf} 
-                    onChange={e => setUf(e.target.value)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum appearance-none"
-                  >
-                    <option value="" className="bg-surface">Opcional: Todos os Estados</option>
-                    {ufs.map(u => <option key={u} value={u} className="bg-surface">{u}</option>)}
-                  </select>
+                    onChange={v => setUf(v)}
+                    options={[{ value: '', label: 'Opcional: Todos os Estados' }, ...ufs.map(u => ({ value: u, label: u }))]}
+                  />
                 </div>
               </div>
             )}
@@ -161,34 +153,30 @@ export default function GoalSettingsModal({ isOpen, onClose }: GoalSettingsModal
         </div>
 
         {/* Date Selection */}
-        <div className="grid grid-cols-2 gap-8 border-t border-border-subtle/30 pt-10">
+        <div className="grid grid-cols-2 gap-6 border-t border-border-subtle/30 pt-6">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2 flex items-center gap-2">
                <Calendar size={12} className="text-primary" />
                Mês de Vigência
             </label>
-            <select 
-              value={month} 
-              onChange={e => setMonth(Number(e.target.value))}
-              className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum appearance-none"
-            >
-              {months.map(m => <option key={m.id} value={m.id} className="bg-surface">{m.name}</option>)}
-            </select>
+            <Select 
+              value={month.toString()} 
+              onChange={v => setMonth(Number(v))}
+              options={months.map(m => ({ value: m.id.toString(), label: m.name }))}
+            />
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Ano</label>
-            <select 
-              value={year} 
-              onChange={e => setYear(Number(e.target.value))}
-              className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum appearance-none"
-            >
-              {years.map(y => <option key={y} value={y} className="bg-surface">{y}</option>)}
-            </select>
+            <Select 
+              value={year.toString()} 
+              onChange={v => setYear(Number(v))}
+              options={years.map(y => ({ value: y.toString(), label: y.toString() }))}
+            />
           </div>
         </div>
 
         {/* Financial & Win Goals */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2">
           <div className="space-y-2 group">
             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-2 flex items-center gap-2">
                <DollarSign size={12} className="text-emerald-500" />
@@ -218,17 +206,17 @@ export default function GoalSettingsModal({ isOpen, onClose }: GoalSettingsModal
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-4 pt-10 border-t border-border-subtle/30">
+        <div className="flex justify-end gap-4 pt-6 border-t border-border-subtle/30">
           <button 
             onClick={onClose}
-            className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors"
+            className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-text-primary transition-colors rounded-full"
           >
             Cancelar
           </button>
           <button 
             onClick={handleSave}
             disabled={isSaving}
-            className="btn-primary py-4 px-12 text-[10px] tracking-widest shadow-platinum-glow flex items-center gap-3"
+            className="btn-primary py-4 px-12 text-[10px] tracking-widest shadow-platinum-glow flex items-center gap-3 rounded-full"
           >
             {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Salvar Configurações

@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { X, Search, Plus, Image as ImageIcon, Trash2, ShieldCheck, FileText, DollarSign, Clock, Truck, ShieldAlert, Zap, User, Sparkles, ChevronRight, Layout, Calendar, Save, Target } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
+import { DatePicker } from '../ui/DatePicker';
+import { Select } from '../ui/Select';
 
 export default function CreateProposalForm({ onClose }: { onClose: () => void }) {
   const [clientType, setClientType] = useState<'pj' | 'pf'>('pj');
+  const [validityDate, setValidityDate] = useState<Date | null>(null);
+  const [status, setStatus] = useState('rascunho');
+  const [transactionType, setTransactionType] = useState('venda');
+  const [incoterm, setIncoterm] = useState('cif');
   const { hasPermission } = usePermissions();
   const canSave = hasPermission('commercial', 'proposals', 'create');
 
@@ -53,25 +59,26 @@ export default function CreateProposalForm({ onClose }: { onClose: () => void })
             <div className="space-y-2 group">
               <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Data de Emissão</label>
               <div className="relative">
-                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4 opacity-40" />
-                 <input type="date" className="w-full pl-11 pr-4 py-3.5 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-muted cursor-not-allowed opacity-40 shadow-inner-platinum" defaultValue={new Date().toISOString().split('T')[0]} readOnly />
+                 <DatePicker selected={new Date()} onChange={() => {}} disabled />
               </div>
             </div>
             <div className="space-y-2 group">
               <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Validade da Oferta</label>
               <div className="relative">
-                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/60 w-4 h-4" />
-                 <input type="date" className="w-full pl-11 pr-4 py-3.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" />
+                 <DatePicker selected={validityDate} onChange={(date) => setValidityDate(date)} />
               </div>
             </div>
             <div className="space-y-2 group">
               <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Status do Fluxo</label>
               <div className="relative">
-                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
-                <select className="w-full pl-11 pr-10 py-3.5 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none appearance-none cursor-pointer shadow-inner-platinum">
-                  <option value="rascunho" className="bg-surface">Rascunho Estratégico</option>
-                  <option value="enviada" className="bg-surface">Documento Enviado</option>
-                </select>
+                <Select
+                  value={status}
+                  onChange={v => setStatus(v)}
+                  options={[
+                    { value: 'rascunho', label: 'Rascunho Estratégico' },
+                    { value: 'enviada', label: 'Documento Enviado' }
+                  ]}
+                />
               </div>
             </div>
             <div className="space-y-2 group">
@@ -168,11 +175,14 @@ export default function CreateProposalForm({ onClose }: { onClose: () => void })
                   <div className="space-y-2 group">
                     <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Tipo de Transação</label>
                     <div className="relative">
-                      <select className="w-full px-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none appearance-none cursor-pointer shadow-inner-platinum">
-                        <option value="venda" className="bg-surface">Venda Direta Neural</option>
-                        <option value="locacao" className="bg-surface">Locação de Ativos RPA</option>
-                      </select>
-                      <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40" />
+                      <Select
+                        value={transactionType}
+                        onChange={v => setTransactionType(v)}
+                        options={[
+                          { value: 'venda', label: 'Venda Direta Neural' },
+                          { value: 'locacao', label: 'Locação de Ativos RPA' }
+                        ]}
+                      />
                     </div>
                   </div>
                 </div>
@@ -258,11 +268,14 @@ export default function CreateProposalForm({ onClose }: { onClose: () => void })
                 <div className="flex-1 space-y-2">
                   <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Incoterm de Operação*</label>
                   <div className="relative">
-                    <select className="w-full px-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-primary outline-none appearance-none cursor-pointer">
-                      <option value="cif" className="bg-surface">CIF (Custódia do Remetente)</option>
-                      <option value="fob" className="bg-surface">FOB (Custódia do Destinatário)</option>
-                    </select>
-                    <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40" />
+                    <Select
+                      value={incoterm}
+                      onChange={v => setIncoterm(v)}
+                      options={[
+                        { value: 'cif', label: 'CIF (Custódia do Remetente)' },
+                        { value: 'fob', label: 'FOB (Custódia do Destinatário)' }
+                      ]}
+                    />
                   </div>
                 </div>
                 <div className="flex-1 space-y-2">

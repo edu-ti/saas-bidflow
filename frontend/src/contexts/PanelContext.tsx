@@ -1,5 +1,7 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { PanelType, currentPanel, isMaster, isApp } from '../utils/panelContext';
+import React, { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
+import type { PanelType } from '../utils/panelContext';
+import { currentPanel, isMaster, isApp } from '../utils/panelContext';
 
 interface PanelContextValue {
   currentPanel: PanelType;

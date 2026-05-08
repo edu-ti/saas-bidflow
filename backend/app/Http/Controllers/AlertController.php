@@ -75,4 +75,14 @@ class AlertController extends Controller
 
         return new BiddingAlertResource($alert);
     }
+
+    /**
+     * Mark all alerts as read for the current tenant.
+     */
+    public function markAllRead()
+    {
+        BiddingAlert::where('is_read', false)->update(['is_read' => true]);
+
+        return response()->json(['message' => 'Todas as notificações foram marcadas como lidas.']);
+    }
 }

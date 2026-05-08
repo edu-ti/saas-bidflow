@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { usePanel } from '../contexts/PanelContext';
 
@@ -7,7 +8,7 @@ interface MasterGuardProps {
 }
 
 export default function MasterGuard({ children }: MasterGuardProps): React.ReactElement {
-  const { isMaster, currentPanel } = usePanel();
+  const { isMaster } = usePanel();
 
   const isAuthenticated = !!localStorage.getItem('api_token');
 
@@ -27,7 +28,8 @@ export default function MasterGuard({ children }: MasterGuardProps): React.React
 
   if (!isMaster) {
     const appDomain = import.meta.env.VITE_APP_DOMAIN || 'app.localhost';
-    const redirectUrl = window.location.protocol + '//' + appDomain + '/dashboard';
+    const port = window.location.port ? ':' + window.location.port : '';
+    const redirectUrl = window.location.protocol + '//' + appDomain + port + '/dashboard';
     window.location.href = redirectUrl;
     return <Navigate to={redirectUrl} replace />;
   }

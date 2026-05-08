@@ -24,6 +24,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { Select } from './ui/Select';
 
 const monthlyData = [
   { month: 'Jan', value: 45000000 },
@@ -99,7 +100,7 @@ export default function MarketAnalysis() {
 
   return (
     <div className="min-h-screen flex gap-8 animate-in fade-in duration-700">
-      <aside className="w-80 flex-shrink-0 space-y-6">
+      <aside className="w-80 flex-shrink-0 space-y-6 relative z-20">
         <div className="bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-3xl p-6 space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
             <button
@@ -135,17 +136,16 @@ export default function MarketAnalysis() {
                 Período de Análise
               </label>
               <div className="relative">
-                <select
+                <Select
                   value={period}
-                  onChange={(e) => setPeriod(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  <option value="3months">Últimos 3 meses</option>
-                  <option value="6months">Últimos 6 meses</option>
-                  <option value="12months">Últimos 12 meses</option>
-                  <option value="24months">Últimos 24 meses</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                  onChange={setPeriod}
+                  options={[
+                    { value: '3months', label: 'Últimos 3 meses' },
+                    { value: '6months', label: 'Últimos 6 meses' },
+                    { value: '12months', label: 'Últimos 12 meses' },
+                    { value: '24months', label: 'Últimos 24 meses' }
+                  ]}
+                />
               </div>
             </div>
 

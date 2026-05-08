@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Sparkles
 } from 'lucide-react';
+import { Select } from './ui/Select';
 
 interface MonitoredBid {
   id: string;
@@ -242,21 +243,21 @@ export default function ChatMonitor() {
           </div>
         </div>
 
-        <div className="p-4 border-b border-border-subtle bg-surface/20">
+        <div className="p-4 border-b border-border-subtle bg-surface/20 relative z-20">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-black uppercase tracking-wider text-text-muted">Filtrar por lote:</span>
             <div className="relative">
-              <select
+              <Select
                 value={selectedLote}
-                onChange={(e) => setSelectedLote(e.target.value)}
-                className="px-4 py-2 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 cursor-pointer"
-              >
-                <option value="1">Lote 1</option>
-                <option value="2">Lote 2</option>
-                <option value="3">Lote 3</option>
-                <option value="all">Todos os lotes</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                onChange={setSelectedLote}
+                options={[
+                  { value: '1', label: 'Lote 1' },
+                  { value: '2', label: 'Lote 2' },
+                  { value: '3', label: 'Lote 3' },
+                  { value: 'all', label: 'Todos os lotes' }
+                ]}
+                className="w-48"
+              />
             </div>
           </div>
         </div>

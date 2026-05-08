@@ -4,6 +4,7 @@ import {
   AlertTriangle, DollarSign, Boxes, X, Filter, Warehouse, ShieldCheck, Zap, Globe, Activity, Database, ChevronRight, Layout, BarChart3, Target
 } from 'lucide-react';
 import api from '../lib/axios';
+import { Select } from './ui/Select';
 import toast from 'react-hot-toast';
 
 interface InventoryProduct {
@@ -360,7 +361,7 @@ export default function Inventory() {
             Gestão estratégica de ativos, valuation e logística global Platinum.
           </p>
         </div>
-        <div className="flex items-center gap-5 bg-surface-elevated/20 border border-border-subtle/30 p-5 rounded-2xl shadow-inner-platinum">
+        <div className="flex items-center gap-5 bg-bg-secondary/20 border border-border-subtle/30 p-5 rounded-2xl shadow-inner-platinum">
           <div className="flex flex-col items-end gap-1">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted italic opacity-60">Saúde Logística</span>
             <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md">Operação Estável</span>
@@ -373,7 +374,7 @@ export default function Inventory() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {kpis.map((kpi, i) => (
-          <div key={i} className="platinum-card p-8 flex flex-col gap-8 group hover:border-primary/40 transition-all duration-500 bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-platinum-glow-sm">
+          <div key={i} className="platinum-card p-8 flex flex-col gap-8 group hover:border-primary/40 transition-all duration-500 bg-bg-secondary/10 backdrop-blur-xl border-border-subtle/30 shadow-platinum-glow-sm">
             <div className={`w-14 h-14 rounded-2xl ${kpi.bg} border border-border-subtle flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-inner-platinum`}>
               <kpi.icon className={`w-7 h-7 ${kpi.color} group-hover:shadow-platinum-glow-sm transition-all`} />
             </div>
@@ -386,7 +387,7 @@ export default function Inventory() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-4 bg-surface-elevated/20 border border-border-subtle/30 p-2 rounded-[2.5rem] w-fit shadow-platinum-glow-sm backdrop-blur-md">
+      <div className="flex items-center gap-4 bg-bg-secondary/20 border border-border-subtle/30 p-2 rounded-[2.5rem] w-fit shadow-platinum-glow-sm backdrop-blur-md">
         {[
           { key: 'products', label: 'Matriz de Produtos', icon: Package },
           { key: 'movements', label: 'Log de Operações', icon: ArrowUpRight },
@@ -398,7 +399,7 @@ export default function Inventory() {
             className={`flex items-center gap-3 px-8 py-3 rounded-[2.2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
               activeTab === tab.key 
                 ? 'bg-primary text-white shadow-platinum-glow' 
-                : 'text-text-muted hover:text-text-primary hover:bg-surface-elevated/50'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary/50'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -408,8 +409,8 @@ export default function Inventory() {
       </div>
 
       {activeTab === 'products' && (
-        <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
-          <div className="p-8 bg-surface-elevated/20 border-b border-border-subtle/30 flex flex-wrap gap-8 items-center justify-between">
+        <div className="platinum-card overflow-hidden bg-bg-secondary/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+          <div className="p-8 bg-bg-secondary/20 border-b border-border-subtle/30 flex flex-wrap gap-8 items-center justify-between">
             <div className="relative max-w-xl w-full group">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
               <input
@@ -431,7 +432,7 @@ export default function Inventory() {
 
           <div className="overflow-x-auto scrollbar-platinum">
             <table className="w-full text-left text-sm">
-              <thead className="bg-surface-elevated/40 border-b border-border-subtle">
+              <thead className="bg-bg-secondary/40 border-b border-border-subtle">
                 <tr>
                   <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">SKU / ID</th>
                   <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Descrição do Ativo</th>
@@ -452,7 +453,7 @@ export default function Inventory() {
                   products.map(product => {
                     const available = (product.on_hand_qty || 0) - (product.reserved_qty || 0);
                     return (
-                      <tr key={product.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-500">
+                      <tr key={product.id} className="hover:bg-bg-secondary/20 transition-all group border-b border-border-subtle/10 duration-500">
                         <td className="px-10 py-10 font-mono text-[11px] text-primary font-black uppercase tracking-widest">
                            <span className="bg-primary/5 px-2 py-1 rounded border border-primary/20 shadow-platinum-glow-sm">{product.sku || '---'}</span>
                         </td>
@@ -483,7 +484,7 @@ export default function Inventory() {
                         <td className="px-10 py-10 text-right font-black text-text-primary text-sm tracking-tighter group-hover:text-primary transition-colors">{formatCurrency(product.sale_price)}</td>
                         <td className="px-10 py-10 text-right">
                           <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                            <button onClick={() => handleOpenModal(product)} className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Refinar"><Edit2 size={18} /></button>
+                            <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Refinar"><Edit2 size={18} /></button>
                             <button onClick={() => handleDelete(product.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all shadow-inner-platinum" title="Arquivar"><Trash2 size={18} /></button>
                           </div>
                         </td>
@@ -498,8 +499,8 @@ export default function Inventory() {
       )}
 
       {activeTab === 'movements' && (
-        <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
-          <div className="p-10 border-b border-border-subtle/30 bg-surface-elevated/20 flex justify-between items-center">
+        <div className="platinum-card overflow-hidden bg-bg-secondary/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+          <div className="p-10 border-b border-border-subtle/30 bg-bg-secondary/20 flex justify-between items-center">
             <h3 className="text-sm font-black text-text-primary uppercase tracking-[0.4em] flex items-center gap-4">
                <div className="w-1.5 h-6 bg-primary rounded-full shadow-platinum-glow" />
                Trilha de Auditoria Logística Core
@@ -510,7 +511,7 @@ export default function Inventory() {
           </div>
           <div className="overflow-x-auto scrollbar-platinum">
             <table className="w-full text-left text-sm">
-              <thead className="bg-surface-elevated/40 border-b border-border-subtle">
+              <thead className="bg-bg-secondary/40 border-b border-border-subtle">
                 <tr>
                   <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Operação</th>
                   <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Cronologia</th>
@@ -524,7 +525,7 @@ export default function Inventory() {
                   <tr><td colSpan={5} className="px-10 py-40 text-center text-text-muted uppercase text-[10px] font-black tracking-widest opacity-40">Nenhuma movimentação auditada no ledger</td></tr>
                 ) : (
                   movements.map(m => (
-                    <tr key={m.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-500">
+                    <tr key={m.id} className="hover:bg-bg-secondary/20 transition-all group border-b border-border-subtle/10 duration-500">
                       <td className="px-10 py-10">
                         <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 w-fit border backdrop-blur-md shadow-platinum-glow-sm ${
                           m.type === 'Entrada' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
@@ -555,7 +556,7 @@ export default function Inventory() {
             { label: 'Depósitos & Hubs', count: depots.length, type: 'depots', icon: Warehouse, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
             { label: 'Status de Operação', count: statuses.length, type: 'statuses', icon: Zap, color: 'text-purple-500', bg: 'bg-purple-500/10' },
           ].map((item, i) => (
-            <div key={i} className="platinum-card p-10 flex flex-col gap-10 group hover:border-primary/40 transition-all duration-700 bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+            <div key={i} className="platinum-card p-10 flex flex-col gap-10 group hover:border-primary/40 transition-all duration-700 bg-bg-secondary/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
               <div className="flex justify-between items-start">
                 <div className={`w-16 h-16 rounded-[2rem] ${item.bg} border border-border-subtle flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform duration-700 shadow-inner-platinum`}>
                   <item.icon size={32} className="shadow-platinum-glow-sm" />
@@ -576,9 +577,9 @@ export default function Inventory() {
 
       {/* Modal - Inventory Product */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-500">
-          <div className="bg-surface-elevated border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
-            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle/30 bg-surface-elevated/20">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-500">
+          <div className="bg-bg-secondary border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
+            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle/30 bg-bg-secondary/20">
               <div className="space-y-1">
                 <h2 className="text-xl font-black text-text-primary uppercase tracking-tighter flex items-center gap-4">
                   {editingProduct ? 'REFINAR' : 'NOVO'} <span className="text-gradient-gold">ATIVO DE ESTOQUE</span>
@@ -587,7 +588,7 @@ export default function Inventory() {
                    <ShieldCheck size={14} className="text-primary" /> Consolidação de Dados Patrimoniais Auditáveis
                 </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-4 bg-surface-elevated/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum">
+              <button onClick={() => setShowModal(false)} className="p-4 bg-bg-secondary/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum">
                 <X size={24} />
               </button>
             </div>
@@ -623,55 +624,49 @@ export default function Inventory() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div className="space-y-4 group">
+                <div className="space-y-4 group relative z-40">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Depósito Alvo Logístico</label>
                   <div className="relative">
-                    <Warehouse className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
-                    <select
+                    <Warehouse className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40 z-10" />
+                    <Select
                       value={formData.depot_id}
-                      onChange={(e) => setFormData({ ...formData, depot_id: e.target.value })}
-                      className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-xs font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                    >
-                      <option value="" className="bg-surface">Selecionar Hub...</option>
-                      {depots.map(d => (
-                        <option key={d.id} value={d.id} className="bg-surface">{d.name.toUpperCase()}</option>
-                      ))}
-                    </select>
-                    <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+                      onChange={(value) => setFormData({ ...formData, depot_id: value })}
+                      options={[
+                        { value: '', label: 'Selecionar Hub...' },
+                        ...depots.map(d => ({ value: d.id.toString(), label: d.name.toUpperCase() }))
+                      ]}
+                      className="pl-14"
+                    />
                   </div>
                 </div>
-                <div className="space-y-4 group">
+                <div className="space-y-4 group relative z-30">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Marca Estratégica Platinum</label>
                    <div className="relative">
-                    <Target className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/60 w-6 h-6" />
-                    <select
+                    <Target className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/60 w-6 h-6 z-10" />
+                    <Select
                       value={formData.brand_id}
-                      onChange={(e) => setFormData({ ...formData, brand_id: e.target.value })}
-                      className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-xs font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                    >
-                      <option value="" className="bg-surface">Selecionar Marca...</option>
-                      {brands.map(b => (
-                        <option key={b.id} value={b.id} className="bg-surface">{b.name.toUpperCase()}</option>
-                      ))}
-                    </select>
-                    <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+                      onChange={(value) => setFormData({ ...formData, brand_id: value })}
+                      options={[
+                        { value: '', label: 'Selecionar Marca...' },
+                        ...brands.map(b => ({ value: b.id.toString(), label: b.name.toUpperCase() }))
+                      ]}
+                      className="pl-14"
+                    />
                   </div>
                 </div>
-                <div className="space-y-4 group">
+                <div className="space-y-4 group relative z-20">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Categoria Operacional Core</label>
                   <div className="relative">
-                    <Filter className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40" />
-                    <select
+                    <Filter className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-6 h-6 opacity-40 z-10" />
+                    <Select
                       value={formData.category_id}
-                      onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                      className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-xs font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                    >
-                      <option value="" className="bg-surface">Selecionar Categ...</option>
-                      {categories.map(c => (
-                        <option key={c.id} value={c.id} className="bg-surface">{c.name.toUpperCase()}</option>
-                      ))}
-                    </select>
-                    <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+                      onChange={(value) => setFormData({ ...formData, category_id: value })}
+                      options={[
+                        { value: '', label: 'Selecionar Categ...' },
+                        ...categories.map(c => ({ value: c.id.toString(), label: c.name.toUpperCase() }))
+                      ]}
+                      className="pl-14"
+                    />
                   </div>
                 </div>
               </div>
@@ -778,13 +773,13 @@ export default function Inventory() {
 
       {/* Modal - Settings Settings */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-500">
-          <div className="bg-surface-elevated border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-lg overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
-            <div className="flex justify-between items-center px-10 py-8 bg-surface-elevated/20 border-b border-border-subtle/30">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-500">
+          <div className="bg-bg-secondary border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-lg overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
+            <div className="flex justify-between items-center px-10 py-8 bg-bg-secondary/20 border-b border-border-subtle/30">
               <h2 className="text-xl font-black text-text-primary uppercase tracking-tighter flex items-center gap-4">
                 NOVO <span className="text-gradient-gold uppercase">{getSettingsLabel()}</span>
               </h2>
-              <button onClick={() => setShowSettingsModal(false)} className="p-4 bg-surface-elevated/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum">
+              <button onClick={() => setShowSettingsModal(false)} className="p-4 bg-bg-secondary/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum">
                 <X size={24} />
               </button>
             </div>

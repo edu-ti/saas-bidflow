@@ -3,6 +3,7 @@ import { Plus, UserPlus, Search, Filter, Lock, Loader2, Mail, Phone, Flame, Chev
 import toast from 'react-hot-toast';
 import api from '../../lib/axios';
 import Modal from '../ui/Modal';
+import { Select } from '../ui/Select';
 
 interface Lead {
   id: number;
@@ -57,132 +58,130 @@ export default function LeadsDashboard() {
 
   const getTemperatureBadge = (temp: string) => {
     const styles: Record<string, string> = {
-      'Quente': 'bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
-      'Morno': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-      'Frio': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      'Quente': 'bg-danger/10 text-danger border-danger/20',
+      'Morno': 'bg-warning/10 text-warning border-warning/20',
+      'Frio': 'bg-primary/10 text-primary border-primary/20',
     };
-    return styles[temp] || 'bg-surface-elevated/40 text-text-muted border-border-subtle';
+    return styles[temp] || 'bg-bg-tertiary text-text-muted border-border';
   };
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Gestão de <span className="text-gradient-gold">Leads</span>
+    <div className="space-y-8 animate-fade-in pb-8">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Gestão de Leads
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <Lock size={14} className="text-primary" />
+          <p className="text-text-secondary text-sm mt-1">
             Central de inteligência comercial e prospecção ativa.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          aria-label="Registrar novo lead"
-          className="btn-primary py-3 px-8 shadow-platinum-glow"
+          className="btn btn-primary flex items-center gap-2"
         >
           <UserPlus className="w-4 h-4" />
-          Novo Lead Platinum
+          <span>Novo Lead</span>
         </button>
       </header>
 
-      <div className="platinum-card p-6 bg-surface-elevated/10 backdrop-blur-xl shrink-0">
+      <div className="card p-4">
         <div className="flex gap-4 flex-wrap">
-          <div className="flex-1 min-w-[300px] relative group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors w-4 h-4" />
+          <div className="flex-1 min-w-[300px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
             <input
               type="text"
               placeholder="Pesquisar leads por nome ou email..."
-              className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-subtle rounded-2xl text-sm font-bold focus:border-primary/30 outline-none transition-all text-text-primary placeholder:text-text-muted/50 shadow-inner"
+              className="input w-full pl-9"
             />
           </div>
-          <button className="px-8 py-4 bg-surface-elevated/40 border border-border-subtle text-text-muted rounded-2xl hover:bg-surface-elevated hover:text-text-primary transition-all flex items-center gap-3">
-            <Filter size={18} className="text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Filtros Avançados</span>
+          <button className="btn btn-outline flex items-center gap-2">
+            <Filter size={16} />
+            <span>Filtros Avançados</span>
           </button>
         </div>
       </div>
 
-      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md flex-1">
+      <div className="card overflow-hidden">
         {loading ? (
-          <div className="p-20 space-y-6">
+          <div className="p-10 space-y-4">
             {[1, 2, 3, 4, 5].map(i => (
               <div key={i} className="flex gap-4 animate-pulse">
-                <div className="h-16 bg-surface-elevated/40 rounded-2xl w-1/4 border border-border-subtle/30" />
-                <div className="h-16 bg-surface-elevated/40 rounded-2xl w-2/4 border border-border-subtle/30" />
-                <div className="h-16 bg-surface-elevated/40 rounded-2xl w-1/4 border border-border-subtle/30" />
+                <div className="h-16 bg-bg-tertiary rounded-lg w-1/4" />
+                <div className="h-16 bg-bg-tertiary rounded-lg w-2/4" />
+                <div className="h-16 bg-bg-tertiary rounded-lg w-1/4" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-platinum">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-surface-elevated/30 border-b border-border-subtle">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-bg-tertiary border-b border-border text-text-secondary">
                 <tr>
-                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Perfil do Prospect</th>
-                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Canais de Contato</th>
-                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Pipeline Stage</th>
-                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-center opacity-60">Engajamento</th>
-                  <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted text-right opacity-60">Ações</th>
+                  <th className="px-6 py-3 font-medium">Perfil do Prospect</th>
+                  <th className="px-6 py-3 font-medium">Canais de Contato</th>
+                  <th className="px-6 py-3 font-medium text-center">Pipeline Stage</th>
+                  <th className="px-6 py-3 font-medium text-center">Engajamento</th>
+                  <th className="px-6 py-3 font-medium text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle/30">
+              <tbody className="divide-y divide-border">
                 {leads.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-10 py-32 text-center">
-                      <div className="flex flex-col items-center gap-6 opacity-20">
-                        <Target size={56} className="text-primary" />
-                        <p className="font-black text-text-primary uppercase tracking-[0.4em] text-[10px]">Nenhum lead localizado no radar</p>
+                    <td colSpan={5} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center gap-4 text-text-muted">
+                        <Target size={48} className="text-border" />
+                        <p className="font-medium">Nenhum lead localizado no radar</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   leads.map(lead => (
-                    <tr key={lead.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/20 duration-300">
-                      <td className="px-10 py-8">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-surface-elevated border border-border-subtle flex items-center justify-center font-black text-primary shadow-platinum-glow-sm group-hover:scale-110 transition-transform">
+                    <tr key={lead.id} className="hover:bg-bg-tertiary transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-bg-secondary border border-border flex items-center justify-center font-semibold text-primary">
                             {lead.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-black text-text-primary group-hover:text-primary transition-colors uppercase tracking-tight text-xs">{lead.name}</div>
-                            <div className="text-[9px] text-text-muted font-bold mt-1 uppercase tracking-widest">{lead.source || 'Lead Manual'}</div>
+                            <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{lead.name}</div>
+                            <div className="text-xs text-text-muted mt-0.5">{lead.source || 'Lead Manual'}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-8">
-                        <div className="space-y-2">
+                      <td className="px-6 py-4">
+                        <div className="space-y-1.5">
                           {lead.email && (
-                            <div className="flex items-center gap-3 text-text-secondary">
-                              <Mail size={14} className="text-primary/60" />
-                              <span className="text-[11px] font-bold">{lead.email}</span>
+                            <div className="flex items-center gap-2 text-text-secondary text-sm">
+                              <Mail size={14} className="text-text-muted" />
+                              <span>{lead.email}</span>
                             </div>
                           )}
                           {lead.phone && (
-                            <div className="flex items-center gap-3 text-text-secondary">
-                              <Phone size={14} className="text-primary/60" />
-                              <span className="text-[11px] font-black font-mono">{lead.phone}</span>
+                            <div className="flex items-center gap-2 text-text-secondary text-sm">
+                              <Phone size={14} className="text-text-muted" />
+                              <span className="font-mono">{lead.phone}</span>
                             </div>
                           )}
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-center">
-                        <span className="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-secondary/10 text-secondary border border-secondary/20 shadow-platinum-glow-sm">
+                      <td className="px-6 py-4 text-center">
+                        <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">
                           {lead.status}
                         </span>
                       </td>
-                      <td className="px-10 py-8">
+                      <td className="px-6 py-4">
                         <div className="flex justify-center">
-                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border w-fit ${getTemperatureBadge(lead.temperature)}`}>
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border w-fit ${getTemperatureBadge(lead.temperature)}`}>
                             <Flame size={14} />
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{lead.temperature}</span>
+                            <span className="text-xs font-medium">{lead.temperature}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-right">
-                         <div className="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                          <button className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary hover:scale-110 transition-all shadow-platinum-glow-sm">
-                            <Search size={18} />
+                      <td className="px-6 py-4 text-right">
+                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 text-text-muted hover:text-primary hover:bg-bg-secondary rounded-lg transition-colors" title="Ver detalhes">
+                            <Search size={16} />
                           </button>
                         </div>
                       </td>
@@ -198,98 +197,98 @@ export default function LeadsDashboard() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="REGISTRAR OPORTUNIDADE PLATINUM"
+        title="Registrar Nova Oportunidade"
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-8 p-2">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Nome do Prospect *</label>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Nome do Prospect <span className="text-danger">*</span></label>
             <input
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
+              className="input w-full"
               placeholder="Nome completo ou Razão Social"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Email Institucional</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Email Institucional</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum"
+                className="input w-full"
                 placeholder="exemplo@empresa.com"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Telefone Direto</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Telefone Direto</label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all font-mono shadow-inner-platinum"
+                className="input w-full font-mono"
                 placeholder="(00) 00000-0000"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Pipeline Status</label>
-              <select
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Pipeline Status</label>
+              <Select
                 value={formData.status}
-                onChange={e => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-              >
-                <option value="Novo" className="bg-surface font-bold text-text-primary">Novo Deal</option>
-                <option value="Em progresso" className="bg-surface font-bold text-text-primary">Qualificando</option>
-                <option value="Qualificado" className="bg-surface font-bold text-text-primary">Validado</option>
-                <option value="Perdido" className="bg-surface font-bold text-text-primary">Perdido</option>
-              </select>
+                onChange={v => setFormData({ ...formData, status: v })}
+                options={[
+                  { value: 'Novo', label: 'Novo Deal' },
+                  { value: 'Em progresso', label: 'Qualificando' },
+                  { value: 'Qualificado', label: 'Validado' },
+                  { value: 'Perdido', label: 'Perdido' }
+                ]}
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Origem do Deal</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Origem do Deal</label>
               <input
                 type="text"
                 value={formData.source}
                 onChange={e => setFormData({ ...formData, source: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum"
+                className="input w-full"
                 placeholder="Inbound, LinkedIn..."
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Lead Intent</label>
-              <select
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Lead Intent</label>
+              <Select
                 value={formData.temperature}
-                onChange={e => setFormData({ ...formData, temperature: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-              >
-                <option value="Frio" className="bg-surface font-bold text-text-primary">Low Priority (Frio)</option>
-                <option value="Morno" className="bg-surface font-bold text-text-primary">Medium Priority (Morno)</option>
-                <option value="Quente" className="bg-surface font-bold text-text-primary">High Priority (Quente)</option>
-              </select>
+                onChange={v => setFormData({ ...formData, temperature: v })}
+                options={[
+                  { value: 'Frio', label: 'Baixa (Frio)' },
+                  { value: 'Morno', label: 'Média (Morno)' },
+                  { value: 'Quente', label: 'Alta (Quente)' }
+                ]}
+              />
             </div>
           </div>
 
-          <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-8 py-3 text-text-muted font-black hover:text-text-primary transition-all text-[10px] uppercase tracking-widest"
+              className="btn btn-outline"
             >
-              Descartar
+              Cancelar
             </button>
             <button
               type="submit"
-              className="btn-primary py-4 px-12 uppercase text-[10px] tracking-widest shadow-platinum-glow flex items-center gap-3"
+              className="btn btn-primary"
             >
-              <Zap size={18} /> Registrar Lead Platinum
+              Salvar Lead
             </button>
           </div>
         </form>

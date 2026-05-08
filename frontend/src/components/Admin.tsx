@@ -85,142 +85,148 @@ export default function Admin() {
     try {
       if (editingUser) {
         await api.put(`/api/tenant/users/${editingUser.id}`, formData);
-        toast.success('Perfil atualizado no diretório.');
+        toast.success('Perfil atualizado com sucesso.');
       } else {
         await api.post('/api/tenant/users', formData);
-        toast.success('Novo acesso concedido.');
+        toast.success('Novo usuário adicionado.');
       }
       setShowModal(false);
       fetchUsers();
     } catch (err: any) {
-      toast.error('Erro na sincronização de segurança.');
+      toast.error('Erro ao salvar usuário.');
     }
   };
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700 overflow-x-hidden">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Administrative <span className="text-gradient-gold">Control Center</span>
+    <div className="space-y-8 animate-fade-in pb-8">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Administração do Sistema
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <Lock size={14} className="text-primary" />
-            Configurações globais de segurança, governança e identidade corporativa Platinum.
+          <p className="text-text-secondary text-sm mt-1">
+            Configurações globais, segurança e gestão de acessos.
           </p>
         </div>
-        <div className="flex items-center gap-5">
-          <div className="bg-surface-elevated/20 border border-border-subtle px-6 py-3 rounded-2xl flex items-center gap-4 shadow-platinum-glow-sm backdrop-blur-md">
-            <div className="relative">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
-              <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-500 blur-[2px]" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-80 italic">Tenant Node: <span className="text-emerald-500">Active</span></span>
-          </div>
+        <div className="flex items-center gap-4 card px-6 py-4">
+           <div className="flex flex-col items-end gap-1">
+              <span className="text-xs font-medium text-text-muted">Tenant Node</span>
+              <span className="text-xs font-semibold text-success bg-success/10 px-2 py-0.5 rounded-md">Ativo</span>
+           </div>
+           <div className="w-px h-10 bg-border mx-1" />
+           <div className="p-2 bg-success/10 rounded-lg text-success">
+             <Activity className="w-5 h-5 animate-pulse" />
+           </div>
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-10">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Vertical Nav */}
-        <div className="w-full lg:w-80 flex flex-col gap-3 shrink-0">
+        <div className="w-full lg:w-64 flex flex-col gap-2 shrink-0">
           {[
-            { id: 'users', label: 'Utilizadores', icon: Users, desc: 'Gestão de acessos core', color: 'text-primary' },
-            { id: 'company', label: 'Empresa', icon: Building2, desc: 'Identidade e Dados fiscais', color: 'text-blue-500' },
-            { id: 'security', label: 'Segurança', icon: Shield, desc: 'Auditoria e Chaves RSA', color: 'text-amber-500' },
+            { id: 'users', label: 'Utilizadores', icon: Users, desc: 'Gestão de acessos', color: 'text-primary' },
+            { id: 'company', label: 'Empresa', icon: Building2, desc: 'Dados corporativos', color: 'text-primary' },
+            { id: 'security', label: 'Segurança', icon: Shield, desc: 'Auditoria e acessos', color: 'text-primary' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`p-5 rounded-[2rem] border transition-all duration-500 text-left group relative overflow-hidden ${
+              className={`p-4 rounded-xl border transition-all text-left group flex items-center justify-between ${
                 activeTab === tab.id 
-                  ? 'bg-surface-elevated border-primary/40 shadow-platinum-glow' 
-                  : 'bg-surface-elevated/10 border-transparent hover:bg-surface-elevated/20 hover:border-border-subtle'
+                  ? 'bg-bg-tertiary border-border' 
+                  : 'bg-transparent border-transparent hover:bg-bg-secondary'
               }`}
             >
-              <div className="flex items-center gap-5 relative z-10">
-                <div className={`p-3.5 rounded-2xl transition-all duration-500 ${activeTab === tab.id ? 'bg-primary text-background shadow-platinum-glow-sm scale-110' : 'bg-surface-elevated/40 text-text-muted group-hover:text-primary'}`}>
-                  <tab.icon size={22} />
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg transition-colors ${activeTab === tab.id ? 'bg-primary text-white' : 'bg-bg-tertiary text-text-muted group-hover:text-text-primary'}`}>
+                  <tab.icon size={18} />
                 </div>
                 <div>
-                  <p className={`text-[11px] font-black uppercase tracking-[0.2em] ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted group-hover:text-text-primary'}`}>{tab.label}</p>
-                  <p className="text-[9px] text-text-muted/60 uppercase tracking-tight mt-1 font-bold">{tab.desc}</p>
+                  <p className={`text-sm font-semibold ${activeTab === tab.id ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-primary'}`}>{tab.label}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{tab.desc}</p>
                 </div>
-                {activeTab === tab.id && <ChevronRight size={14} className="ml-auto text-primary" />}
               </div>
-              {activeTab === tab.id && <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16" />}
+              {activeTab === tab.id && <ChevronRight size={16} className="text-text-muted" />}
             </button>
           ))}
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 space-y-8 overflow-hidden min-h-[600px]">
+        <div className="flex-1 min-h-[500px]">
           {activeTab === 'users' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-              <div className="platinum-card p-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-surface-elevated/10 backdrop-blur-xl">
-                <div className="relative flex-1 w-full group">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5 group-focus-within:text-primary transition-colors" />
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="card p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
                   <input
                     type="text"
-                    placeholder="Pesquisar por nome, email ou cargo..."
+                    placeholder="Pesquisar utilizador..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-14 pr-6 py-4 bg-background/50 border border-border-subtle rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
+                    className="input w-full pl-9"
                   />
                 </div>
                 <button
                   onClick={() => handleOpenModal()}
-                  className="btn-primary py-4 px-10 shadow-platinum-glow w-full md:w-auto"
+                  className="btn btn-primary flex items-center gap-2 w-full md:w-auto justify-center"
                 >
-                  <Plus className="w-5 h-5" /> Adicionar Operador
+                  <Plus className="w-4 h-4" /> <span>Adicionar Utilizador</span>
                 </button>
               </div>
 
-              <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md">
+              <div className="card overflow-hidden">
                 {loading ? (
-                  <div className="py-40 text-center opacity-40 flex flex-col items-center gap-6">
-                     <Loader2 className="animate-spin w-12 h-12 text-primary" />
-                     <p className="text-[10px] font-black uppercase tracking-[0.4em]">Indexando Diretório Global...</p>
+                  <div className="py-32 text-center flex flex-col items-center gap-4">
+                     <Loader2 className="animate-spin w-8 h-8 text-primary" />
+                     <p className="text-sm font-medium text-text-muted">Carregando utilizadores...</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto scrollbar-platinum">
-                    <table className="w-full text-left text-sm">
-                      <thead>
-                        <tr className="bg-surface-elevated/30 border-b border-border-subtle">
-                          <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Operador / Identidade</th>
-                          <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Qualificação</th>
-                          <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60">Acesso</th>
-                          <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.3em] text-text-muted opacity-60 text-right">Controles</th>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-bg-tertiary border-b border-border text-text-secondary">
+                        <tr>
+                          <th className="px-6 py-3 font-medium">Utilizador</th>
+                          <th className="px-6 py-3 font-medium">Cargo</th>
+                          <th className="px-6 py-3 font-medium">Status</th>
+                          <th className="px-6 py-3 font-medium text-right">Ações</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border-subtle/30">
+                      <tbody className="divide-y divide-border">
                         {users.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase())).map(user => (
-                          <tr key={user.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/20 duration-300">
-                            <td className="px-10 py-8">
-                              <div className="flex items-center gap-5">
-                                <div className="w-12 h-12 rounded-2xl bg-surface-elevated/60 border border-border-subtle flex items-center justify-center text-primary font-black uppercase text-lg shadow-platinum-glow-sm group-hover:scale-110 transition-transform duration-300">
-                                  {user.name.charAt(0)}
+                          <tr key={user.id} className="hover:bg-bg-tertiary transition-colors group">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-secondary font-semibold">
+                                  {user.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                  <p className="font-black text-text-primary group-hover:text-primary transition-colors tracking-tight text-sm uppercase">{user.name}</p>
-                                  <p className="text-[10px] text-text-muted font-black tracking-widest mt-1 opacity-60">{user.email}</p>
+                                  <p className="font-medium text-text-primary group-hover:text-primary transition-colors">{user.name}</p>
+                                  <p className="text-xs text-text-muted mt-0.5">{user.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-10 py-8">
-                              <span className="px-3.5 py-1.5 rounded-xl bg-surface-elevated/40 border border-border-subtle text-text-muted text-[9px] font-black uppercase tracking-[0.2em] group-hover:text-text-primary transition-colors">
-                                {user.role} <span className="opacity-40 px-1">|</span> {user.position || 'Standard Core'}
-                              </span>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 bg-bg-secondary text-text-primary rounded text-xs font-medium border border-border">
+                                  {user.role}
+                                </span>
+                                {user.position && <span className="text-xs text-text-muted">{user.position}</span>}
+                              </div>
                             </td>
-                            <td className="px-10 py-8">
-                               <div className="flex items-center gap-3">
-                                 <div className={`w-2.5 h-2.5 rounded-full ${user.status === 'active' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`} />
-                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted group-hover:text-text-primary transition-colors">{user.status}</span>
+                            <td className="px-6 py-4">
+                               <div className="flex items-center gap-2">
+                                 <div className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-success' : 'bg-danger'}`} />
+                                 <span className="text-xs font-medium text-text-secondary capitalize">{user.status}</span>
                                </div>
                             </td>
-                            <td className="px-10 py-8 text-right">
-                              <div className="flex items-center justify-end gap-3 opacity-40 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                                <button onClick={() => handleOpenModal(user)} className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl hover:bg-primary/20 hover:text-primary text-text-muted transition-all hover:scale-110 shadow-platinum-glow-sm"><Pencil size={18} /></button>
-                                <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 transition-all hover:scale-110 shadow-platinum-glow-sm"><Trash2 size={18} /></button>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleOpenModal(user)} className="p-2 text-text-muted hover:text-primary hover:bg-bg-secondary rounded-lg transition-colors">
+                                  <Pencil size={16} />
+                                </button>
+                                <button className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                                  <Trash2 size={16} />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -234,67 +240,90 @@ export default function Admin() {
           )}
 
           {activeTab === 'company' && company && (
-            <div className="space-y-8 animate-in slide-in-from-right-8 duration-700">
-               <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-text-primary uppercase tracking-[0.3em] flex items-center gap-4">
-                      <div className="p-2.5 bg-primary/10 rounded-xl text-primary shadow-platinum-glow-sm">
-                        <Building2 size={20} />
-                      </div>
-                      Identidade Corporativa Core
-                    </h3>
-                    <div className="px-4 py-1.5 bg-surface-elevated/40 rounded-full border border-border-subtle text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Compliance: Verified</div>
+            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+               <div className="card p-6 space-y-8">
+                  <div className="flex items-center gap-3 border-b border-border pb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                      <Building2 size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-text-primary">Dados da Empresa</h3>
+                      <p className="text-sm text-text-muted">Informações cadastrais e fiscais</p>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    {[
-                      { label: 'Razão Social / Nome Fantasia', val: company.name, key: 'name', placeholder: 'Ex: BidFlow Enterprise LTDA' },
-                      { label: 'CNPJ / RPA Tax ID', val: company.cnpj, key: 'cnpj', placeholder: '00.000.000/0000-00' },
-                      { label: 'Email Institucional Master', val: company.email, key: 'email', placeholder: 'contato@empresa.com' },
-                      { label: 'Telefone Principal / Suporte', val: company.phone, key: 'phone', placeholder: '+55 (00) 00000-0000' },
-                    ].map(field => (
-                      <div key={field.key} className="space-y-3 group">
-                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1 group-focus-within:text-primary transition-colors">{field.label}</label>
-                        <input
-                          type="text"
-                          value={field.val || ''}
-                          onChange={(e) => setCompany({ ...company, [field.key]: e.target.value })}
-                          className="w-full px-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/30 shadow-inner-platinum"
-                          placeholder={field.placeholder}
-                        />
-                      </div>
-                    ))}
-                    <div className="md:col-span-2 space-y-3 group">
-                      <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1 group-focus-within:text-primary transition-colors">Sede Global / Endereço Fiscal Platinum</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-text-primary">Razão Social / Nome Fantasia</label>
+                      <input
+                        type="text"
+                        value={company.name || ''}
+                        onChange={(e) => setCompany({ ...company, name: e.target.value })}
+                        className="input w-full"
+                        placeholder="Ex: BidFlow Enterprise LTDA"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-text-primary">CNPJ</label>
+                      <input
+                        type="text"
+                        value={company.cnpj || ''}
+                        onChange={(e) => setCompany({ ...company, cnpj: e.target.value })}
+                        className="input w-full"
+                        placeholder="00.000.000/0000-00"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-text-primary">Email Institucional</label>
+                      <input
+                        type="text"
+                        value={company.email || ''}
+                        onChange={(e) => setCompany({ ...company, email: e.target.value })}
+                        className="input w-full"
+                        placeholder="contato@empresa.com"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-text-primary">Telefone</label>
+                      <input
+                        type="text"
+                        value={company.phone || ''}
+                        onChange={(e) => setCompany({ ...company, phone: e.target.value })}
+                        className="input w-full"
+                        placeholder="(00) 00000-0000"
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-1.5">
+                      <label className="text-sm font-medium text-text-primary">Endereço Completo</label>
                       <input
                         type="text"
                         value={company.address || ''}
                         onChange={(e) => setCompany({ ...company, address: e.target.value })}
-                        className="w-full px-6 py-4 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/30 shadow-inner-platinum"
+                        className="input w-full"
                         placeholder="Logradouro, Nº, Bairro, Cidade - UF, CEP"
                       />
                     </div>
                   </div>
-                  <div className="flex justify-end pt-10 border-t border-border-subtle">
-                    <button className="btn-primary py-4 px-12 shadow-platinum-glow uppercase text-[11px] tracking-[0.2em]">
-                      <Save className="w-5 h-5" /> Consolidar Dados Mestres
+                  <div className="flex justify-end pt-6 border-t border-border">
+                    <button className="btn btn-primary flex items-center gap-2">
+                      <Save className="w-4 h-4" /> <span>Salvar Alterações</span>
                     </button>
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
-                    { label: 'Uptime Sistema', val: '99.98%', icon: Activity, color: 'text-emerald-500' },
-                    { label: 'Certificados', val: 'Active RSA', icon: ShieldCheck, color: 'text-blue-500' },
-                    { label: 'Logs Auditoria', val: '24/7 Monitoring', icon: Server, color: 'text-amber-500' },
+                    { label: 'Uptime Sistema', val: '99.98%', icon: Activity, color: 'text-success', bg: 'bg-success/10' },
+                    { label: 'Certificados', val: 'Ativos', icon: ShieldCheck, color: 'text-primary', bg: 'bg-primary/10' },
+                    { label: 'Auditoria', val: 'Monitorando', icon: Server, color: 'text-warning', bg: 'bg-warning/10' },
                   ].map((stat, i) => (
-                    <div key={i} className="platinum-card p-6 bg-surface-elevated/10 flex items-center gap-5 border border-border-subtle/30 backdrop-blur-sm">
-                      <div className={`p-3 rounded-2xl bg-surface-elevated/40 ${stat.color}`}>
+                    <div key={i} className="card p-5 flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
                         <stat.icon size={20} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">{stat.label}</p>
-                        <p className="text-sm font-black text-text-primary tracking-tight mt-0.5">{stat.val}</p>
+                        <p className="text-xs font-medium text-text-muted">{stat.label}</p>
+                        <p className="text-base font-semibold text-text-primary mt-0.5">{stat.val}</p>
                       </div>
                     </div>
                   ))}
@@ -303,70 +332,67 @@ export default function Admin() {
           )}
 
           {activeTab === 'security' && (
-             <div className="space-y-8 animate-in slide-in-from-left-8 duration-700">
-                <div className="platinum-card p-12 text-center bg-surface-elevated/10 backdrop-blur-xl border-dashed border-2 border-border-subtle">
-                   <div className="w-24 h-24 bg-amber-500/10 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-platinum-glow-sm relative">
-                      <div className="absolute inset-0 bg-amber-500/5 rounded-3xl animate-ping opacity-20" />
-                      <ShieldAlert size={48} className="text-amber-500 relative z-10" />
+             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                <div className="card p-10 text-center flex flex-col items-center">
+                   <div className="w-20 h-20 bg-bg-secondary rounded-2xl flex items-center justify-center mb-6 border border-border">
+                      <ShieldAlert size={40} className="text-text-muted" />
                    </div>
-                   <h2 className="text-2xl font-black text-text-primary uppercase tracking-tighter mb-4">Camada de Segurança Nível 5</h2>
-                   <p className="text-text-muted max-w-lg mx-auto text-sm font-medium leading-relaxed mb-10 opacity-70">
-                      Este módulo gerencia chaves de criptografia RSA-2048, auditoria de logins (IP/UA) e permissões granulares de acesso à API BidFlow.
+                   <h2 className="text-xl font-semibold text-text-primary mb-2">Configurações de Segurança</h2>
+                   <p className="text-text-secondary text-sm max-w-md mx-auto mb-8">
+                      Este módulo gerencia chaves de criptografia, auditoria de logins e permissões avançadas de acesso à plataforma.
                    </p>
-                   <button className="btn-primary py-4 px-12 shadow-platinum-glow mx-auto opacity-40 cursor-not-allowed">
-                      Configurações Avançadas de Criptografia
+                   <button className="btn btn-outline" disabled>
+                      Recursos Avançados em Breve
                    </button>
-                   <p className="mt-8 text-[9px] font-black uppercase tracking-[0.5em] text-text-muted opacity-40 flex items-center justify-center gap-4 italic">
-                      <Lock size={10} /> Encrypted Session <Lock size={10} />
-                   </p>
                 </div>
              </div>
           )}
         </div>
       </div>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingUser ? 'REFINAR OPERADOR ESTRATÉGICO' : 'NOVO ACESSO CORE'} size="md">
-        <form onSubmit={handleSaveUser} className="space-y-10 p-2">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Nome Completo do Colaborador *</label>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingUser ? 'Editar Utilizador' : 'Novo Utilizador'} size="md">
+        <form onSubmit={handleSaveUser} className="p-6 space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Nome Completo <span className="text-danger">*</span></label>
             <div className="relative">
-              <Users className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/60 w-5 h-5" />
-              <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full pl-14 pr-5 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" placeholder="Nome Completo" />
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+              <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="input w-full pl-9" placeholder="Nome do colaborador" />
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Email Principal (SSO) *</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Email <span className="text-danger">*</span></label>
               <div className="relative">
-                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
-                 <input type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full pl-14 pr-5 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" placeholder="email@empresa.com" />
+                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+                 <input type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="input w-full pl-9" placeholder="email@empresa.com" />
               </div>
             </div>
             
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Perfil de Acesso</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Perfil de Acesso</label>
               <div className="relative">
-                <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
-                <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full pl-14 pr-10 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none appearance-none cursor-pointer">
-                  <option value="admin" className="bg-surface font-bold text-text-primary">Administrador Master</option>
-                  <option value="manager" className="bg-surface font-bold text-text-primary">Gerente de Operações</option>
-                  <option value="user" className="bg-surface font-bold text-text-primary">Operador de Funil</option>
-                  <option value="analyst" className="bg-surface font-bold text-text-primary">Analista de BI</option>
+                <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+                <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="input w-full pl-9 appearance-none">
+                  <option value="admin">Administrador</option>
+                  <option value="manager">Gerente</option>
+                  <option value="user">Operador</option>
+                  <option value="analyst">Analista</option>
                 </select>
+                <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-muted pointer-events-none" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Cargo / Posição Estratégica</label>
-             <input type="text" value={formData.position} onChange={e => setFormData({ ...formData, position: e.target.value })} className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" placeholder="Ex: Diretor de Licitações" />
+          <div className="space-y-1.5">
+             <label className="text-sm font-medium text-text-primary">Cargo / Posição</label>
+             <input type="text" value={formData.position} onChange={e => setFormData({ ...formData, position: e.target.value })} className="input w-full" placeholder="Ex: Diretor Comercial" />
           </div>
 
-          <div className="flex justify-end gap-6 pt-10 border-t border-border-subtle">
-            <button type="button" onClick={() => setShowModal(false)} className="px-10 py-4 text-text-muted font-black hover:text-text-primary uppercase tracking-[0.3em] transition-all text-[10px]">Descartar</button>
-            <button type="submit" className="btn-primary py-4 px-12 shadow-platinum-glow uppercase text-[10px] tracking-[0.3em]">
-               <ShieldCheck className="w-5 h-5" /> Confirmar Operador
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
+            <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">Cancelar</button>
+            <button type="submit" className="btn btn-primary">
+               Salvar
             </button>
           </div>
         </form>

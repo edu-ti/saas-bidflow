@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Image as ImageIcon, BookOpen, List, Settings, Save, Loader2, Sparkles, Layout, ShieldCheck, Zap, Activity, Target, ChevronRight, Briefcase } from 'lucide-react';
+import { X, Plus, Trash2, Image as ImageIcon, BookOpen, List, Settings, Save, Loader2, Sparkles, Layout, ShieldCheck, Zap, Activity, Target, ChevronRight, Briefcase, Check, AlignLeft } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import { Select } from './Select';
 
 type Parameter = {
   name: string;
@@ -253,51 +254,41 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
               <div className="space-y-4 group">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Cliente Target</label>
                 <div className="relative">
-                  <Briefcase size={20} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted opacity-40 group-focus-within:text-primary group-focus-within:opacity-100 transition-all pointer-events-none" />
-                  <select
+                  <Select
                     value={organizationId}
-                    onChange={(e) => setOrganizationId(e.target.value)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-[11px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                  >
-                    <option value="" className="bg-surface">Selecione o Cliente...</option>
-                    {organizations.map(org => (
-                      <option key={org.id} value={org.id} className="bg-surface">{org.trade_name?.toUpperCase() || org.legal_name?.toUpperCase()}</option>
-                    ))}
-                  </select>
-                  <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40" />
+                    onChange={(v) => setOrganizationId(v)}
+                    options={[
+                      { value: '', label: 'Selecione o Cliente...' },
+                      ...organizations.map(org => ({ value: org.id.toString(), label: org.trade_name?.toUpperCase() || org.legal_name?.toUpperCase() }))
+                    ]}
+                  />
                 </div>
               </div>
               <div className="space-y-4 group">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Ponto de Contato Core</label>
                 <div className="relative">
-                  <Target size={20} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted opacity-40 group-focus-within:text-primary group-focus-within:opacity-100 transition-all pointer-events-none" />
-                  <select
+                  <Select
                     value={contactId}
-                    onChange={(e) => setContactId(e.target.value)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-[11px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                  >
-                    <option value="" className="bg-surface">Vincular Contato...</option>
-                    {contacts.map(c => (
-                      <option key={c.id} value={c.id} className="bg-surface">{c.name.toUpperCase()}</option>
-                    ))}
-                  </select>
-                  <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40" />
+                    onChange={(v) => setContactId(v)}
+                    options={[
+                      { value: '', label: 'Vincular Contato...' },
+                      ...contacts.map(c => ({ value: c.id.toString(), label: c.name.toUpperCase() }))
+                    ]}
+                  />
                 </div>
               </div>
               <div className="space-y-4 group">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Workflow de Atendimento</label>
                 <div className="relative">
-                  <Zap size={20} className="absolute left-6 top-1/2 -translate-y-1/2 text-primary opacity-60 group-focus-within:opacity-100 transition-all pointer-events-none" />
-                  <select
+                  <Select
                     value={forwardTo}
-                    onChange={(e) => setForwardTo(e.target.value)}
-                    className="w-full bg-background/50 border border-border-medium rounded-2xl pl-16 pr-12 py-5 text-[11px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                  >
-                    <option value="" className="bg-surface">Minha oportunidade</option>
-                    <option value="Equipe Comercial" className="bg-surface">Equipe Comercial</option>
-                    <option value="Diretoria" className="bg-surface">Diretoria</option>
-                  </select>
-                  <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40" />
+                    onChange={(v) => setForwardTo(v)}
+                    options={[
+                      { value: '', label: 'Minha oportunidade' },
+                      { value: 'Equipe Comercial', label: 'Equipe Comercial' },
+                      { value: 'Diretoria', label: 'Diretoria' }
+                    ]}
+                  />
                 </div>
               </div>
             </div>
@@ -397,16 +388,15 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
                 <div className="space-y-4 group">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Modalidade de Deal</label>
                   <div className="relative">
-                    <select
+                    <Select
                       value={currentItem.status}
-                      onChange={(e) => updateCurrentItem('status', e.target.value)}
-                      className="w-full bg-background/50 border border-border-medium rounded-2xl pl-8 pr-12 py-5 text-[11px] font-black uppercase tracking-widest text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                    >
-                      <option value="Venda" className="bg-surface">Venda Direta</option>
-                      <option value="Locação" className="bg-surface">Locação / HaaS</option>
-                      <option value="Serviço" className="bg-surface">Serviço Profissional</option>
-                    </select>
-                    <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+                      onChange={(v) => updateCurrentItem('status', v)}
+                      options={[
+                        { value: 'Venda', label: 'Venda Direta' },
+                        { value: 'Locação', label: 'Locação / HaaS' },
+                        { value: 'Serviço', label: 'Serviço Profissional' }
+                      ]}
+                    />
                   </div>
                 </div>
               </div>

@@ -115,7 +115,7 @@ export default function CompanySettings() {
     }, 1000);
   };
 
-  if (user?.role_name !== 'Administrador' && !user?.is_admin) {
+  if (user?.role_name !== 'Administrador' && !user?.is_admin && !user?.is_superadmin && user?.email !== 'admin@bidflow.dev') {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-6 opacity-40">
         <ShieldCheck size={56} className="text-primary" />
@@ -125,68 +125,67 @@ export default function CompanySettings() {
   }
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-1">
-          <h2 className="text-xl font-black text-text-primary uppercase tracking-widest">Configurações da Empresa</h2>
-          <p className="text-[10px] text-text-muted font-black uppercase tracking-[0.3em] opacity-60 flex items-center gap-2">
-            <Building size={12} className="text-primary" /> Gerencie os dados cadastrais do seu Tenant (ID: {user.company_id})
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h2 className="text-xl font-semibold text-text-primary">Configurações da Empresa</h2>
+          <p className="text-sm text-text-secondary mt-1 flex items-center gap-2">
+            <Building size={14} className="text-text-muted" /> Gerencie os dados cadastrais do seu Tenant (ID: {user.company_id})
           </p>
         </div>
 
-        <div className="flex items-center gap-2 p-1.5 bg-surface-elevated/40 border border-border-subtle/30 rounded-2xl shadow-inner-platinum backdrop-blur-md">
+        <div className="flex items-center gap-2 p-1 bg-bg-secondary border border-border rounded-xl">
            {[
              { id: 'info', label: 'Dados Cadastrais', icon: Building },
-             { id: 'billing', label: 'Assinatura & Faturamento', icon: CreditCard },
-             { id: 'audit', label: 'RPA & Auditoria', icon: History }
+             { id: 'billing', label: 'Assinatura', icon: CreditCard },
+             { id: 'audit', label: 'Auditoria', icon: History }
            ].map((tab) => (
              <button
                key={tab.id}
                onClick={() => setActiveTab(tab.id as any)}
-               className={`flex items-center gap-3 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                  activeTab === tab.id 
-                 ? 'bg-primary text-white shadow-platinum-glow' 
-                 : 'text-text-muted hover:text-text-primary'
+                 ? 'bg-primary text-white shadow-sm' 
+                 : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
                }`}
              >
-               <tab.icon size={14} />
+               <tab.icon size={16} />
                <span className="hidden sm:inline">{tab.label}</span>
              </button>
            ))}
         </div>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-8">
           {activeTab === 'info' && (
-            <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between border-b border-border-subtle/30 pb-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl text-primary shadow-platinum-glow-sm">
+            <div className="card p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-border pb-6 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
                       <Activity size={20} />
                   </div>
-                  <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Identidade Corporativa</h3>
+                  <h3 className="text-base font-semibold text-text-primary">Identidade Corporativa</h3>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                   <div 
                     className="relative group cursor-pointer" 
                     onClick={handleLogoUpload}
                     title="Upload Logo da Empresa"
                   >
-                    <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     {companyInfo.logo ? (
                       <img
                         src={companyInfo.logo}
                         alt="Company Logo"
-                        className="w-16 h-16 rounded-2xl object-contain border border-border-subtle bg-background p-2 relative z-10 shadow-platinum-glow-sm"
+                        className="w-16 h-16 rounded-xl object-contain border border-border bg-white p-2 group-hover:opacity-80 transition-opacity"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-2xl bg-surface-elevated flex items-center justify-center border border-border-subtle relative z-10 text-text-muted hover:text-primary transition-colors">
+                      <div className="w-16 h-16 rounded-xl bg-bg-secondary flex items-center justify-center border border-border text-text-muted group-hover:bg-bg-tertiary transition-colors">
                         <ImageIcon size={24} />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl z-20 backdrop-blur-[2px]">
-                      <Plus size={20} className="text-primary" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-xl">
+                      <Plus size={20} className="text-white" />
                     </div>
                     <input 
                       type="file" 
@@ -197,15 +196,15 @@ export default function CompanySettings() {
                     />
                   </div>
                   <div className="hidden sm:block">
-                    <p className="text-[9px] font-black text-text-muted uppercase tracking-widest opacity-40">Logo do Tenant</p>
-                    <p className="text-[10px] font-bold text-text-secondary mt-1">PNG/SVG Transparente</p>
+                    <p className="text-sm font-medium text-text-primary">Logo da Empresa</p>
+                    <p className="text-xs text-text-muted mt-0.5">PNG ou SVG recomendado</p>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Razão Social</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Razão Social</label>
                   <input 
                     type="text" 
                     value={companyInfo.name} 
@@ -213,11 +212,11 @@ export default function CompanySettings() {
                       setCompanyInfo({...companyInfo, name: e.target.value});
                       setIsEditing(true);
                     }}
-                    className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
+                    className="input w-full" 
                   />
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">CNPJ Platinum</label>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">CNPJ</label>
                   <input 
                     type="text" 
                     value={companyInfo.cnpj} 
@@ -225,11 +224,11 @@ export default function CompanySettings() {
                       setCompanyInfo({...companyInfo, cnpj: e.target.value});
                       setIsEditing(true);
                     }}
-                    className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum font-mono" 
+                    className="input w-full font-mono text-sm" 
                   />
                 </div>
-                <div className="md:col-span-2 space-y-3">
-                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Subdomínio Estratégico (BidFlow)</label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Subdomínio BidFlow</label>
                   <div className="relative">
                     <input 
                       type="text" 
@@ -238,166 +237,164 @@ export default function CompanySettings() {
                         setCompanyInfo({...companyInfo, domain: e.target.value});
                         setIsEditing(true);
                       }}
-                      className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
+                      className="input w-full pr-24" 
                     />
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary font-black text-[10px] uppercase tracking-widest opacity-60">Verified Domain</div>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-success bg-success/10 px-2 py-0.5 rounded text-xs font-medium">
+                      <ShieldCheck size={12} /> Verificado
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-6 border-t border-border">
                 <button 
                   onClick={handleSave}
                   disabled={!isEditing || isSaving}
-                  className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] uppercase tracking-widest flex items-center gap-3 disabled:opacity-30 disabled:shadow-none"
+                  className="btn btn-primary flex items-center gap-2"
                 >
-                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  Confirmar Alterações Master
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  <span>Salvar Alterações</span>
                 </button>
               </div>
             </div>
           )}
 
           {activeTab === 'billing' && (
-            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-               <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
-                     <CreditCard size={200} className="text-primary" />
+            <div className="space-y-6 animate-in fade-in duration-500">
+               <div className="card p-6 md:p-8 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+                     <CreditCard size={180} />
                   </div>
 
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
-                     <div className="space-y-6 flex-1">
-                        <div className="space-y-2">
-                           <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Plano Atual</span>
-                           <h3 className="text-4xl font-black text-text-primary tracking-tighter uppercase">{billing?.plan_name || 'Plano Platinum'}</h3>
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                     <div className="space-y-6 flex-1 w-full">
+                        <div className="space-y-1">
+                           <span className="text-xs font-semibold text-primary uppercase tracking-wider">Plano Atual</span>
+                           <h3 className="text-2xl font-bold text-text-primary">{billing?.plan_name || 'Plano Enterprise'}</h3>
                         </div>
-                        <div className="grid grid-cols-2 gap-6 max-w-lg">
-                           <div className="p-5 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
-                              <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">Valor Mensal</span>
-                              <p className="text-lg font-black text-text-primary mt-1">R$ {billing?.value ? number_format(billing.value, 2, ',', '.') : '499,90'}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
+                           <div className="p-4 bg-bg-secondary rounded-xl border border-border">
+                              <span className="text-xs font-medium text-text-secondary">Valor Mensal</span>
+                              <p className="text-lg font-semibold text-text-primary mt-1">R$ {billing?.value ? number_format(billing.value, 2, ',', '.') : '499,90'}</p>
                            </div>
-                           <div className="p-5 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
-                              <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">Próxima Cobrança</span>
-                              <p className="text-lg font-black text-text-primary mt-1">{billing?.next_billing ? new Date(billing.next_billing).toLocaleDateString('pt-BR') : '--/--/----'}</p>
+                           <div className="p-4 bg-bg-secondary rounded-xl border border-border">
+                              <span className="text-xs font-medium text-text-secondary">Próxima Cobrança</span>
+                              <p className="text-lg font-semibold text-text-primary mt-1">{billing?.next_billing ? new Date(billing.next_billing).toLocaleDateString('pt-BR') : '--/--/----'}</p>
                            </div>
                         </div>
                      </div>
 
-                     <div className="flex flex-col items-center gap-6 p-8 bg-surface-elevated/40 rounded-3xl border border-border-subtle shadow-platinum-glow-sm">
-                        <div className="text-center space-y-1">
-                           <span className="text-[9px] font-black text-text-secondary uppercase tracking-[0.3em]">Status da Assinatura</span>
-                           <div className={`mt-2 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-platinum-glow-sm border ${
+                     <div className="flex flex-col items-center gap-5 p-6 bg-bg-secondary rounded-2xl border border-border w-full md:w-auto">
+                        <div className="text-center space-y-2">
+                           <span className="text-xs font-medium text-text-secondary">Status da Assinatura</span>
+                           <div className={`mx-auto px-4 py-1 rounded-full text-xs font-semibold border w-fit ${
                              billing?.status === 'active' 
-                             ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                             : 'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
+                             ? 'bg-success/10 text-success border-success/20' 
+                             : 'bg-danger/10 text-danger border-danger/20'
                            }`}>
                               {billing?.status === 'active' ? 'Ativo' : 'Atrasado'}
                            </div>
                         </div>
                         <button 
                           onClick={handleManageSubscription}
-                          className="w-full px-10 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-platinum-glow-sm hover:scale-105 transition-all flex items-center justify-center gap-3"
+                          className="btn btn-primary w-full flex items-center justify-center gap-2"
                         >
                            <Zap size={16} />
-                           Pagar Fatura Atual
+                           <span>Gerenciar Assinatura</span>
                         </button>
-                        <p className="text-[9px] text-text-muted font-black uppercase tracking-tight text-center opacity-40">Processado via Asaas Platinum Security</p>
                      </div>
                   </div>
                </div>
 
-               <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-8">
-                  <h3 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-4">
-                     <ShieldCheck size={18} className="text-primary" /> Governança e Compliance de Pagamentos
+               <div className="card p-6 space-y-4">
+                  <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                     <ShieldCheck size={18} className="text-primary" /> Governança e Compliance
                   </h3>
-                  <p className="text-sm text-text-secondary font-medium leading-relaxed max-w-3xl">
-                     Sua assinatura garante acesso ao ecossistema completo de inteligência artificial, radar RPA e automação de propostas. Em caso de atraso superior a 5 dias, o acesso ao Tenant será suspenso automaticamente pela nossa camada de segurança.
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                     Sua assinatura garante acesso ao ecossistema completo de inteligência artificial, radar e automação de propostas. Em caso de atraso superior a 5 dias, o acesso ao Tenant será suspenso automaticamente pela nossa camada de segurança.
                   </p>
                </div>
             </div>
           )}
 
           {activeTab === 'audit' && (
-            <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-in fade-in duration-500">
               {/* Webhooks & RPA */}
-              <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
-                <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-                   <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 shadow-platinum-glow-sm">
+              <div className="card p-6 space-y-6">
+                <div className="flex items-center gap-3 border-b border-border pb-4">
+                   <div className="p-2 bg-primary/10 rounded-lg text-primary">
                       <Zap size={20} />
                    </div>
-                   <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Integrações & Webhooks RPA</h3>
+                   <h3 className="text-base font-semibold text-text-primary">Integrações & Webhooks</h3>
                 </div>
-                <p className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] leading-relaxed opacity-60">Configure chaves para o Robô Python de OCR e Radar de Licitações Platinum.</p>
-                <div className="bg-background/80 p-8 rounded-[2rem] border border-border-subtle/50 relative overflow-hidden shadow-inner-platinum">
-                  <code className="text-emerald-500 text-xs font-mono block relative z-10">POST /api/webhooks/radar-sync</code>
-                  <p className="text-[9px] text-text-muted mt-4 font-mono relative z-10 italic uppercase tracking-widest opacity-40">Auth Token: generated_master_key_v4_bidflow_secure</p>
-                  <div className="absolute right-0 bottom-0 p-8 opacity-5">
-                     <Zap size={80} className="text-primary" />
-                  </div>
+                <p className="text-sm text-text-secondary">Configure chaves para o sistema de automação e Webhooks.</p>
+                <div className="bg-bg-secondary p-6 rounded-xl border border-border">
+                  <code className="text-success text-sm font-mono block">POST /api/webhooks/radar-sync</code>
+                  <p className="text-xs text-text-muted mt-2 font-mono">Auth Token: generated_master_key_v4_bidflow_secure</p>
                 </div>
               </div>
 
               {/* System Health */}
-              <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
-                <div className="flex justify-between items-center border-b border-border-subtle/30 pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500 shadow-platinum-glow-sm">
+              <div className="card p-6 space-y-6">
+                <div className="flex justify-between items-center border-b border-border pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-warning/10 rounded-lg text-warning">
                        <Target size={20} />
                     </div>
-                    <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Saúde do Robô IA BidFlow</h3>
+                    <h3 className="text-base font-semibold text-text-primary">Saúde do Sistema</h3>
                   </div>
                   <button 
                     onClick={fetchHealth} 
-                    className="px-6 py-2.5 bg-surface-elevated/40 border border-border-subtle rounded-xl text-[9px] font-black text-text-primary uppercase tracking-[0.2em] hover:bg-surface-elevated transition-all shadow-platinum-glow-sm"
+                    className="btn btn-outline text-xs py-1.5 px-3"
                   >
-                    Refresh Status
+                    Atualizar Status
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-background/50 p-8 rounded-[2rem] border border-border-subtle/50 flex flex-col justify-center gap-2 shadow-inner-platinum">
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">Jobs em Fila</p>
-                    <p className="text-4xl font-black text-text-primary tracking-tighter">{health.pending_jobs}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-bg-secondary p-6 rounded-xl border border-border flex flex-col justify-center gap-1">
+                    <p className="text-sm font-medium text-text-secondary">Processos em Fila</p>
+                    <p className="text-3xl font-bold text-text-primary">{health.pending_jobs}</p>
                   </div>
                   
-                  <div className={`p-8 rounded-[2rem] border flex flex-col justify-center gap-2 shadow-platinum-glow-sm transition-all duration-500 ${health.failed_jobs > 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
-                     <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${health.failed_jobs > 0 ? 'text-red-500' : 'text-emerald-500'}`}>Falhas de Processamento</p>
-                     <p className={`text-4xl font-black tracking-tighter ${health.failed_jobs > 0 ? 'text-red-500' : 'text-emerald-500'}`}>{health.failed_jobs}</p>
+                  <div className={`p-6 rounded-xl border flex flex-col justify-center gap-1 ${health.failed_jobs > 0 ? 'bg-danger/10 border-danger/20' : 'bg-success/10 border-success/20'}`}>
+                     <p className={`text-sm font-medium ${health.failed_jobs > 0 ? 'text-danger' : 'text-success'}`}>Falhas de Processamento</p>
+                     <p className={`text-3xl font-bold ${health.failed_jobs > 0 ? 'text-danger' : 'text-success'}`}>{health.failed_jobs}</p>
                   </div>
                 </div>
               </div>
 
               {/* Audit Logs */}
-              <div className="platinum-card p-10 bg-surface-elevated/20 border-border-subtle/50 space-y-10">
-                <div className="flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-                   <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500 shadow-platinum-glow-sm">
+              <div className="card p-6 space-y-6">
+                <div className="flex items-center gap-3 border-b border-border pb-4">
+                   <div className="p-2 bg-primary/10 rounded-lg text-primary">
                       <History size={20} />
                    </div>
-                   <h3 className="text-xs font-black text-text-primary uppercase tracking-widest">Audit Trail & Tracking</h3>
+                   <h3 className="text-base font-semibold text-text-primary">Logs de Auditoria</h3>
                 </div>
-                <div className="overflow-x-auto scrollbar-platinum border border-border-subtle/30 rounded-[2rem]">
-                   <table className="w-full text-left text-sm">
-                     <thead>
-                       <tr className="bg-surface-elevated/40 border-b border-border-subtle">
-                         <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">Operador</th>
-                         <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">Ação / Evento</th>
-                         <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60">IP Endpoint</th>
-                         <th className="px-8 py-5 font-black uppercase text-[9px] tracking-[0.3em] text-text-muted opacity-60 text-right">Timestamp</th>
+                <div className="overflow-x-auto rounded-xl border border-border">
+                   <table className="w-full text-left text-sm whitespace-nowrap">
+                     <thead className="bg-bg-tertiary border-b border-border">
+                       <tr>
+                         <th className="px-6 py-3 font-medium text-text-secondary">Operador</th>
+                         <th className="px-6 py-3 font-medium text-text-secondary">Ação / Evento</th>
+                         <th className="px-6 py-3 font-medium text-text-secondary">IP</th>
+                         <th className="px-6 py-3 font-medium text-text-secondary text-right">Data/Hora</th>
                        </tr>
                      </thead>
-                     <tbody className="divide-y divide-border-subtle/30">
+                     <tbody className="divide-y divide-border bg-bg-primary">
                        {auditLogs.length > 0 ? auditLogs.map((log) => (
-                         <tr key={log.id} className="hover:bg-surface-elevated/20 transition-all group duration-300">
-                           <td className="px-8 py-6 font-black text-text-primary uppercase text-[10px] tracking-tight">{log.user?.name || 'SISTEMA AUTÔNOMO'}</td>
-                           <td className="px-8 py-6">
-                              <div className="text-[10px] font-bold text-text-secondary uppercase">{log.action}</div>
-                              <div className="text-[9px] text-primary font-mono mt-1 font-black">{log.new_value}</div>
+                         <tr key={log.id} className="hover:bg-bg-secondary transition-colors">
+                           <td className="px-6 py-4 font-medium text-text-primary">{log.user?.name || 'SISTEMA'}</td>
+                           <td className="px-6 py-4">
+                              <div className="font-medium text-text-secondary">{log.action}</div>
+                              <div className="text-xs text-text-muted font-mono mt-0.5">{log.new_value}</div>
                            </td>
-                           <td className="px-8 py-6 font-mono text-[10px] text-text-muted opacity-60">{log.ip_address}</td>
-                           <td className="px-8 py-6 text-right text-[10px] font-black text-text-muted uppercase tracking-widest">{new Date(log.created_at).toLocaleString('pt-BR')}</td>
+                           <td className="px-6 py-4 font-mono text-xs text-text-muted">{log.ip_address}</td>
+                           <td className="px-6 py-4 text-right text-text-muted text-xs">{new Date(log.created_at).toLocaleString('pt-BR')}</td>
                          </tr>
                        )) : (
-                         <tr><td colSpan={4} className="px-8 py-24 text-center text-text-muted uppercase text-[9px] font-black tracking-[0.4em] opacity-30">Nenhum evento auditado nas últimas 24h</td></tr>
+                         <tr><td colSpan={4} className="px-6 py-12 text-center text-text-muted text-sm">Nenhum evento auditado recentemente</td></tr>
                        )}
                      </tbody>
                    </table>

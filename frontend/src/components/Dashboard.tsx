@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-import { TrendingUp, DollarSign, Target, Award, PieChart, Zap, ShieldCheck, Activity, Globe, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, DollarSign, Target, Award, PieChart, Zap, ShieldCheck, Activity, Globe, ArrowUpRight, X, Loader2, Save } from 'lucide-react';
 import api from '../lib/axios';
+import toast from 'react-hot-toast';
+import Modal from './ui/Modal';
 
 type PipelineStat = {
   name: string;
@@ -22,10 +25,24 @@ type TopOrg = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [pipeline, setPipeline] = useState<PipelineStat[]>([]);
   const [winRate, setWinRate] = useState<WinRate | null>(null);
   const [topOrgs, setTopOrgs] = useState<TopOrg[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Goal modal state
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [savingGoal, setSavingGoal] = useState(false);
+  const [goalForm, setGoalForm] = useState({
+    goal_type: 'global',
+    target_id: '',
+    uf: '',
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    target_revenue: '',
+    target_wins: '',
+  });
 
   useEffect(() => {
     api.get('/api/dashboard/stats')
@@ -38,195 +55,214 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleSaveGoal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingGoal(true);
+    try {
+      await api.post('/api/goals', {
+        ...goalForm,
+        target_id: goalForm.target_id ? parseInt(goalForm.target_id) : null,
+        target_revenue: parseFloat(goalForm.target_revenue) || 0,
+        target_wins: parseInt(goalForm.target_wins as string) || 0,
+      });
+      toast.success('Meta estratégica definida com sucesso!');
+      setIsGoalModalOpen(false);
+      setGoalForm({
+        goal_type: 'global', target_id: '', uf: '',
+        month: new Date().getMonth() + 1, year: new Date().getFullYear(),
+        target_revenue: '', target_wins: '',
+      });
+    } catch {
+      toast.error('Erro ao salvar a meta.');
+    } finally {
+      setSavingGoal(false);
+    }
+  };
+
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-6 animate-in fade-in duration-700">
-      <div className="relative">
-        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin shadow-platinum-glow" />
-        <Zap size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary animate-pulse" />
-      </div>
-      <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.5em]">Auditando Performance Neural...</div>
+    <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
+      <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
+      <div className="text-sm text-text-muted font-medium">Carregando métricas...</div>
     </div>
   );
 
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
 
+  const months = [
+    { value: 1, label: 'Janeiro' }, { value: 2, label: 'Fevereiro' }, { value: 3, label: 'Março' },
+    { value: 4, label: 'Abril' }, { value: 5, label: 'Maio' }, { value: 6, label: 'Junho' },
+    { value: 7, label: 'Julho' }, { value: 8, label: 'Agosto' }, { value: 9, label: 'Setembro' },
+    { value: 10, label: 'Outubro' }, { value: 11, label: 'Novembro' }, { value: 12, label: 'Dezembro' },
+  ];
+
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 animate-in fade-in duration-700 text-text-primary">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Performance <span className="text-gradient-gold">Estratégica Platinum</span>
+    <div className="space-y-8 animate-fade-in">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Visão Geral
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <ShieldCheck size={14} className="text-primary" /> 
-            Visão consolidada da inteligência comercial e fluxos de licitação RPA.
+          <p className="text-text-secondary text-sm mt-1">
+            Métricas consolidadas de desempenho e oportunidades.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="flex items-center gap-3 bg-surface-elevated/40 border border-border-subtle p-2 rounded-2xl shadow-platinum-glow-sm">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-surface bg-surface-elevated flex items-center justify-center text-[10px] font-black text-primary">
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                ))}
-              </div>
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest px-2">Time Ativo</span>
-           </div>
-           <button className="btn-primary py-4 px-10 shadow-platinum-glow text-[10px] tracking-widest">
-             <Activity size={16} className="mr-2" /> Report Executivo
+        <div className="flex items-center gap-3">
+           <button
+             onClick={() => navigate('/reports-dashboard')}
+             className="btn btn-outline text-xs"
+           >
+             <Activity size={14} /> Relatório Analítico
+           </button>
+           <button
+             onClick={() => setIsGoalModalOpen(true)}
+             className="btn btn-primary text-xs"
+           >
+             <Target size={14} /> Nova Meta
            </button>
         </div>
       </header>
       
-      {/* KPI Highlight Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="flex justify-between items-start mb-8 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
-              <Award size={28} />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="card p-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center text-success">
+              <Award size={20} />
             </div>
-            <div className="text-right">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Neural Success</span>
-              <div className="flex items-center text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20 mt-2 shadow-platinum-glow-sm">
-                <ArrowUpRight size={12} className="mr-2" /> +12.4%
-              </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-success bg-success/10 px-2 py-1 rounded-md">
+              <ArrowUpRight size={12} /> +12.4%
             </div>
           </div>
-          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Taxa de Conversão Master</h2>
-          <div className="flex items-baseline gap-4 relative z-10">
-            <span className="text-5xl font-black text-gradient-gold tracking-tighter">{winRate?.rate}%</span>
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Taxa de Conversão</h2>
+            <div className="text-3xl font-semibold text-text-primary mt-1 tracking-tight">{winRate?.rate}%</div>
           </div>
-          <div className="mt-8 grid grid-cols-2 gap-6 relative z-10">
-            <div className="p-4 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
-              <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-1">Ganhos Reais</p>
-              <p className="text-lg font-black text-emerald-500">{winRate?.won}</p>
+          <div className="flex items-center gap-4 text-xs mt-2 border-t border-border pt-4">
+            <div>
+              <span className="text-text-muted">Ganhos</span>
+              <p className="font-semibold text-success text-sm">{winRate?.won}</p>
             </div>
-            <div className="p-4 bg-background/50 rounded-2xl border border-border-subtle shadow-inner-platinum">
-              <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-1">Impacto Perda</p>
-              <p className="text-lg font-black text-red-500/60">{winRate?.lost}</p>
+            <div className="w-px h-8 bg-border" />
+            <div>
+              <span className="text-text-muted">Perdas</span>
+              <p className="font-semibold text-danger text-sm">{winRate?.lost}</p>
             </div>
           </div>
-          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-primary/5 blur-[50px] rounded-full group-hover:bg-primary/10 transition-all duration-700" />
         </div>
 
-        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="flex justify-between items-start mb-8 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
-              <DollarSign size={28} />
+        <div className="card p-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <DollarSign size={20} />
             </div>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Global Assets</span>
           </div>
-          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Volume Total Pipeline</h2>
-          <div className="flex items-baseline gap-2 relative z-10">
-            <span className="text-4xl font-black text-text-primary tracking-tighter group-hover:text-primary transition-colors">
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Volume no Funil</h2>
+            <div className="text-3xl font-semibold text-text-primary mt-1 tracking-tight">
               {formatCurrency(pipeline.reduce((acc, curr) => acc + curr.value, 0))}
-            </span>
+            </div>
           </div>
-          <p className="mt-8 text-[10px] text-text-secondary font-bold uppercase tracking-widest leading-relaxed opacity-60 italic border-l-2 border-secondary/30 pl-4">
-            Total bruto das oportunidades ativas em estágio de qualificação e análise RPA.
-          </p>
-          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-secondary/5 blur-[50px] rounded-full group-hover:bg-secondary/10 transition-all duration-700" />
+          <div className="mt-2 border-t border-border pt-4">
+            <p className="text-xs text-text-muted">
+              Total bruto das oportunidades ativas em estágio de qualificação.
+            </p>
+          </div>
         </div>
 
-        <div className="platinum-card p-10 group bg-surface-elevated/10 backdrop-blur-xl relative overflow-hidden">
-           <div className="flex justify-between items-start mb-8 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform duration-500 shadow-platinum-glow-sm">
-              <PieChart size={28} />
+        <div className="card p-6 flex flex-col gap-4">
+           <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center text-info">
+              <PieChart size={20} />
             </div>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Deep Intelligence</span>
           </div>
-          <h2 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-text-muted">Participações RPA Ativas</h2>
-          <div className="flex items-baseline gap-3 relative z-10">
-            <span className="text-5xl font-black text-text-primary tracking-tighter group-hover:text-accent transition-colors">
-              {pipeline.reduce((acc, curr) => acc + curr.count, 0)}
-            </span>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Oportunidades</span>
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Oportunidades Ativas</h2>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-3xl font-semibold text-text-primary tracking-tight">
+                {pipeline.reduce((acc, curr) => acc + curr.count, 0)}
+              </span>
+              <span className="text-sm text-text-muted font-medium">unid.</span>
+            </div>
           </div>
-          <div className="mt-10 flex items-center gap-2 relative z-10">
-             {pipeline.map((p, i) => (
-               <div key={i} className="h-2 rounded-full transition-all hover:h-4 cursor-help shadow-platinum-glow-sm" style={{ width: `${(p.count / pipeline.reduce((a,c) => a+c.count, 0)) * 100}%`, backgroundColor: p.color || '#6366f1' }} title={`${p.name}: ${p.count}`} />
-             ))}
+          <div className="mt-2 border-t border-border pt-4 flex flex-col justify-center">
+             <div className="flex items-center gap-1 w-full">
+               {pipeline.map((p, i) => (
+                 <div key={i} className="h-1.5 rounded-full transition-all bg-primary" style={{ width: `${(p.count / pipeline.reduce((a,c) => a+c.count, 0)) * 100}%`, opacity: 1 - (i * 0.15) }} title={`${p.name}: ${p.count}`} />
+               ))}
+             </div>
           </div>
-          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-accent/5 blur-[50px] rounded-full group-hover:bg-accent/10 transition-all duration-700" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
-          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-text-primary flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-            <div className="w-1.5 h-6 bg-primary rounded-full shadow-platinum-glow" />
-            Fluxo Neural por Etapa (Valuation)
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <div className="card p-6 flex flex-col">
+          <h3 className="text-sm font-semibold text-text-primary mb-6">
+            Evolução do Funil (Valuation)
           </h3>
-          <div className="h-96 w-full">
+          <div className="h-72 w-full mt-auto">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={pipeline} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-subtle)" opacity={0.5} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }} 
-                  dy={15}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} 
+                  dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
                   tickFormatter={(val) => `R$ ${(val/1000)}k`}
                 />
                 <Tooltip 
-                  cursor={{ stroke: '#2563eb', strokeWidth: 2 }}
+                  cursor={{ stroke: 'var(--color-border-hover)', strokeWidth: 1, strokeDasharray: '4 4' }}
                   contentStyle={{ 
-                    backgroundColor: 'var(--color-surface)', 
-                    border: '1px solid var(--color-border-medium)', 
-                    borderRadius: '24px',
-                    boxShadow: 'var(--shadow-platinum)',
-                    fontSize: '11px',
-                    fontWeight: 'black',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-text-primary)',
-                    padding: '16px'
+                    backgroundColor: 'var(--color-bg-secondary)', 
+                    border: '1px solid var(--color-border)', 
+                    borderRadius: '8px',
+                    boxShadow: 'var(--shadow-md)',
+                    fontSize: '12px',
+                    color: 'var(--color-text-primary)'
                   }} 
-                  itemStyle={{ color: 'var(--color-primary)' }}
-                  formatter={(value: number) => [formatCurrency(value), 'VALUATION']}
+                  itemStyle={{ color: 'var(--color-primary)', fontWeight: 600 }}
+                  formatter={(value: number) => [formatCurrency(value), 'Valuation']}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="url(#colorValue)" 
-                  strokeWidth={5}
+                  stroke="var(--color-primary)" 
+                  strokeWidth={2}
                   fillOpacity={1} 
                   fill="url(#colorValue)" 
-                  animationDuration={2000}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
-          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-text-primary flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-            <div className="w-1.5 h-6 bg-secondary rounded-full shadow-platinum-glow" />
-            Top Órgãos Licitantes (Target)
+        <div className="card p-6 flex flex-col">
+          <h3 className="text-sm font-semibold text-text-primary mb-6">
+            Top Órgãos Licitantes
           </h3>
-          <div className="h-96 w-full">
+          <div className="h-72 w-full mt-auto">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topOrgs} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--color-border-subtle)" opacity={0.5} />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--color-border)" opacity={0.5} />
                 <XAxis 
                   type="number" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--color-text-muted)', fontSize: 9, fontWeight: 900 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
                   tickFormatter={(val) => `R$ ${(val/1000)}k`}
-                  dy={15}
                 />
                 <YAxis 
                   dataKey="name" 
@@ -234,32 +270,28 @@ export default function Dashboard() {
                   axisLine={false} 
                   tickLine={false} 
                   width={140} 
-                  tick={{fontSize: 9, fill: 'var(--color-text-primary)', fontWeight: 900, textTransform: 'uppercase'}} 
+                  tick={{fontSize: 11, fill: 'var(--color-text-primary)'}} 
                 />
                 <Tooltip 
-                  cursor={{ fill: 'var(--color-surface-elevated)', opacity: 0.2 }}
+                  cursor={{ fill: 'var(--color-bg-tertiary)', opacity: 0.5 }}
                   contentStyle={{ 
-                    backgroundColor: 'var(--color-surface)', 
-                    border: '1px solid var(--color-border-medium)', 
-                    borderRadius: '24px',
-                    boxShadow: 'var(--shadow-platinum)',
-                    fontSize: '11px',
-                    fontWeight: 'black',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-text-primary)',
-                    padding: '16px'
+                    backgroundColor: 'var(--color-bg-secondary)', 
+                    border: '1px solid var(--color-border)', 
+                    borderRadius: '8px',
+                    boxShadow: 'var(--shadow-md)',
+                    fontSize: '12px',
+                    color: 'var(--color-text-primary)'
                   }}
-                  itemStyle={{ color: 'var(--color-secondary)' }}
-                  formatter={(value: number) => [formatCurrency(value), 'TOTAL OPPORTUNITY']}
+                  itemStyle={{ color: 'var(--color-primary)', fontWeight: 600 }}
+                  formatter={(value: number) => [formatCurrency(value), 'Oportunidade Total']}
                 />
                 <Bar 
                   dataKey="total_value" 
-                  radius={[0, 12, 12, 0]} 
-                  barSize={20}
-                  className="transition-all duration-500 cursor-pointer"
+                  radius={[0, 4, 4, 0]} 
+                  barSize={24}
                 >
                   {topOrgs.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 0 ? '#2563eb' : '#14b8a6'} fillOpacity={1 - index * 0.15} />
+                    <Cell key={`cell-${index}`} fill="var(--color-primary)" fillOpacity={1 - index * 0.15} />
                   ))}
                 </Bar>
               </BarChart>
@@ -267,6 +299,99 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Goal Modal */}
+      <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title="Definir Nova Meta Estratégica" size="md">
+        <form onSubmit={handleSaveGoal} className="space-y-6 p-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Tipo de Meta</label>
+              <select
+                value={goalForm.goal_type}
+                onChange={e => setGoalForm({ ...goalForm, goal_type: e.target.value })}
+                className="input"
+              >
+                <option value="global">Global (Empresa)</option>
+                <option value="user">Por Usuário</option>
+                <option value="supplier">Por Fornecedor</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">UF (opcional)</label>
+              <input
+                type="text"
+                value={goalForm.uf}
+                onChange={e => setGoalForm({ ...goalForm, uf: e.target.value.toUpperCase().slice(0, 2) })}
+                className="input"
+                placeholder="Ex: SP"
+                maxLength={2}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Mês</label>
+              <select
+                value={goalForm.month}
+                onChange={e => setGoalForm({ ...goalForm, month: parseInt(e.target.value) })}
+                className="input"
+              >
+                {months.map(m => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Ano</label>
+              <input
+                type="number"
+                value={goalForm.year}
+                onChange={e => setGoalForm({ ...goalForm, year: parseInt(e.target.value) })}
+                className="input"
+                min={2024}
+                max={2030}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Receita Alvo (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={goalForm.target_revenue}
+                onChange={e => setGoalForm({ ...goalForm, target_revenue: e.target.value })}
+                className="input"
+                placeholder="100000.00"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Vitórias Alvo</label>
+              <input
+                type="number"
+                value={goalForm.target_wins}
+                onChange={e => setGoalForm({ ...goalForm, target_wins: e.target.value })}
+                className="input"
+                placeholder="10"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsGoalModalOpen(false)} className="btn btn-outline">
+              Cancelar
+            </button>
+            <button type="submit" disabled={savingGoal} className="btn btn-primary flex items-center gap-2">
+              {savingGoal ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Salvar Meta
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

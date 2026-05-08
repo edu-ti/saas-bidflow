@@ -3,6 +3,7 @@ import { DollarSign, AlertTriangle, CheckCircle, Loader2, Search, Zap, Filter, A
 import api from '../../lib/axios';
 import type { DashboardStats, ConsignmentRecord } from './types';
 import { fmt, fmtDate, STATUS_LABELS, STATUS_COLORS_PLATINUM } from './types';
+import { Select } from '../ui/Select';
 
 interface Props {
   onOpenWizard: () => void;
@@ -67,20 +68,17 @@ export default function ConsignmentDashboard({
               className="w-full pl-16 pr-6 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
-          <div className="relative group min-w-[240px]">
-            <Filter size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none" />
-            <select
-              id="filter-status"
+          <div className="relative group min-w-[240px] z-20">
+            <Filter size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none z-10" />
+            <Select
               value={filterStatus}
-              onChange={e => onFilterChange(e.target.value)}
-              className="w-full pl-16 pr-12 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-            >
-              <option value="" className="bg-surface">Filtro de Estado</option>
-              {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                <option key={v} value={v} className="bg-surface font-black">{l.toUpperCase()}</option>
-              ))}
-            </select>
-            <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+              onChange={onFilterChange}
+              options={[
+                { value: '', label: 'Filtro de Estado' },
+                ...Object.entries(STATUS_LABELS).map(([v, l]) => ({ value: v, label: l.toUpperCase() }))
+              ]}
+              className="pl-14"
+            />
           </div>
         </div>
         <button

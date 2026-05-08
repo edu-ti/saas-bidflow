@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, Bell, Sun, Moon } from 'lucide-react';
 import type { Page } from './components/Sidebar';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -105,97 +106,313 @@ const hasPermission = (module?: string, page?: string, action: string = 'view') 
 };
 
 // Componente para rotas com permissão específica
-function PermissionRoute({ children, module, page }: { children: React.ReactNode, module: string, page: string }) {
-  if (!hasPermission(module, page, 'view')) {
+function PermissionRoute({ children, module, page, permission }: { 
+  children: React.ReactNode, 
+  module?: string, 
+  page?: string,
+  permission?: string 
+}) {
+  // Support legacy permission prop (treated as module)
+  const effectiveModule = permission || module || '';
+  const effectivePage = page || 'view';
+  
+  if (!hasPermission(effectiveModule, effectivePage, 'view')) {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
 }
 
-// Componente Topbar
+// Componente Topbar - Premium Design
 function Topbar({ title }: { title?: string }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { theme, toggleTheme, resolvedTheme } = useTheme();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   
   const getPageTitle = () => {
     if (title) return title;
     const path = location.pathname;
     const titles: Record<string, string> = {
-      '/': 'Dashboard Estratégico',
-      '/dashboard': 'Dashboard Estratégico',
-      '/company': 'Unidade de Negócio',
-      '/users': 'Equipe / Utilizadores',
-      '/reports': 'Relatórios & BI',
-      '/reports-dashboard': 'BI Inteligente',
+      '/': 'Dashboard',
+      '/dashboard': 'Dashboard',
+      '/company': 'Empresa',
+      '/users': 'Usuários',
+      '/reports': 'Relatórios',
+      '/reports-dashboard': 'BI',
       '/sales-funnel': 'Funil de Vendas',
-      '/leads': 'Gestão de Leads',
-      '/clients': 'Base de Clientes',
-      '/products': 'Catálogo de Produtos',
-      '/proposals': 'Propostas de Valor',
-      '/agenda': 'Agenda Integrada',
+      '/leads': 'Leads',
+      '/clients': 'Clientes',
+      '/products': 'Produtos',
+      '/proposals': 'Propostas',
+      '/agenda': 'Agenda',
       '/bidding-funnel': 'Funil de Licitações',
       '/bidding-hub': 'Hub de Licitações',
-      '/bidding-search': 'Encontrar Licitações',
+      '/bidding-search': 'Buscar Licitações',
       '/bidding-bulletin': 'Boletim de Licitações',
       '/bidding-manage': 'Gerenciar Licitações',
-      '/documents': 'Gerenciar Documentos',
+      '/documents': 'Documentos',
       '/legal-consultant': 'Consultor Jurídico',
-      '/chat-monitor': 'Monitorar Chat',
-      '/chat-monitor-settings': 'Configurações Monitoramento',
+      '/chat-monitor': 'Monitoramento',
+      '/chat-monitor-settings': 'Configurações Chat',
       '/market-analysis': 'Análise de Mercado',
-      '/competitor-analysis': 'Análise de Concorrentes',
+      '/competitor-analysis': 'Concorrentes',
       '/bidding-radar': 'Radar de Licitações',
-      '/bidding-monitoring': 'Monitoramento Ativo',
-      '/bidding-capture': 'Captação de Editais',
+      '/bidding-monitoring': 'Monitoramento',
+      '/bidding-capture': 'Captação',
       '/auction-details': 'Detalhes do Pregão',
       '/ai-generator': 'Gerador IA',
-      '/licenses': 'Licenças e Certidões',
-      '/consignment': 'Gestão de Consignação',
-      '/contracts': 'Contratos (CLM)',
-      '/inventory': 'Inventário',
-      '/campaigns': 'Marketing / Campanhas',
-      '/tasks': 'Plano de Ação',
-      '/finance': 'Motor Financeiro',
-      '/accounts-payable-receivable': 'Contas a Pagar / Receber',
-      '/chatbot': 'Construtor de Chatbot',
-      '/conversations': 'Central de Atendimento',
-      '/admin': 'Configurações da Empresa',
-      '/settings': 'Preferências do Sistema',
+      '/licenses': 'Licenças',
+      '/consignment': 'Consignação',
+      '/contracts': 'Contratos',
+      '/inventory': 'Estoque',
+      '/campaigns': 'Campanhas',
+      '/tasks': 'Tarefas',
+      '/finance': 'Financeiro',
+      '/accounts-payable-receivable': 'Contas',
+      '/chatbot': 'Chatbot',
+      '/conversations': 'Conversas',
+      '/admin': 'Administração',
+      '/settings': 'Configurações',
     };
     return titles[path] || 'Dashboard';
   };
 
+  // Fechar menus ao clicar fora
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const notifRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    if (showUserMenu || showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu, showNotifications]);
+
+  // Buscar notificações
+  const fetchNotifications = React.useCallback(async () => {
+    try {
+      const token = localStorage.getItem('api_token');
+      if (!token) return;
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/alerts`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.data || data || [];
+        setNotifications(items.slice(0, 20));
+        setUnreadCount(items.filter((n: any) => !n.is_read).length);
+      }
+    } catch {
+      // Silently fail - notifications are not critical
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      const token = localStorage.getItem('api_token');
+      if (!token) return;
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/alerts/mark-all-read`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch {
+      // Silently fail
+    }
+  };
+
+  const getNotifIcon = (type: string) => {
+    switch (type) {
+      case 'new_message': return '💬';
+      case 'new_bid': return '🔔';
+      case 'deadline': return '⏰';
+      case 'status_change': return '📋';
+      case 'win': return '🏆';
+      case 'loss': return '❌';
+      default: return '🔔';
+    }
+  };
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'agora';
+    if (mins < 60) return `${mins}min`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
+  };
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const handleLogout = () => {
+    localStorage.removeItem('api_token');
+    localStorage.removeItem('user');
+    setShowUserMenu(false);
+    navigate('/login');
+  };
+
   return (
-    <div className="h-20 bg-background/80 backdrop-blur-xl border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-40">
+    <header className="h-16 bg-bg-secondary/90 backdrop-blur-md border-b border-border flex items-center justify-between px-6 sticky top-0 z-40">
       <div className="flex items-center gap-6">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">
-            <span>Main</span>
+          <div className="flex items-center gap-2 text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-0.5">
+            <span>BidFlow</span>
             <span className="w-1 h-1 rounded-full bg-primary/40" />
-            <span className="text-primary/60 italic lowercase">v2.0 Platinum</span>
+            <span className="text-primary/60">SaaS</span>
           </div>
-          <h2 className="text-xl font-bold text-text-primary tracking-tight flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-text-primary tracking-tight">
             {getPageTitle()}
-            <span className="w-px h-4 bg-border-medium mx-1" />
           </h2>
         </div>
       </div>
       
-      <div className="flex items-center gap-6">
-        <div className="hidden md:flex flex-col items-end">
-          <span className="text-[10px] font-black text-primary uppercase tracking-widest">Acesso Seguro</span>
-          <span className="text-xs text-text-secondary font-medium">
-            {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
-          </span>
-        </div>
-        <div className="w-px h-8 bg-border-subtle" />
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-amber-600 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-          <button className="relative p-2 bg-surface rounded-full border border-border-subtle text-text-muted hover:text-text-primary transition-colors">
-            <Activity size={18} />
+      <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-all"
+        >
+          {resolvedTheme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+
+        {/* Notifications */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
+            className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-all relative"
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-danger text-white text-[10px] font-bold rounded-full px-1">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 top-full mt-2 w-96 bg-bg-secondary rounded-xl shadow-xl border border-border z-50 animate-fade-in overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <h3 className="text-sm font-semibold text-text-primary">Notificações</h3>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-xs text-primary hover:text-primary-hover font-medium transition-colors"
+                  >
+                    Marcar todas como lidas
+                  </button>
+                )}
+              </div>
+
+              {/* List */}
+              <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
+                {notifications.length > 0 ? (
+                  notifications.map((notif, idx) => (
+                    <div
+                      key={notif.id || idx}
+                      className={`flex items-start gap-3 px-4 py-3 border-b border-border/50 hover:bg-bg-tertiary transition-colors cursor-pointer ${
+                        !notif.is_read ? 'bg-primary/5' : ''
+                      }`}
+                    >
+                      <span className="text-lg mt-0.5 shrink-0">{getNotifIcon(notif.type)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm leading-snug ${!notif.is_read ? 'font-semibold text-text-primary' : 'text-text-secondary'}`}>
+                          {notif.content || notif.type || 'Nova notificação'}
+                        </p>
+                        <p className="text-xs text-text-muted mt-1">
+                          {notif.created_at ? timeAgo(notif.created_at) : ''}
+                        </p>
+                      </div>
+                      {!notif.is_read && (
+                        <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <Bell size={32} className="text-text-muted opacity-30" />
+                    <p className="text-sm text-text-muted">Nenhuma notificação</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              {notifications.length > 0 && (
+                <div className="border-t border-border px-4 py-2.5">
+                  <button
+                    onClick={() => { setShowNotifications(false); navigate('/settings'); }}
+                    className="w-full text-center text-xs font-medium text-primary hover:text-primary-hover transition-colors"
+                  >
+                    Ver todas as configurações de alertas
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="w-px h-6 bg-border" />
+
+        {/* User Menu */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-3 p-1.5 pr-3 rounded-lg hover:bg-bg-tertiary transition-all"
+          >
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
+              {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+            </div>
+            <div className="hidden md:block text-left">
+              <div className="text-sm font-medium text-text-primary">{user.name || 'Usuário'}</div>
+              <div className="text-xs text-text-secondary">{user.email || 'usuario@email.com'}</div>
+            </div>
+          </button>
+
+          {showUserMenu && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-bg-secondary rounded-lg shadow-lg border border-border py-1 z-50 animate-fade-in">
+              <button
+                onClick={() => { setShowUserMenu(false); navigate('/settings'); }}
+                className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+              >
+                Perfil
+              </button>
+              <button
+                onClick={() => { setShowUserMenu(false); navigate('/settings'); }}
+                className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+              >
+                Configurações
+              </button>
+              <div className="border-t border-border my-1" />
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-2 text-left text-sm text-danger hover:bg-danger/10 transition-colors"
+              >
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -257,7 +474,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage={getPageFromPath()}
-        onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
+        onNavigate={(page) => navigate(`/${page}`)}
         onLogout={handleLogout}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -284,7 +501,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage="dashboard"
-        onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
+        onNavigate={(page) => navigate(`/${page}`)}
         onLogout={handleLogout}
       />
       <div className="flex-1 flex flex-col overflow-hidden">

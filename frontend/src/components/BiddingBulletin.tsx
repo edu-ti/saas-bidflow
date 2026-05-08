@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   ChevronDown
 } from 'lucide-react';
+import { Select } from './ui/Select';
 
 interface BiddingResult {
   id: string;
@@ -130,6 +131,9 @@ function getDaysText(days: number) {
 export default function BiddingBulletin() {
   const navigate = useNavigate();
   const [favorited, setFavorited] = useState<Set<string>>(new Set());
+  const [situation, setSituation] = useState('');
+  const [state, setState] = useState('');
+  const [status, setStatus] = useState('');
 
   const today = new Date();
   const editionNumber = Math.floor(Math.random() * 900) + 100;
@@ -174,44 +178,54 @@ export default function BiddingBulletin() {
         </button>
       </header>
 
-      <div className="flex items-center gap-4 p-4 bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-2xl">
+      <div className="flex items-center gap-4 p-4 bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-2xl relative z-20">
         <div className="flex-1">
           <label className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Situação</label>
           <div className="relative">
-            <select className="w-full px-4 py-2.5 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer">
-              <option value="">Todas as situações</option>
-              <option value="nova">Nova</option>
-              <option value="retificacao">Retificação</option>
-              <option value="aberta">Aberta</option>
-              <option value="encerrada">Encerrada</option>
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+            <Select 
+              value={situation}
+              onChange={setSituation}
+              options={[
+                { value: '', label: 'Todas as situações' },
+                { value: 'nova', label: 'Nova' },
+                { value: 'retificacao', label: 'Retificação' },
+                { value: 'aberta', label: 'Aberta' },
+                { value: 'encerrada', label: 'Encerrada' }
+              ]}
+            />
           </div>
         </div>
         <div className="flex-1">
           <label className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Estados</label>
           <div className="relative">
-            <select className="w-full px-4 py-2.5 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer">
-              <option value="">Todos os estados</option>
-              <option value="SP">São Paulo</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="PR">Paraná</option>
-              <option value="DF">Distrito Federal</option>
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+            <Select 
+              value={state}
+              onChange={setState}
+              options={[
+                { value: '', label: 'Todos os estados' },
+                { value: 'SP', label: 'São Paulo' },
+                { value: 'RJ', label: 'Rio de Janeiro' },
+                { value: 'MG', label: 'Minas Gerais' },
+                { value: 'RS', label: 'Rio Grande do Sul' },
+                { value: 'PR', label: 'Paraná' },
+                { value: 'DF', label: 'Distrito Federal' }
+              ]}
+              searchable
+            />
           </div>
         </div>
         <div className="flex-1">
           <label className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Status</label>
           <div className="relative">
-            <select className="w-full px-4 py-2.5 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer">
-              <option value="">Todos os status</option>
-              <option value="urgente">Urgente</option>
-              <option value="normal">Normal</option>
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+            <Select 
+              value={status}
+              onChange={setStatus}
+              options={[
+                { value: '', label: 'Todos os status' },
+                { value: 'urgente', label: 'Urgente' },
+                { value: 'normal', label: 'Normal' }
+              ]}
+            />
           </div>
         </div>
       </div>

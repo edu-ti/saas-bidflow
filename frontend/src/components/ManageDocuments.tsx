@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Filter
 } from 'lucide-react';
+import { Select } from './ui/Select';
 
 interface Document {
   id: string;
@@ -103,7 +104,7 @@ export default function ManageDocuments() {
       </header>
 
       <div className="flex gap-8">
-        <aside className="w-72 flex-shrink-0 space-y-6">
+        <aside className="w-72 flex-shrink-0 space-y-6 relative z-20">
           <div className="bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-3xl p-6 space-y-6">
             <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -140,17 +141,16 @@ export default function ManageDocuments() {
                 Situação
               </label>
               <div className="relative">
-                <select
+                <Select
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  <option value="">Todas as situações</option>
-                  <option value="DISPONIVEL">Disponível</option>
-                  <option value="PENDENTE">Pendente</option>
-                  <option value="COLETANDO">Coletando</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                  onChange={setSelectedStatus}
+                  options={[
+                    { value: '', label: 'Todas as situações' },
+                    { value: 'DISPONIVEL', label: 'Disponível' },
+                    { value: 'PENDENTE', label: 'Pendente' },
+                    { value: 'COLETANDO', label: 'Coletando' }
+                  ]}
+                />
               </div>
             </div>
 
@@ -159,16 +159,15 @@ export default function ManageDocuments() {
                 Forma de Atualização
               </label>
               <div className="relative">
-                <select
+                <Select
                   value={selectedUpdateType}
-                  onChange={(e) => setSelectedUpdateType(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  <option value="">Todas</option>
-                  <option value="auto">Automática</option>
-                  <option value="manual">Manual</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                  onChange={setSelectedUpdateType}
+                  options={[
+                    { value: '', label: 'Todas' },
+                    { value: 'auto', label: 'Automática' },
+                    { value: 'manual', label: 'Manual' }
+                  ]}
+                />
               </div>
             </div>
           </div>

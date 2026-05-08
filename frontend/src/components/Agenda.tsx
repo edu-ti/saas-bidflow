@@ -8,6 +8,8 @@ import { Plus, Pencil, Trash2, X, Loader2, Save, Calendar as CalendarIcon, Clock
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
+import { DatePicker } from './ui/DatePicker';
+import { Select } from './ui/Select';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -216,7 +218,7 @@ export default function Agenda() {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'REFINAR COMPROMISSO' : 'NOVA DATA ESTRATÉGICA'} size="md">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'REFINAR COMPROMISSO' : 'NOVA DATA ESTRATÉGICA'} size="3xl">
         <form onSubmit={handleSubmit} className="space-y-8 p-2">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Título do Compromisso *</label>
@@ -236,21 +238,20 @@ export default function Agenda() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Início do Evento *</label>
-              <input
-                type="datetime-local"
-                value={formData.start_date}
-                onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all"
-                required
+              <DatePicker
+                selected={formData.start_date ? new Date(formData.start_date) : null}
+                onChange={date => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd'T'HH:mm") : '' })}
+                showTimeSelect
+                placeholderText="dd/mm/aaaa --:--"
               />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Conclusão Estimada</label>
-              <input
-                type="datetime-local"
-                value={formData.end_date}
-                onChange={e => setFormData({ ...formData, end_date: e.target.value })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all"
+              <DatePicker
+                selected={formData.end_date ? new Date(formData.end_date) : null}
+                onChange={date => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd'T'HH:mm") : '' })}
+                showTimeSelect
+                placeholderText="dd/mm/aaaa --:--"
               />
             </div>
           </div>
@@ -258,14 +259,14 @@ export default function Agenda() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Classificação</label>
-              <select
+              <Select
                 value={formData.type}
-                onChange={e => setFormData({ ...formData, type: e.target.value as 'event' | 'opportunity' })}
-                className="w-full px-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer"
-              >
-                <option value="event" className="bg-surface">Evento / Reunião (CRM)</option>
-                <option value="opportunity" className="bg-surface">Prazo / Edital (Strategic)</option>
-              </select>
+                onChange={v => setFormData({ ...formData, type: v as 'event' | 'opportunity' })}
+                options={[
+                  { value: 'event', label: 'Evento / Reunião (CRM)' },
+                  { value: 'opportunity', label: 'Prazo / Edital (Strategic)' }
+                ]}
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Localidade / Link</label>

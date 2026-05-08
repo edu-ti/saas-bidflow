@@ -26,7 +26,8 @@ export default function UnauthorizedPage() {
   const handleGoToPanel = () => {
     if (panel === 'master') {
       const masterDomain = import.meta.env.VITE_MASTER_DOMAIN || 'master.localhost';
-      window.location.href = window.location.protocol + '//' + masterDomain + '/dashboard';
+      const port = window.location.port ? ':' + window.location.port : '';
+      window.location.href = window.location.protocol + '//' + masterDomain + port + '/dashboard';
     } else {
       navigate('/dashboard');
     }

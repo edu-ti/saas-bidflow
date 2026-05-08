@@ -84,153 +84,149 @@ export default function BiddingMonitoring() {
   });
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Notificações de <span className="text-gradient-gold">Disputa</span>
+    <div className="space-y-8 animate-fade-in pb-8">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Notificações de Disputa
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <Inbox size={14} className="text-primary" />
+          <p className="text-text-secondary text-sm mt-1">
             Caixa de entrada consolidada das mensagens dos pregoeiros em tempo real.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="bg-red-500/10 border border-red-500/20 px-8 py-4 rounded-2xl flex items-center gap-6 shadow-platinum-glow-sm backdrop-blur-xl">
-              <div className="w-3 h-3 rounded-full bg-red-500 animate-ping shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 opacity-80">Atenção Requerida</p>
-                <p className="text-xs font-black text-text-primary uppercase tracking-tight mt-1">
-                  {messages.filter(m => m.urgency === 'high' && !m.isRead).length} Alertas Críticos
-                </p>
-              </div>
-           </div>
+        <div className="flex items-center gap-3 bg-danger/10 border border-danger/20 px-4 py-2 rounded-xl">
+          <div className="w-2 h-2 rounded-full bg-danger animate-ping" />
+          <div>
+            <p className="text-xs font-semibold text-danger">
+              {messages.filter(m => m.urgency === 'high' && !m.isRead).length} Alertas Críticos
+            </p>
+          </div>
         </div>
       </header>
 
       {/* Control Panel */}
-      <div className="platinum-card p-4 flex flex-col md:flex-row gap-4 items-center justify-between bg-surface-elevated/10 backdrop-blur-xl">
+      <div className="card p-3 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button 
             onClick={() => setFilter('all')}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-primary text-background shadow-platinum-glow' : 'text-text-muted hover:bg-surface-elevated hover:text-text-primary'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${filter === 'all' ? 'bg-primary text-white' : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'}`}
           >
             Todas as Mensagens
           </button>
           <button 
             onClick={() => setFilter('unread')}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'unread' ? 'bg-primary text-background shadow-platinum-glow' : 'text-text-muted hover:bg-surface-elevated hover:text-text-primary'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${filter === 'unread' ? 'bg-primary text-white' : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'}`}
           >
             Não Lidas
           </button>
           <button 
             onClick={() => setFilter('urgent')}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${filter === 'urgent' ? 'bg-red-500 text-background shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'text-text-muted hover:bg-red-500/10 hover:text-red-500'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition-colors ${filter === 'urgent' ? 'bg-danger text-white' : 'text-text-secondary hover:bg-danger/10 hover:text-danger'}`}
           >
-            <ShieldAlert size={12} /> Urgentes
+            <ShieldAlert size={14} /> Urgentes
           </button>
         </div>
 
         <div className="relative w-full md:w-80 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4 group-focus-within:text-primary transition-colors" />
           <input
             type="text"
             placeholder="Buscar por pregão ou mensagem..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-background/50 border border-border-medium rounded-xl text-xs font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
+            className="input w-full pl-9"
           />
         </div>
       </div>
 
       {/* Inbox Feed */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {loading ? (
-          <div className="py-32 text-center opacity-40 space-y-6">
-             <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" /> 
-             <span className="text-[10px] font-black uppercase tracking-[0.5em]">Sincronizando Chats dos Portais...</span>
+          <div className="py-24 text-center opacity-40 space-y-4 flex flex-col items-center justify-center">
+             <Loader2 className="w-8 h-8 animate-spin text-primary" /> 
+             <span className="text-sm font-medium">Sincronizando Chats dos Portais...</span>
           </div>
         ) : filteredMessages.length === 0 ? (
-          <div className="py-32 text-center opacity-40 space-y-6">
-             <CheckCircle2 className="w-16 h-16 mx-auto text-emerald-500" />
+          <div className="py-24 text-center opacity-60 space-y-4 flex flex-col items-center justify-center">
+             <CheckCircle2 className="w-12 h-12 text-success" />
              <div>
-               <p className="text-sm font-black uppercase tracking-[0.2em] text-text-primary">Inbox Zerada</p>
-               <p className="text-[10px] font-black uppercase tracking-[0.4em] mt-2">Nenhuma notificação atende aos filtros atuais.</p>
+               <p className="text-base font-semibold text-text-primary">Inbox Zerada</p>
+               <p className="text-sm mt-1 text-text-secondary">Nenhuma notificação atende aos filtros atuais.</p>
              </div>
           </div>
         ) : (
           filteredMessages.map(msg => (
             <div 
               key={msg.id} 
-              className={`group flex flex-col md:flex-row gap-6 p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
+              className={`group flex flex-col md:flex-row gap-4 p-4 md:p-5 rounded-xl border transition-all duration-300 relative overflow-hidden ${
                 !msg.isRead 
-                  ? 'bg-surface-elevated/40 border-primary/30 shadow-platinum-glow-sm cursor-pointer hover:bg-surface-elevated/60' 
-                  : 'bg-surface border-border-subtle opacity-70 hover:opacity-100 hover:border-primary/20'
+                  ? 'bg-bg-secondary border-primary/20 shadow-sm cursor-pointer hover:border-primary/40' 
+                  : 'bg-bg-tertiary border-border opacity-80 hover:opacity-100'
               }`}
               onClick={() => markAsRead(msg.id)}
             >
               {/* Unread Indicator */}
               {!msg.isRead && (
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary shadow-platinum-glow" />
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               )}
 
               {/* Status Icon */}
-              <div className="hidden md:flex shrink-0 items-start justify-center pt-2">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center border shadow-platinum-glow-sm ${
-                  msg.urgency === 'high' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                  msg.urgency === 'medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
-                  'bg-blue-500/10 border-blue-500/20 text-blue-500'
+              <div className="hidden md:flex shrink-0 items-start justify-center pt-1 pl-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
+                  msg.urgency === 'high' ? 'bg-danger/10 border-danger/20 text-danger' :
+                  msg.urgency === 'medium' ? 'bg-warning/10 border-warning/20 text-warning' :
+                  'bg-info/10 border-info/20 text-info'
                 }`}>
-                  {msg.urgency === 'high' ? <AlertCircle size={20} /> :
-                   msg.urgency === 'medium' ? <Clock size={20} /> :
-                   <MessageSquare size={20} />}
+                  {msg.urgency === 'high' ? <AlertCircle size={18} /> :
+                   msg.urgency === 'medium' ? <Clock size={18} /> :
+                   <MessageSquare size={18} />}
                 </div>
               </div>
 
               {/* Message Content */}
-              <div className="flex-1 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                   <div className="flex items-center gap-3">
-                     <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg border shadow-inner-platinum ${
-                        msg.urgency === 'high' ? 'bg-red-500/10 border-red-500/30 text-red-500' :
-                        msg.urgency === 'medium' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' :
-                        'bg-surface-elevated/50 border-border-subtle text-text-muted'
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                   <div className="flex items-center gap-2">
+                     <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                        msg.urgency === 'high' ? 'bg-danger/10 border-danger/20 text-danger' :
+                        msg.urgency === 'medium' ? 'bg-warning/10 border-warning/20 text-warning' :
+                        'bg-bg-tertiary border-border text-text-secondary'
                      }`}>
                         {msg.urgency === 'high' ? 'Ação Requerida' : msg.urgency === 'medium' ? 'Aviso Importante' : 'Informativo'}
                      </span>
-                     <span className="text-[10px] font-black uppercase tracking-widest text-text-muted opacity-80 flex items-center gap-1.5">
+                     <span className="text-xs font-medium text-text-muted flex items-center gap-1.5">
                        <Clock size={12} /> {msg.timestamp}
                      </span>
                    </div>
                    
-                   <div className="flex items-center gap-2 px-3 py-1 bg-surface-elevated/30 border border-border-subtle rounded-xl text-[10px] font-black uppercase tracking-widest">
-                     <span className="opacity-60">Portal:</span>
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-bg-tertiary border border-border rounded text-[10px] font-semibold uppercase">
+                     <span className="text-text-muted">Portal:</span>
                      <span className="text-primary">{msg.portal}</span>
                    </div>
                 </div>
 
                 <div>
-                  <h3 className="text-base font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
+                  <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
                     {msg.processNumber}
                     {msg.position && (
-                      <span className="inline-flex items-center gap-1.5 text-[10px] text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-lg">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
                         <Award size={12} /> {msg.position}
                       </span>
                     )}
                   </h3>
-                  <p className={`mt-3 text-sm font-medium leading-relaxed max-w-4xl ${!msg.isRead ? 'text-text-primary' : 'text-text-secondary'}`}>
+                  <p className={`mt-1.5 text-sm leading-relaxed max-w-4xl ${!msg.isRead ? 'text-text-primary font-medium' : 'text-text-secondary'}`}>
                     "{msg.messageSnippet}"
                   </p>
                 </div>
               </div>
 
               {/* Action Button */}
-              <div className="shrink-0 flex items-center md:items-end justify-start md:justify-center md:pl-6 md:border-l border-border-subtle/30">
+              <div className="shrink-0 flex items-center md:items-start justify-end md:pl-4">
                 <button 
                   onClick={(e) => { e.stopPropagation(); navigate('/auction-details?id=1'); }}
-                  className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-4 bg-background border border-border-subtle rounded-xl text-[10px] font-black text-text-primary hover:text-primary hover:border-primary/40 hover:bg-surface transition-all uppercase tracking-widest shadow-inner-platinum group-hover:scale-105"
+                  className="btn btn-outline py-1.5 px-3 flex items-center gap-2 text-xs"
                 >
-                  <ExternalLink size={14} className="text-primary" /> Abrir Chat
+                  <ExternalLink size={14} /> Abrir
                 </button>
               </div>
             </div>

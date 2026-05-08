@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
+import { Select } from './ui/Select';
 
 interface EmailCampaign {
   id: number;
@@ -28,7 +29,7 @@ interface Lead {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-surface-elevated/40 text-text-muted border-border-subtle/30',
+  draft: 'bg-bg-secondary/40 text-text-muted border-border-subtle/30',
   scheduled: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
   sending: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   sent: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
@@ -195,8 +196,8 @@ export default function EmailMarketing() {
         </button>
       </header>
 
-      <div className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
-        <div className="p-8 bg-surface-elevated/20 border-b border-border-subtle/30 flex flex-wrap gap-6 items-center">
+      <div className="platinum-card overflow-hidden bg-bg-secondary/10 backdrop-blur-md border-border-subtle/30 shadow-platinum-glow-sm">
+        <div className="p-8 bg-bg-secondary/20 border-b border-border-subtle/30 flex flex-wrap gap-6 items-center">
           <div className="relative flex-1 min-w-[320px] group">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-primary transition-colors" />
             <input
@@ -207,25 +208,25 @@ export default function EmailMarketing() {
               className="w-full pl-16 pr-6 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 shadow-inner-platinum"
             />
           </div>
-          <div className="relative group min-w-[240px]">
-             <Target size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none" />
-            <select
+          <div className="relative group min-w-[240px] z-20">
+             <Target size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none z-10" />
+            <Select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full pl-16 pr-12 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-            >
-              <option value="" className="bg-surface font-black">Estado: Todos</option>
-              <option value="draft" className="bg-surface font-black">Rascunhos</option>
-              <option value="scheduled" className="bg-surface font-black">Agendadas</option>
-              <option value="sent" className="bg-surface font-black">Concluídas</option>
-            </select>
-            <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+              onChange={setFilterStatus}
+              options={[
+                { value: '', label: 'Estado: Todos' },
+                { value: 'draft', label: 'Rascunhos' },
+                { value: 'scheduled', label: 'Agendadas' },
+                { value: 'sent', label: 'Concluídas' }
+              ]}
+              className="pl-14"
+            />
           </div>
         </div>
 
         <div className="overflow-x-auto scrollbar-platinum">
           <table className="w-full text-left text-sm">
-            <thead className="bg-surface-elevated/40 border-b border-border-subtle">
+            <thead className="bg-bg-secondary/40 border-b border-border-subtle">
               <tr>
                 <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Identificação Neural</th>
                 <th className="px-10 py-6 font-black uppercase text-[10px] tracking-[0.4em] text-text-muted opacity-60">Engajamento de Base</th>
@@ -241,7 +242,7 @@ export default function EmailMarketing() {
                 <tr><td colSpan={5} className="px-10 py-40 text-center text-text-muted uppercase text-[10px] font-black tracking-widest opacity-40">Nenhuma campanha orquestrada no grid</td></tr>
               ) : (
                 campaigns.map(campaign => (
-                  <tr key={campaign.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-500">
+                  <tr key={campaign.id} className="hover:bg-bg-secondary/20 transition-all group border-b border-border-subtle/10 duration-500">
                     <td className="px-10 py-10 space-y-3">
                       <div className="font-black text-text-primary group-hover:text-primary transition-colors uppercase tracking-tight text-sm">{campaign.name}</div>
                       <div className="text-[10px] text-text-muted font-black uppercase tracking-widest opacity-60 flex items-center gap-2">
@@ -275,7 +276,7 @@ export default function EmailMarketing() {
                     </td>
                     <td className="px-10 py-10 text-right">
                       <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                        <button onClick={() => handleOpenCompose(campaign)} className="p-3 bg-surface-elevated/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Refinar"><Edit2 size={18} /></button>
+                        <button onClick={() => handleOpenCompose(campaign)} className="p-3 bg-bg-secondary/40 border border-border-subtle rounded-xl text-text-muted hover:text-primary transition-all shadow-inner-platinum" title="Refinar"><Edit2 size={18} /></button>
                         {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
                           <button onClick={() => handleSendCampaign(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl text-primary hover:bg-primary hover:text-white transition-all shadow-platinum-glow-sm" title="Disparar"><Send size={18} /></button>
                         )}
@@ -291,9 +292,9 @@ export default function EmailMarketing() {
       </div>
 
       {showComposeModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-500">
-          <div className="bg-surface-elevated border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
-            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle/30 bg-surface-elevated/20">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-500">
+          <div className="bg-bg-secondary border border-border-subtle/30 rounded-[2.5rem] shadow-platinum-glow w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-500">
+            <div className="flex justify-between items-center px-10 py-8 border-b border-border-subtle/30 bg-bg-secondary/20">
               <div className="space-y-1">
                 <h2 className="text-sm font-black text-text-primary uppercase tracking-[0.4em]">
                   {editingCampaign ? 'REFINAR ESTRATÉGIA DE CAMPANHA' : 'ORQUESTRAR NOVA TRANSMISSÃO NEURAL'}
@@ -302,7 +303,7 @@ export default function EmailMarketing() {
                   <Lock size={14} className="text-primary" /> Multi-Channel Strategic Engine Active
                 </div>
               </div>
-              <button onClick={() => setShowComposeModal(false)} className="p-4 bg-surface-elevated/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum"><X size={24} /></button>
+              <button onClick={() => setShowComposeModal(false)} className="p-4 bg-bg-secondary/40 border border-border-subtle rounded-2xl text-text-muted hover:text-text-primary transition-all shadow-inner-platinum"><X size={24} /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-10 scrollbar-platinum">
@@ -413,7 +414,7 @@ export default function EmailMarketing() {
               </div>
             </div>
 
-            <div className="flex justify-end items-center gap-8 p-10 border-t border-border-subtle/30 bg-surface-elevated/20">
+            <div className="flex justify-end items-center gap-8 p-10 border-t border-border-subtle/30 bg-bg-secondary/20">
               <button
                 onClick={() => setShowComposeModal(false)}
                 className="text-[11px] font-black text-text-muted hover:text-text-primary uppercase tracking-[0.4em] transition-all"

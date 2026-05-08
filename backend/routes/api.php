@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
     Route::middleware('feature:bidding')->group(function () {
         Route::get('/alerts', [AlertController::class, 'index']);
         Route::post('/alerts', [AlertController::class, 'store']);
+        Route::patch('/alerts/mark-all-read', [AlertController::class, 'markAllRead']);
         Route::post('/alerts/{id}/qualify', [\App\Http\Controllers\OpportunityController::class, 'qualify']);
     });
     

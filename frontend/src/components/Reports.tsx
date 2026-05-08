@@ -6,6 +6,7 @@ import {
 import { Download, Calendar, TrendingUp, TrendingDown, Award, XCircle, Clock, DollarSign, Target, Users, Briefcase, ShoppingCart, BarChart3, Loader2, Sparkles, ChevronRight, PieChart as PieChartIcon, Layout } from 'lucide-react';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
+import { Select } from './ui/Select';
 
 // Reports Analysis Engine
 
@@ -137,7 +138,7 @@ export default function Reports() {
 
   return (
     <div className="p-8 min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-20">
         <div className="space-y-1">
           <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
             Relatórios & <span className="text-gradient-gold">Business Intelligence</span>
@@ -149,18 +150,18 @@ export default function Reports() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 bg-surface-elevated/20 border border-border-subtle p-2 rounded-2xl shadow-platinum-glow-sm backdrop-blur-md">
-            <Calendar size={14} className="text-primary ml-3" />
-            <select 
+          <div className="flex items-center gap-3">
+            <Select 
               value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="bg-transparent text-[10px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer pr-4 hover:text-primary transition-colors"
-            >
-              <option value="month" className="bg-surface text-text-primary">Este Mês Atual</option>
-              <option value="quarter" className="bg-surface text-text-primary">Este Trimestre Fiscal</option>
-              <option value="year" className="bg-surface text-text-primary">Este Ano Fiscal</option>
-              <option value="all" className="bg-surface text-text-primary">Todo o Período Histórico</option>
-            </select>
+              onChange={setDateRange}
+              options={[
+                { value: 'month', label: 'Este Mês Atual' },
+                { value: 'quarter', label: 'Este Trimestre Fiscal' },
+                { value: 'year', label: 'Este Ano Fiscal' },
+                { value: 'all', label: 'Todo o Período Histórico' }
+              ]}
+              className="w-64 shadow-platinum-glow-sm"
+            />
           </div>
           
           <button 

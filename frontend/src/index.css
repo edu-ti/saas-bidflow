@@ -1,149 +1,468 @@
 @import "tailwindcss";
 
-:root {
-  /* Core Brand Palette - BidFlow Identity */
-  --color-primary: #6366f1; /* Indigo */
-  --color-primary-rgb: 99, 102, 241;
-  --color-secondary: #14b8a6; /* Teal */
-  --color-secondary-rgb: 20, 184, 166;
-  --color-accent: #8b5cf6; /* Violet */
-  --color-accent-rgb: 139, 92, 246;
+/* ============================================
+   DESIGN SYSTEM TOKENS - SaaS Premium
+   Inspired by Linear, Stripe, Vercel, shadcn/ui
+   ============================================ */
 
-  /* Semantic - Light Mode (Flow Light) */
-  --color-background: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-elevated: #f1f5f9;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #334155;
-  --color-text-muted: #475569;
-  --color-border-subtle: #e2e8f0;
-  --color-border-medium: #cbd5e1;
-  --color-border-strong: #64748b;
-  
-  /* Gradients - Digital Flow */
-  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
-  --shadow-platinum: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
-  --shadow-platinum-glow: 0 0 20px rgba(99, 102, 241, 0.2);
-}
-
-.dark {
-  /* Semantic - Dark Mode (Flow Deep) */
-  --color-background: #020617;
-  --color-surface: #0f172a;
-  --color-surface-elevated: #1e293b;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #94a3b8;
-  --color-border-subtle: #1e293b;
-  --color-border-medium: #334155;
-  --color-border-strong: #64748b;
-
-  /* Gradients - Digital Flow Dark */
-  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
-  --shadow-platinum: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
-  --shadow-platinum-glow: 0 0 30px rgba(99, 102, 241, 0.15);
-}
-
-@theme {
-  --color-background: var(--color-background);
-  --color-surface: var(--color-surface);
-  --color-surface-elevated: var(--color-surface-elevated);
-  --color-primary: var(--color-primary);
-  --color-secondary: var(--color-secondary);
-  --color-accent: var(--color-accent);
-  
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-muted: var(--color-text-muted);
-  
-  --color-border-subtle: var(--color-border-subtle);
-  --color-border-medium: var(--color-border-medium);
-  
-  --shadow-platinum: var(--shadow-platinum);
-  --shadow-platinum-glow: var(--shadow-platinum-glow);
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
-  body {
-    @apply bg-background text-text-primary antialiased selection:bg-primary/30 selection:text-primary transition-colors duration-300;
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
+  :root {
+    /* ============================================
+       LIGHT MODE
+       ============================================ */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --bg-elevated: #ffffff;
+    --bg-subtle: #f8fafc;
+    --bg-canvas: #f1f5f9;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+    --text-link: #2563eb;
+    
+    --primary: #3B28F5;
+    --primary-hover: #2F20C4;
+    --primary-light: #EEF2FF;
+    --primary-dark: #20168A;
+    --primary-foreground: #ffffff;
+    
+    --accent: #1DC998;
+    --accent-hover: #159C75;
+    --accent-light: #E6FAF4;
+    
+    --success: #10b981;
+    --success-hover: #059669;
+    --success-light: #ecfdf5;
+    --success-foreground: #ffffff;
+    
+    --warning: #f59e0b;
+    --warning-hover: #d97706;
+    --warning-light: #fffbeb;
+    --warning-foreground: #ffffff;
+    
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-light: #fef2f2;
+    --danger-foreground: #ffffff;
+    
+    --info: #0ea5e9;
+    --info-hover: #0284c7;
+    --info-light: #f0f9ff;
+    --info-foreground: #ffffff;
+    
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --border-focus: #3B28F5;
+    --border-subtle: #f1f5f9;
+    --border-muted: #f8fafc;
+    
+    /* Premium Shadows */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    --shadow-glow: 0 0 20px rgb(37 99 235 / 0.15);
+    
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    --sidebar-width: 260px;
+    --sidebar-collapsed: 72px;
   }
 
-  h1, h2, h3, h4 {
-    @apply font-black tracking-tighter text-text-primary uppercase;
-    line-height: 1.1;
+  .dark {
+    /* ============================================
+       DARK MODE
+       ============================================ */
+    --bg-primary: #0A0D16;
+    --bg-secondary: #121522;
+    --bg-tertiary: #1C2134;
+    --bg-elevated: #121522;
+    --bg-subtle: #0A0D16;
+    --bg-canvas: #0A0D16;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #020617;
+    --text-link: #60a5fa;
+    
+    --primary: #5A47F7;
+    --primary-hover: #7566F9;
+    --primary-light: #24205B;
+    --primary-dark: #ffffff;
+    --primary-foreground: #ffffff;
+    
+    --accent: #1DC998;
+    --accent-hover: #36D1A6;
+    --accent-light: #124033;
+    
+    --success: #10b981;
+    --success-hover: #34d399;
+    --success-light: #064e3b;
+    --success-foreground: #ffffff;
+    
+    --warning: #f59e0b;
+    --warning-hover: #fbbf24;
+    --warning-light: #451a03;
+    --warning-foreground: #ffffff;
+    
+    --danger: #ef4444;
+    --danger-hover: #f87171;
+    --danger-light: #450a0a;
+    --danger-foreground: #ffffff;
+    
+    --info: #0ea5e9;
+    --info-hover: #38bdf8;
+    --info-light: #0c4a6e;
+    --info-foreground: #ffffff;
+    
+    --border: #23283E;
+    --border-hover: #2D334E;
+    --border-focus: #5A47F7;
+    --border-subtle: #121522;
+    --border-muted: #0A0D16;
+    
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+    --shadow-glow: 0 0 20px rgb(59 130 246 / 0.2);
   }
 
   * {
-    @apply border-border-subtle;
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   ::-webkit-scrollbar {
-    @apply w-1.5 h-1.5;
+    width: 6px;
+    height: 6px;
   }
-
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-primary;
   }
 }
 
 @layer components {
-  .platinum-card {
-    @apply bg-surface/50 backdrop-blur-xl border border-border-subtle rounded-[2.5rem] transition-all duration-500;
-    box-shadow: var(--shadow-platinum);
+  /* ============================================
+     COMPONENTES PREMIUM
+     ============================================ */
+  
+  .card {
+    @apply bg-bg-secondary rounded-xl border border-border shadow-sm transition-all duration-200;
   }
-
-  .platinum-card:hover {
-    @apply border-primary/30 bg-surface/70 translate-y-[-4px];
-    box-shadow: var(--shadow-platinum-glow);
+  .card-hover {
+    @apply hover:shadow-md hover:border-border-hover cursor-pointer;
   }
-
+  .card-elevated {
+    @apply shadow-lg;
+  }
+  
+  .glass {
+    @apply bg-bg-secondary/70 backdrop-blur-xl border border-border/50;
+  }
+  
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-bg-primary disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+  }
   .btn-primary {
-    @apply flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-black rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 uppercase text-[10px] tracking-[0.3em];
-    box-shadow: var(--shadow-platinum-glow);
+    @apply bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm;
   }
-  .btn-primary:hover {
-    @apply scale-[1.02];
-    box-shadow: var(--shadow-platinum);
+  .btn-secondary {
+    @apply bg-bg-tertiary text-text-primary hover:bg-border border border-border;
   }
-
-  .text-gradient-gold {
-    @apply bg-gradient-to-r from-[#2563eb] via-[#8b5cf6] to-[#14b8a6] bg-clip-text text-transparent;
-    background-size: 200% auto;
-    animation: flowGradient 5s linear infinite;
+  .btn-outline {
+    @apply border border-border text-text-secondary hover:bg-bg-tertiary hover:text-text-primary;
   }
-
-  .shadow-platinum-glow {
-    box-shadow: var(--shadow-platinum-glow);
+  .btn-ghost {
+    @apply text-text-secondary hover:bg-bg-tertiary hover:text-text-primary;
   }
-
-  .shadow-inner-platinum {
-    @apply shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)];
+  .btn-danger {
+    @apply bg-danger text-danger-foreground hover:bg-danger-hover;
   }
-
-  .dark .shadow-inner-platinum {
-    @apply shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)];
+  
+  .input {
+    @apply w-full px-3 py-2 rounded-lg bg-bg-primary border border-border text-text-primary text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .input-error {
+    @apply border-danger focus:ring-danger/20 focus:border-danger;
+  }
+  
+  .table-container {
+    @apply w-full overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-sm;
+  }
+  .table {
+    @apply w-full text-sm text-left;
+  }
+  .table th {
+    @apply px-4 py-3 font-medium text-text-secondary bg-bg-tertiary/50 border-b border-border;
+  }
+  .table td {
+    @apply px-4 py-3 text-text-primary border-b border-border/50;
+  }
+  .table tr:last-child td {
+    @apply border-b-0;
+  }
+  .table tr:hover td {
+    @apply bg-bg-tertiary/30;
+  }
+  
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border;
+  }
+  .badge-default {
+    @apply bg-bg-tertiary text-text-secondary border-border;
+  }
+  .badge-primary {
+    @apply bg-primary-light text-primary border-primary-light;
+  }
+  .badge-success {
+    @apply bg-success-light text-success border-success-light;
+  }
+  .badge-warning {
+    @apply bg-warning-light text-warning border-warning-light;
+  }
+  .badge-danger {
+    @apply bg-danger-light text-danger border-danger-light;
+  }
+  .badge-info {
+    @apply bg-info-light text-info border-info-light;
+  }
+  
+  .modal-overlay {
+    @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in;
+  }
+  .modal-content {
+    @apply bg-bg-secondary rounded-xl shadow-xl border border-border max-w-lg w-full mx-4 p-6 animate-scale-in;
+  }
+  
+  .dropdown {
+    @apply absolute z-50 mt-2 py-1 min-w-[200px] bg-bg-secondary rounded-lg shadow-lg border border-border animate-fade-in-up;
+  }
+  .dropdown-item {
+    @apply flex items-center gap-3 px-3 py-2 mx-1 rounded-md text-sm text-text-secondary transition-colors duration-150 hover:bg-bg-tertiary hover:text-text-primary cursor-pointer;
+  }
+  
+  .skeleton {
+    @apply bg-border rounded animate-pulse;
   }
 }
 
-@keyframes flowGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-info;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px;
+  }
 }
 
-.animate-shimmer {
-  animation: shimmer 3s infinite linear;
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-canvas: var(--bg-canvas);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-link: var(--text-link);
+  
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+  --color-success-light: var(--success-light);
+  --color-success-foreground: var(--success-foreground);
+  
+  --color-warning: var(--warning);
+  --color-warning-hover: var(--warning-hover);
+  --color-warning-light: var(--warning-light);
+  --color-warning-foreground: var(--warning-foreground);
+  
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-light: var(--danger-light);
+  --color-danger-foreground: var(--danger-foreground);
+  
+  --color-info: var(--info);
+  --color-info-hover: var(--info-hover);
+  --color-info-light: var(--info-light);
+  --color-info-foreground: var(--info-foreground);
+  
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-border-focus: var(--border-focus);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-muted: var(--border-muted);
+
+  --animate-fade-in: fadeIn 200ms ease-out;
+  --animate-fade-in-up: fadeInUp 200ms ease-out;
+  --animate-scale-in: scaleIn 200ms ease-out;
+  --animate-slide-in-left: slideInLeft 200ms ease-out;
+  --animate-slide-in-right: slideInRight 200ms ease-out;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
+
+/* ============================================
+   REACT-DATEPICKER PREMIUM OVERRIDES
+   ============================================ */
+.react-datepicker-wrapper {
+  @apply !w-full;
+}
+
+.react-datepicker-popper {
+  z-index: 100 !important;
+}
+
+.react-datepicker__input-container {
+  @apply !w-full;
+}
+
+.react-datepicker {
+  @apply !bg-bg-secondary !border !border-border !shadow-2xl !shadow-primary/10 !font-sans !rounded-2xl !text-text-primary !flex !flex-row;
+}
+
+.react-datepicker__header {
+  @apply !bg-bg-tertiary !border-b !border-border !rounded-t-2xl !text-text-primary !pt-3 !pb-2;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker-time__header, 
+.react-datepicker-year-header {
+  @apply !text-text-primary !font-black !uppercase !tracking-widest text-[11px] !mb-2;
+}
+
+.react-datepicker__day-names,
+.react-datepicker__week {
+  @apply !flex !flex-row !justify-center;
+}
+
+.react-datepicker__day-name {
+  @apply !text-text-muted !font-black !uppercase !tracking-widest text-[9px] !w-8 !inline-block !text-center !m-1;
+}
+
+.react-datepicker__day, 
+.react-datepicker__time-name {
+  @apply !text-text-primary hover:!bg-bg-tertiary hover:!text-primary !rounded-xl !transition-all !font-bold !text-xs !w-8 !h-8 !flex !items-center !justify-center !m-1;
+}
+
+.react-datepicker__day--outside-month {
+  @apply !text-text-muted !opacity-40 hover:!bg-transparent hover:!text-text-muted;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply !bg-primary/20 !text-primary;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--in-selecting-range, 
+.react-datepicker__day--in-range {
+  @apply !bg-primary !text-primary-foreground !font-black hover:!bg-primary-hover !shadow-lg !shadow-primary/30;
+}
+
+.react-datepicker__time-container {
+  @apply !border-l !border-border !bg-bg-secondary !rounded-r-2xl !w-[100px] !flex !flex-col;
+}
+
+.react-datepicker__time-container .react-datepicker__time {
+  @apply !bg-bg-secondary !text-text-primary !rounded-r-2xl;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+  @apply !w-full !rounded-r-2xl;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
+  @apply !overflow-y-auto;
+  max-height: 250px !important;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  @apply !text-xs !font-bold !transition-colors hover:!bg-bg-tertiary hover:!text-primary !rounded-lg !mx-1;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  @apply !bg-primary !text-primary-foreground !font-black hover:!bg-primary-hover !shadow-lg !shadow-primary/30;
+}
+
+/* Setinhas (Navigation) */
+.react-datepicker__navigation-icon::before {
+  @apply !border-text-muted !transition-colors;
+}
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  @apply !border-primary;
+}
+
+/* Seta Superior (Triangle) */
+.react-datepicker__triangle {
+  display: none !important;
 }

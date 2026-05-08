@@ -33,12 +33,13 @@ class DatabaseSeeder extends Seeder
         //  2. Admin User
         // ─────────────────────────────────────
         $user = User::withoutGlobalScopes()->create([
-            'company_id' => $company->id,
-            'name'       => 'Administrador',
-            'email'      => 'admin@bidflow.dev',
-            'password'   => Hash::make('password'),
-            'role'       => 'Admin',
-            'status'     => 'Active',
+            'company_id'    => $company->id,
+            'name'          => 'Administrador',
+            'email'         => 'admin@bidflow.dev',
+            'password'      => Hash::make('password'),
+            'role'          => 'Admin',
+            'status'        => 'Active',
+            'is_superadmin' => true,
         ]);
 
         $this->command->info("✅ Company '{$company->name}' created.");

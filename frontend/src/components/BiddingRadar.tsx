@@ -36,7 +36,7 @@ export default function BiddingRadar() {
     }
   };
 
-  const PLATINUM_COLORS = ['#6366f1', '#14b8a6', '#8b5cf6', '#3b82f6', '#ec4899', '#f43f5e'];
+  const COLORS = ['var(--color-primary)', 'var(--color-info)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', 'var(--color-accent)'];
 
   // Metrics Calculation
   const metrics = useMemo(() => {
@@ -65,75 +65,86 @@ export default function BiddingRadar() {
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v);
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Radar <span className="text-gradient-gold">Dashboard</span>
+    <div className="space-y-8 animate-fade-in">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Radar Dashboard
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <ShieldCheck size={14} className="text-primary" />
+          <p className="text-text-secondary text-sm mt-1">
             Inteligência de Mercado e Mapeamento Estratégico de Oportunidades.
           </p>
         </div>
-        <div className="flex items-center gap-4 bg-surface-elevated/10 backdrop-blur-xl px-8 py-4 rounded-2xl border border-primary/20 shadow-platinum-glow-sm">
-          <Zap size={18} className="text-primary animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Live Scan Active</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+          <Zap size={14} className="text-primary animate-pulse" />
+          <span className="text-xs font-medium text-primary">Live Scan Ativo</span>
         </div>
       </header>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="platinum-card p-10 flex flex-col gap-6 group hover:border-primary/40 transition-all relative overflow-hidden bg-surface-elevated/10 backdrop-blur-xl">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-border-subtle flex items-center justify-center shadow-platinum-glow-sm group-hover:scale-110 transition-transform duration-500">
-            <Target className="w-7 h-7 text-primary" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="card p-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <Target size={20} />
+            </div>
           </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted opacity-60">Oportunidades Mapeadas (Mês)</p>
-            <p className="text-3xl font-black text-text-primary mt-2 tracking-tighter group-hover:text-primary transition-colors">{loading ? '...' : alerts.length}</p>
-          </div>
-        </div>
-
-        <div className="platinum-card p-10 flex flex-col gap-6 group hover:border-emerald-500/40 transition-all relative overflow-hidden bg-surface-elevated/10 backdrop-blur-xl">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-border-subtle flex items-center justify-center shadow-platinum-glow-sm group-hover:scale-110 transition-transform duration-500">
-            <DollarSign className="w-7 h-7 text-emerald-500" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted opacity-60">Volume Financeiro Mapeado (R$)</p>
-            <p className="text-3xl font-black text-text-primary mt-2 tracking-tighter group-hover:text-emerald-500 transition-colors">{loading ? '...' : formatCurrency(metrics.totalValue)}</p>
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Oportunidades Mapeadas (Mês)</h2>
+            <div className="text-3xl font-semibold text-text-primary mt-1 tracking-tight">
+              {loading ? '...' : alerts.length}
+            </div>
           </div>
         </div>
 
-        <div className="platinum-card p-10 flex flex-col gap-6 group hover:border-blue-500/40 transition-all relative overflow-hidden bg-surface-elevated/10 backdrop-blur-xl">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-border-subtle flex items-center justify-center shadow-platinum-glow-sm group-hover:scale-110 transition-transform duration-500">
-            <BarChart3 className="w-7 h-7 text-blue-500" />
+        <div className="card p-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center text-success">
+              <DollarSign size={20} />
+            </div>
           </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-text-muted opacity-60">Top Portal</p>
-            <p className="text-2xl font-black text-text-primary mt-2 tracking-tighter group-hover:text-blue-500 transition-colors truncate" title={metrics.topPortal}>{loading ? '...' : metrics.topPortal}</p>
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Volume Financeiro Mapeado</h2>
+            <div className="text-3xl font-semibold text-text-primary mt-1 tracking-tight">
+              {loading ? '...' : formatCurrency(metrics.totalValue)}
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center text-info">
+              <BarChart3 size={20} />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-sm font-medium text-text-secondary">Top Portal</h2>
+            <div className="text-2xl font-semibold text-text-primary mt-1 tracking-tight truncate" title={metrics.topPortal}>
+              {loading ? '...' : metrics.topPortal}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Bar Chart: Volume UF */}
-        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
-          <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.4em] flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-             <MapPin size={16} className="text-primary" /> Volume de Licitações por Estado (UF)
+        <div className="card p-6 flex flex-col">
+          <h3 className="text-sm font-semibold text-text-primary mb-6">
+            Volume de Licitações por Estado (UF)
           </h3>
-          <div className="h-[300px] w-full">
+          <div className="h-72 w-full mt-auto">
             {loading ? (
-               <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-primary opacity-50" size={32} /></div>
+               <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-text-muted" size={24} /></div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={metrics.ufChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-subtle)" opacity={0.3} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 900 }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 900 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} />
                   <Tooltip 
-                    cursor={{ fill: 'var(--color-surface-elevated)', opacity: 0.2 }}
-                    contentStyle={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border-medium)', borderRadius: '16px', fontSize: '11px', fontWeight: 'black', textTransform: 'uppercase', color: 'var(--color-text-primary)' }} 
+                    cursor={{ fill: 'var(--color-bg-tertiary)', opacity: 0.5 }}
+                    contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '12px', color: 'var(--color-text-primary)', boxShadow: 'var(--shadow-md)' }} 
                   />
                   <Bar dataKey="value" name="Licitações" fill="var(--color-primary)" radius={[4, 4, 0, 0]} barSize={24} />
                 </BarChart>
@@ -143,13 +154,13 @@ export default function BiddingRadar() {
         </div>
 
         {/* Donut Chart: Portais */}
-        <div className="platinum-card p-10 space-y-10 bg-surface-elevated/10 backdrop-blur-xl">
-          <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.4em] flex items-center gap-4 border-b border-border-subtle/30 pb-6">
-             <PieChartIcon size={16} className="text-primary" /> Distribuição por Portal
+        <div className="card p-6 flex flex-col">
+          <h3 className="text-sm font-semibold text-text-primary mb-6">
+            Distribuição por Portal
           </h3>
-          <div className="h-[300px] w-full">
+          <div className="h-72 w-full mt-auto">
             {loading ? (
-               <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-primary opacity-50" size={32} /></div>
+               <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-text-muted" size={24} /></div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -157,20 +168,20 @@ export default function BiddingRadar() {
                     data={metrics.portalChartData}
                     cx="50%"
                     cy="45%"
-                    innerRadius={70}
-                    outerRadius={100}
+                    innerRadius={60}
+                    outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
                     stroke="none"
                   >
                     {metrics.portalChartData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={PLATINUM_COLORS[index % PLATINUM_COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border-medium)', borderRadius: '16px', fontSize: '11px', fontWeight: 'black', textTransform: 'uppercase', color: 'var(--color-text-primary)' }} 
+                    contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '12px', color: 'var(--color-text-primary)', boxShadow: 'var(--shadow-md)' }} 
                   />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', opacity: 0.7 }} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', color: 'var(--color-text-secondary)' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}

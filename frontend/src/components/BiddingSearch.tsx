@@ -17,6 +17,8 @@ import {
   Filter,
   ArrowLeft
 } from 'lucide-react';
+import { Select } from './ui/Select';
+import { DatePicker } from './ui/DatePicker';
 
 interface BiddingResult {
   id: string;
@@ -106,6 +108,13 @@ export default function BiddingSearch() {
   const navigate = useNavigate();
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  
+  // Filter States
+  const [stateFilter, setStateFilter] = useState('');
+  const [modalityFilter, setModalityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   const handleSearch = () => {
     setSearchPerformed(true);
@@ -144,36 +153,38 @@ export default function BiddingSearch() {
               <label className="text-[10px] font-black uppercase tracking-wider text-text-muted">
                 Estado / UF
               </label>
-              <div className="relative">
-                <select className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
-                  <option value="">Todos os estados</option>
-                  <option value="SP">São Paulo</option>
-                  <option value="RJ">Rio de Janeiro</option>
-                  <option value="MG">Minas Gerais</option>
-                  <option value="RS">Rio Grande do Sul</option>
-                  <option value="PR">Paraná</option>
-                  <option value="DF">Distrito Federal</option>
-                  <option value="BA">Bahia</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-              </div>
+              <Select
+                value={stateFilter}
+                onChange={setStateFilter}
+                options={[
+                  { value: '', label: 'Todos os estados' },
+                  { value: 'SP', label: 'São Paulo' },
+                  { value: 'RJ', label: 'Rio de Janeiro' },
+                  { value: 'MG', label: 'Minas Gerais' },
+                  { value: 'RS', label: 'Rio Grande do Sul' },
+                  { value: 'PR', label: 'Paraná' },
+                  { value: 'DF', label: 'Distrito Federal' },
+                  { value: 'BA', label: 'Bahia' }
+                ]}
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-wider text-text-muted">
                 Modalidade
               </label>
-              <div className="relative">
-                <select className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
-                  <option value="">Todas as modalidades</option>
-                  <option value="pregao">Pregão Eletrônico</option>
-                  <option value="concorrencia">Concorrência</option>
-                  <option value="tomada_precos">Tomada de Preços</option>
-                  <option value="convite">Convite</option>
-                  <option value="inexigibilidade">Inexigibilidade</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-              </div>
+              <Select
+                value={modalityFilter}
+                onChange={setModalityFilter}
+                options={[
+                  { value: '', label: 'Todas as modalidades' },
+                  { value: 'pregao', label: 'Pregão Eletrônico' },
+                  { value: 'concorrencia', label: 'Concorrência' },
+                  { value: 'tomada_precos', label: 'Tomada de Preços' },
+                  { value: 'convite', label: 'Convite' },
+                  { value: 'inexigibilidade', label: 'Inexigibilidade' }
+                ]}
+              />
             </div>
 
             <div className="space-y-2">
@@ -181,13 +192,15 @@ export default function BiddingSearch() {
                 Data de Inclusão
               </label>
               <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="date"
-                  className="px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+                <DatePicker
+                  selected={startDate}
+                  onChange={setStartDate}
+                  placeholderText="Início"
                 />
-                <input
-                  type="date"
-                  className="px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+                <DatePicker
+                  selected={endDate}
+                  onChange={setEndDate}
+                  placeholderText="Fim"
                 />
               </div>
             </div>
@@ -207,16 +220,17 @@ export default function BiddingSearch() {
               <label className="text-[10px] font-black uppercase tracking-wider text-text-muted">
                 Situação
               </label>
-              <div className="relative">
-                <select className="w-full px-4 py-3 bg-surface-elevated/50 border border-border-subtle rounded-xl text-sm text-text-primary appearance-none focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
-                  <option value="">Todas as situações</option>
-                  <option value="nova">Nova</option>
-                  <option value="retificacao">Retificação</option>
-                  <option value="aberta">Aberta</option>
-                  <option value="encerrada">Encerrada</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-              </div>
+              <Select
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={[
+                  { value: '', label: 'Todas as situações' },
+                  { value: 'nova', label: 'Nova' },
+                  { value: 'retificacao', label: 'Retificação' },
+                  { value: 'aberta', label: 'Aberta' },
+                  { value: 'encerrada', label: 'Encerrada' }
+                ]}
+              />
             </div>
 
             <div className="flex items-center gap-3 py-2">

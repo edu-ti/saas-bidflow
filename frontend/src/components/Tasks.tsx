@@ -6,6 +6,9 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import Modal from './ui/Modal';
+import { DatePicker } from './ui/DatePicker';
+import { Select } from './ui/Select';
+import { format } from 'date-fns';
 
 interface Task {
   id: number;
@@ -306,27 +309,22 @@ export default function Tasks() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Prazo Fatal (Deadline)</label>
-              <div className="relative">
-                <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
-                <input
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  className="w-full pl-16 pr-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                />
-              </div>
+              <DatePicker
+                selected={formData.due_date ? new Date(`${formData.due_date}T12:00:00`) : null}
+                onChange={date => setFormData({ ...formData, due_date: date ? format(date, "yyyy-MM-dd") : '' })}
+              />
             </div>
             <div className="space-y-3">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Nível de Prioridade</label>
-              <select
+              <Select
                 value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-              >
-                <option value="high" className="bg-surface font-bold text-text-primary">MÁXIMA (Crítica)</option>
-                <option value="medium" className="bg-surface font-bold text-text-primary">MÉDIA (Padrão)</option>
-                <option value="low" className="bg-surface font-bold text-text-primary">BAIXA (Suporte)</option>
-              </select>
+                onChange={(v) => setFormData({ ...formData, priority: v as any })}
+                options={[
+                  { value: 'high', label: 'MÁXIMA (Crítica)' },
+                  { value: 'medium', label: 'MÉDIA (Padrão)' },
+                  { value: 'low', label: 'BAIXA (Suporte)' }
+                ]}
+              />
             </div>
           </div>
 

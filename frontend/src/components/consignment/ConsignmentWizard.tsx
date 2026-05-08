@@ -3,8 +3,10 @@ import { Search, Plus, Trash2, Loader2, ArrowLeft, ArrowRight, Check, Zap, Packa
 import toast from 'react-hot-toast';
 import api from '../../lib/axios';
 import Modal from '../ui/Modal';
+import { DatePicker } from '../ui/DatePicker';
 import type { Consignee, Product, WizardItem } from './types';
 import { fmt } from './types';
+import { format } from 'date-fns';
 
 interface Props {
   isOpen: boolean;
@@ -162,12 +164,10 @@ export default function ConsignmentWizard({ isOpen, onClose, onSuccess }: Props)
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-8 border-t border-border-subtle/30">
               <div className="space-y-4 group">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Previsão de Acerto (SLA)</label>
-                <div className="relative">
-                  <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none" />
-                  <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                    className="w-full pl-16 pr-6 py-4.5 bg-background/50 border border-border-medium rounded-2xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum"
-                  />
-                </div>
+                <DatePicker
+                  selected={dueDate ? new Date(`${dueDate}T12:00:00`) : null}
+                  onChange={date => setDueDate(date ? format(date, "yyyy-MM-dd") : '')}
+                />
               </div>
               <div className="space-y-4 group">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] px-2 group-focus-within:text-primary transition-colors">Diretrizes Adicionais Core</label>

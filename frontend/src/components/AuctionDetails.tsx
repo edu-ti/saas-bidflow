@@ -6,6 +6,7 @@ import {
   DollarSign, Zap, Calendar, Target, Globe, Activity, AlignLeft, Check, Sparkles
 } from 'lucide-react';
 import api from '../lib/axios';
+import { Select } from './ui/Select';
 
 interface Bidding {
   id: number;
@@ -284,21 +285,21 @@ export default function AuctionDetails() {
                 <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">Valuation de Referência</span>
                 <p className="text-2xl font-black text-primary tracking-tighter shadow-platinum-glow-sm">{parseFloat(bidding.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 relative z-20">
                 <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] opacity-60">Governança de Status</span>
                 <div className="relative group mt-1">
-                   <Activity size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary opacity-60 group-focus-within:opacity-100 transition-opacity" />
-                   <select 
+                   <Activity size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary opacity-60 group-focus-within:opacity-100 transition-opacity z-10" />
+                   <Select 
                     value={currentStatus}
-                    onChange={(e) => setCurrentStatus(e.target.value)}
-                    className="w-full bg-background/50 border border-border-medium rounded-xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-text-primary outline-none focus:border-primary/40 appearance-none cursor-pointer shadow-inner-platinum"
-                  >
-                    <option value="Em análise" className="bg-surface">Em análise</option>
-                    <option value="Aguardando" className="bg-surface">Aguardando</option>
-                    <option value="Ativa" className="bg-surface">Ativa</option>
-                    <option value="Encerrada" className="bg-surface">Encerrada</option>
-                  </select>
-                  <ChevronRight size={12} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-text-muted opacity-40 pointer-events-none" />
+                    onChange={setCurrentStatus}
+                    options={[
+                      { value: 'Em análise', label: 'Em análise' },
+                      { value: 'Aguardando', label: 'Aguardando' },
+                      { value: 'Ativa', label: 'Ativa' },
+                      { value: 'Encerrada', label: 'Encerrada' }
+                    ]}
+                    className="pl-8"
+                  />
                 </div>
               </div>
             </div>

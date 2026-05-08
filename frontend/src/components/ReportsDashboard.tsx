@@ -11,6 +11,7 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import GoalSettingsModal from './GoalSettingsModal';
+import { Select } from './ui/Select';
 
 type TabType = 'overview' | 'bidding' | 'sales' | 'suppliers' | 'team';
 
@@ -120,14 +121,14 @@ export default function ReportsDashboard() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsGoalModalOpen(true)}
-            className="flex items-center gap-3 px-6 py-3.5 bg-surface-elevated/40 text-text-primary font-black rounded-2xl border border-border-subtle hover:bg-surface-elevated transition-all text-[10px] uppercase tracking-widest shadow-platinum-glow-sm"
+            className="flex items-center gap-3 px-6 py-3.5 bg-surface-elevated/40 text-text-primary font-black rounded-full border border-border-subtle hover:bg-surface-elevated transition-all text-[10px] uppercase tracking-widest shadow-platinum-glow-sm"
           >
             <Settings size={16} className="text-primary" />
             Configurar Metas
           </button>
 
           <div className="relative group">
-            <button className="btn-primary py-3.5 px-8 text-[10px] tracking-widest shadow-platinum-glow flex items-center gap-3">
+            <button className="btn-primary py-3.5 px-8 text-[10px] tracking-widest shadow-platinum-glow flex items-center gap-3 rounded-full">
               <Download size={16} />
               Exportar
             </button>
@@ -146,23 +147,31 @@ export default function ReportsDashboard() {
       </header>
 
       {/* Global Filter Bar */}
-      <div className="platinum-card p-8 flex flex-wrap items-center gap-10 bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-inner-platinum">
+      <div className="relative z-40 platinum-card p-8 flex flex-wrap items-center gap-10 bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30 shadow-inner-platinum">
         <div className="flex items-center gap-4 group">
           <div className="p-3 bg-primary/10 rounded-2xl text-primary shadow-platinum-glow-sm group-hover:scale-110 transition-transform">
              <Calendar size={20} />
           </div>
           <div className="flex gap-4">
             <div className="flex flex-col">
-               <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60">Mês</span>
-               <select value={month} onChange={e => setMonth(Number(e.target.value))} className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer">
-                 {months.map(m => <option key={m.id} value={m.id} className="bg-surface">{m.name}</option>)}
-               </select>
+               <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60 mb-1">Mês</span>
+               <div className="min-w-[140px]">
+                 <Select 
+                   value={month.toString()} 
+                   onChange={v => setMonth(Number(v))} 
+                   options={months.map(m => ({ value: m.id.toString(), label: m.name }))}
+                 />
+               </div>
             </div>
             <div className="flex flex-col">
-               <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60">Ano</span>
-               <select value={year} onChange={e => setYear(Number(e.target.value))} className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer">
-                 {years.map(y => <option key={y} value={y} className="bg-surface">{y}</option>)}
-               </select>
+               <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60 mb-1">Ano</span>
+               <div className="min-w-[120px]">
+                 <Select 
+                   value={year.toString()} 
+                   onChange={v => setYear(Number(v))} 
+                   options={years.map(y => ({ value: y.toString(), label: y.toString() }))}
+                 />
+               </div>
             </div>
           </div>
         </div>
@@ -174,11 +183,14 @@ export default function ReportsDashboard() {
              <Users size={20} />
           </div>
           <div className="flex flex-col">
-             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60">Vendedor / Responsável</span>
-             <select value={userId || ''} onChange={e => setUserId(e.target.value ? Number(e.target.value) : null)} className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer">
-               <option value="" className="bg-surface">Todos os Vendedores</option>
-               {users.map(u => <option key={u.id} value={u.id} className="bg-surface">{u.name}</option>)}
-             </select>
+             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60 mb-1">Vendedor / Responsável</span>
+             <div className="min-w-[220px]">
+               <Select 
+                 value={userId?.toString() || ''} 
+                 onChange={v => setUserId(v ? Number(v) : null)} 
+                 options={[{ value: '', label: 'Todos os Vendedores' }, ...users.map(u => ({ value: u.id.toString(), label: u.name }))]}
+               />
+             </div>
           </div>
         </div>
 
@@ -189,11 +201,14 @@ export default function ReportsDashboard() {
              <Truck size={20} />
           </div>
           <div className="flex flex-col">
-             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60">Fornecedor</span>
-             <select value={supplierId || ''} onChange={e => setSupplierId(e.target.value ? Number(e.target.value) : null)} className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer">
-               <option value="" className="bg-surface">Todos os Fornecedores</option>
-               {suppliers.map(s => <option key={s.id} value={s.id} className="bg-surface">{s.name}</option>)}
-             </select>
+             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60 mb-1">Fornecedor</span>
+             <div className="min-w-[220px]">
+               <Select 
+                 value={supplierId?.toString() || ''} 
+                 onChange={v => setSupplierId(v ? Number(v) : null)} 
+                 options={[{ value: '', label: 'Todos os Fornecedores' }, ...suppliers.map(s => ({ value: s.id.toString(), label: s.name }))]}
+               />
+             </div>
           </div>
         </div>
 
@@ -204,11 +219,14 @@ export default function ReportsDashboard() {
              <MapPin size={20} />
           </div>
           <div className="flex flex-col">
-             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60">Estado (UF)</span>
-             <select value={uf} onChange={e => setUf(e.target.value)} className="bg-transparent text-[11px] font-black uppercase tracking-[0.2em] text-text-primary outline-none cursor-pointer">
-               <option value="" className="bg-surface">Brasil (Todos)</option>
-               {ufs.map(u => <option key={u} value={u} className="bg-surface">{u}</option>)}
-             </select>
+             <span className="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-60 mb-1">Estado (UF)</span>
+             <div className="min-w-[180px]">
+               <Select 
+                 value={uf} 
+                 onChange={v => setUf(v)} 
+                 options={[{ value: '', label: 'Brasil (Todos)' }, ...ufs.map(u => ({ value: u, label: u }))]}
+               />
+             </div>
           </div>
         </div>
       </div>
@@ -227,7 +245,7 @@ export default function ReportsDashboard() {
             onClick={() => setActiveTab(tab.id as TabType)}
             className={`flex items-center gap-3 px-8 py-3.5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
               activeTab === tab.id 
-                ? 'bg-primary text-background shadow-platinum-glow' 
+                ? 'bg-primary text-white shadow-platinum-glow' 
                 : 'text-text-muted hover:text-text-primary hover:bg-surface-elevated/50'
             }`}
           >

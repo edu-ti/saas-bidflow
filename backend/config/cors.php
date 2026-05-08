@@ -23,6 +23,7 @@ return [
 
     'allowed_origins_patterns' => [
         '#^http://localhost(:\d+)?$#',
+        '#^http://[a-zA-Z0-9-]+\.localhost(:\d+)?$#',
     ],
 
     'allowed_headers' => ['*'],

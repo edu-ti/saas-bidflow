@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, PlusCircle, List, Eye, Download, Trash2, Save, FileCheck, Calendar, Lock, ShieldCheck, FileWarning, Sparkles, ChevronRight, Layout, FileText, Loader2, AlertTriangle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from './ui/Modal';
+import { DatePicker } from './ui/DatePicker';
+import { format } from 'date-fns';
 
 interface LicenseDocument {
   id: string;
@@ -134,11 +136,9 @@ export default function Licenses() {
           <div className="md:col-span-3 space-y-2 group">
             <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Data de Vencimento</label>
             <div className="relative">
-              <input 
-                type="date" 
-                value={newDoc.expirationDate}
-                onChange={(e) => setNewDoc({ ...newDoc, expirationDate: e.target.value })}
-                className="w-full bg-background/50 border border-border-medium rounded-2xl px-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" 
+              <DatePicker
+                selected={newDoc.expirationDate ? new Date(`${newDoc.expirationDate}T12:00:00`) : null}
+                onChange={date => setNewDoc({ ...newDoc, expirationDate: date ? format(date, "yyyy-MM-dd") : '' })}
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function Licenses() {
         isOpen={showPopup} 
         onClose={() => setShowPopup(false)} 
         title="CENTRAL DE ALERTAS: RISCO DOCUMENTAL"
-        size="md"
+        size="lg"
       >
         <div className="space-y-8 p-2">
           <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center gap-6 shadow-platinum-glow-sm">
@@ -278,7 +278,7 @@ export default function Licenses() {
             </div>
           </div>
 
-          <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 scrollbar-platinum">
+          <div className="space-y-4">
             {criticalDocs.map(doc => (
               <div key={doc.id} className="p-5 bg-surface-elevated/40 border border-border-subtle rounded-2xl flex items-center justify-between group hover:border-primary/40 transition-all">
                 <div className="flex items-center gap-4">

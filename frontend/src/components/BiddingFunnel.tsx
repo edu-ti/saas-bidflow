@@ -5,6 +5,9 @@ import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Fil
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
+import { DatePicker } from './ui/DatePicker';
+import { Select } from './ui/Select';
+import { format } from 'date-fns';
 
 interface Bidding {
   id: number;
@@ -168,7 +171,7 @@ export default function BiddingFunnel() {
         <button
           onClick={() => { resetForm(); setIsModalOpen(true); }}
           aria-label="Registrar nova licitação no pipeline"
-          className="btn-primary py-4 px-10 shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest"
+          className="btn-primary py-4 px-10 rounded-full shadow-platinum-glow flex items-center gap-3 uppercase text-[10px] tracking-widest"
         >
           <Plus className="w-5 h-5" />
           Novo Processo Platinum
@@ -203,7 +206,7 @@ export default function BiddingFunnel() {
                       className={`flex-1 rounded-[3rem] p-5 min-h-[700px] transition-all duration-500 border-2 overflow-y-auto scrollbar-platinum ${
                         snapshot.isDraggingOver 
                           ? 'bg-primary/5 border-primary/30 shadow-platinum-glow' 
-                          : 'bg-surface-elevated/10 border-border-subtle/30 backdrop-blur-md'
+                          : 'bg-bg-tertiary border-border backdrop-blur-md'
                       }`}
                     >
                       <div className="space-y-6">
@@ -214,10 +217,10 @@ export default function BiddingFunnel() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`platinum-card p-6 group transition-all duration-500 relative overflow-hidden ${
+                                className={`platinum-card p-6 group transition-all duration-500 relative overflow-hidden rounded-2xl ${
                                   snapshot.isDragging 
-                                    ? 'shadow-platinum-glow-lg border-primary/60 scale-105 bg-surface-elevated z-50' 
-                                    : 'hover:border-primary/40 hover:translate-y-[-4px] bg-surface-elevated/20'
+                                    ? 'shadow-platinum-glow-lg border-primary/60 scale-105 bg-bg-secondary z-50' 
+                                    : 'border border-border hover:border-primary/40 hover:translate-y-[-4px] bg-bg-secondary shadow-sm'
                                 }`}
                               >
                                 <div className="space-y-6 relative z-10">
@@ -324,19 +327,27 @@ export default function BiddingFunnel() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Modalidade Jurídica</label>
-              <select value={formData.modality} onChange={e => setFormData({ ...formData, modality: e.target.value })} className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum">
-                <option value="" className="bg-surface font-bold text-text-primary">Selecione a Modalidade</option>
-                <option value="pregão" className="bg-surface font-bold text-text-primary">Pregão Eletrônico</option>
-                <option value="tomada_de_precos" className="bg-surface font-bold text-text-primary">Tomada de Preços</option>
-                <option value="concurso" className="bg-surface font-bold text-text-primary">Concurso Público</option>
-                <option value="convite" className="bg-surface font-bold text-text-primary">Convite</option>
-                <option value="inexigibilidade" className="bg-surface font-bold text-text-primary">Inexigibilidade</option>
-                <option value="dispensabilidade" className="bg-surface font-bold text-text-primary">Dispensa de Licitação</option>
-              </select>
+              <Select
+                value={formData.modality}
+                onChange={v => setFormData({ ...formData, modality: v })}
+                options={[
+                  { value: 'pregão', label: 'Pregão Eletrônico' },
+                  { value: 'tomada_de_precos', label: 'Tomada de Preços' },
+                  { value: 'concurso', label: 'Concurso Público' },
+                  { value: 'convite', label: 'Convite' },
+                  { value: 'inexigibilidade', label: 'Inexigibilidade' },
+                  { value: 'dispensabilidade', label: 'Dispensa de Licitação' }
+                ]}
+              />
             </div>
             <div className="space-y-3">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Data de Disputa</label>
-              <input type="datetime-local" value={formData.opening_date} onChange={e => setFormData({ ...formData, opening_date: e.target.value })} className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-black text-text-primary focus:border-primary/40 outline-none transition-all shadow-inner-platinum" />
+              <DatePicker
+                selected={formData.opening_date ? new Date(formData.opening_date) : null}
+                onChange={date => setFormData({ ...formData, opening_date: date ? format(date, "yyyy-MM-dd'T'HH:mm") : '' })}
+                showTimeSelect
+                placeholderText="dd/mm/aaaa --:--"
+              />
             </div>
           </div>
 
@@ -350,11 +361,11 @@ export default function BiddingFunnel() {
             </div>
             <div className="space-y-3">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] px-1">Estágio do Pipeline</label>
-              <select value={formData.funnel_stage_id} onChange={e => setFormData({ ...formData, funnel_stage_id: parseInt(e.target.value) })} className="w-full px-6 py-4 bg-background border border-border-medium rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer shadow-inner-platinum">
-                {stages.map(stage => (
-                  <option key={stage.id} value={stage.id} className="bg-surface font-bold text-text-primary">{stage.name}</option>
-                ))}
-              </select>
+              <Select
+                value={String(formData.funnel_stage_id)}
+                onChange={v => setFormData({ ...formData, funnel_stage_id: parseInt(v) })}
+                options={stages.map(stage => ({ value: String(stage.id), label: stage.name }))}
+              />
             </div>
           </div>
 
