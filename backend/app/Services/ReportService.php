@@ -191,6 +191,90 @@ class ReportService
         return $query->get()->toArray();
     }
 
+    public function getTeamPerformance(Request $request): array
+    {
+        $companyId = Auth::user()->company_id;
+        $year = $request->get('year', now()->year);
+
+        $wonStageIds = FunnelStage::where('company_id', $companyId)
+            ->where('is_final_win', true)
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($wonStageIds)) {
+            return [];
+        }
+
+        $results = Opportunity::where('opportunities.company_id', $companyId)
+            ->whereIn('funnel_stage_id', $wonStageIds)
+            ->whereYear('opportunities.created_at', $year)
+            ->join('users', 'opportunities.user_id', '=', 'users.id')
+            ->select(
+                'users.id as user_id',
+                'users.name as user_name',
+                DB::raw('COUNT(*) as won_count'),
+                DB::raw('SUM(opportunities.value) as won_value'),
+            )
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('won_value')
+            ->get()
+            ->toArray();
+
+        // Calculate win rate per user
+        foreach ($results as &$user) {
+            $totalByUser = Opportunity::where('company_id', $companyId)
+                ->where('user_id', $user['user_id'])
+                ->whereYear('created_at', $year)
+                ->count();
+            $user['total_opps'] = $totalByUser;
+            $user['win_rate'] = $totalByUser > 0 ? round(($user['won_count'] / $totalByUser) * 100, 1) : 0;
+        }
+
+        return $results;
+    }
+
+    public function getMarketEvolution(Request $request): array
+    {
+        $companyId = Auth::user()->company_id;
+        $year = $request->get('year', now()->year);
+
+        $wonStageIds = FunnelStage::where('company_id', $companyId)
+            ->where('is_final_win', true)
+            ->pluck('id')
+            ->toArray();
+
+        $monthlyRevenue = [];
+        $monthlyGoals = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $startDate = \Carbon\Carbon::create($year, $m, 1)->startOfMonth();
+            $endDate = \Carbon\Carbon::create($year, $m, 1)->endOfMonth();
+
+            $revenue = 0;
+            if (!empty($wonStageIds)) {
+                $revenue = Opportunity::where('company_id', $companyId)
+                    ->whereIn('funnel_stage_id', $wonStageIds)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->sum('value');
+            }
+
+            $goal = Goal::where('company_id', $companyId)
+                ->where('goal_type', 'global')
+                ->where('month', $m)
+                ->where('year', $year)
+                ->first();
+
+            $monthlyRevenue[] = [
+                'month' => $m,
+                'month_name' => $startDate->translatedFormat('M'),
+                'realizado' => (float) $revenue,
+                'meta' => (float) ($goal?->target_revenue ?? 0),
+            ];
+        }
+
+        return $monthlyRevenue;
+    }
+
     protected function applyFilters($query, array $filters)
     {
         if ($filters['user_id']) {

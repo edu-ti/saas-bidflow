@@ -79,6 +79,12 @@ class ReportController extends Controller
         return response()->json($performance);
     }
 
+    public function marketEvolution(Request $request)
+    {
+        $evolution = $this->reportService->getMarketEvolution($request);
+        return response()->json($evolution);
+    }
+
     public function lossAnalysis(Request $request)
     {
         $analysis = $this->reportService->getLossAnalysis($request);

@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
     Route::get('/reports/financial-health', [ReportController::class, 'financialHealth']);
     Route::get('/reports/financial-timeline', [ReportController::class, 'financialTimeline']);
     Route::get('/reports/team-performance', [ReportController::class, 'teamPerformance']);
+    Route::get('/reports/market-evolution', [ReportController::class, 'marketEvolution']);
     Route::get('/reports/users', [ReportController::class, 'users']);
     Route::get('/reports/available-suppliers', [ReportController::class, 'availableSuppliers']);
     Route::post('/goals', [\App\Http\Controllers\GoalController::class, 'store']);
