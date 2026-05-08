@@ -35,8 +35,7 @@ import Contracts from './components/contracts/ContractsDashboard';
 import Inventory from './components/inventory/InventoryDashboard';
 import Campaigns from './components/Campaigns';
 import Tasks from './components/Tasks';
-import Reports from './components/Reports';
-import ReportsDashboard from './components/ReportsDashboard';
+import ReportsBIPage from './components/ReportsBIPage';
 import AccountsPayableReceivable from './components/AccountsPayableReceivable';
 import Finance from './components/financial/FinanceDashboard';
 import Admin from './components/Admin';
@@ -141,7 +140,6 @@ function Topbar({ title }: { title?: string }) {
       '/company': 'Empresa',
       '/users': 'Usuários',
       '/reports': 'Relatórios',
-      '/reports-dashboard': 'BI',
       '/sales-funnel': 'Funil de Vendas',
       '/leads': 'Leads',
       '/clients': 'Clientes',
@@ -434,7 +432,6 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/company') return 'company';
     if (path === '/users') return 'users';
     if (path === '/reports') return 'reports';
-    if (path === '/reports-dashboard') return 'reports-dashboard';
     if (path === '/sales-funnel') return 'sales-funnel';
     if (path === '/leads') return 'leads';
     if (path === '/clients') return 'clients';
@@ -574,17 +571,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="admin" page="logs">
               <AuthenticatedLayout>
-                <Reports />
-              </AuthenticatedLayout>
-            </PermissionRoute>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/reports-dashboard" element={
-          <ProtectedRoute>
-            <PermissionRoute module="admin" page="logs">
-              <AuthenticatedLayout>
-                <ReportsDashboard />
+                <ReportsBIPage />
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>

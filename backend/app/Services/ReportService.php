@@ -326,6 +326,81 @@ class ReportService
         ];
     }
 
+    public function getCommissionAnalysis(Request $request): array
+    {
+        $companyId = Auth::user()->company_id;
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        if ($startDate && $endDate) {
+            $dateRange = [$startDate . ' 00:00:00', $endDate . ' 23:59:59'];
+        } elseif ($month) {
+            $start = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+            $end = \Carbon\Carbon::create($year, $month, 1)->endOfMonth();
+            $dateRange = [$start, $end];
+        } else {
+            $start = \Carbon\Carbon::create($year, 1, 1)->startOfYear();
+            $end = \Carbon\Carbon::create($year, 12, 31)->endOfYear();
+            $dateRange = [$start, $end];
+        }
+
+        $wonStageIds = FunnelStage::where('company_id', $companyId)
+            ->where('is_final_win', true)
+            ->pluck('id')
+            ->toArray();
+
+        $users = User::where('company_id', $companyId)
+            ->select('id', 'name')
+            ->get();
+
+        $configs = \App\Models\CommissionConfig::where('company_id', $companyId)
+            ->where('year', $year)
+            ->get()
+            ->keyBy('user_id');
+
+        $results = [];
+
+        foreach ($users as $user) {
+            $config = $configs->get($user->id);
+
+            $totalVendas = 0;
+            if (!empty($wonStageIds)) {
+                $totalVendas = Opportunity::where('company_id', $companyId)
+                    ->where('user_id', $user->id)
+                    ->whereIn('funnel_stage_id', $wonStageIds)
+                    ->whereBetween('created_at', $dateRange)
+                    ->sum('value');
+            }
+
+            if ($totalVendas <= 0 && !$config) continue;
+
+            $meta = (float) ($config?->meta_mensal ?? 0);
+            $fixo = (float) ($config?->salario_fixo ?? 0);
+            $pct = (float) ($config?->percentual_comissao ?? 1);
+            $comissao = $totalVendas * ($pct / 100);
+            $diferenca = $totalVendas - $meta;
+            $total = $fixo + $comissao;
+
+            $results[] = [
+                'user_id' => $user->id,
+                'nome' => $user->name,
+                'meta_mensal' => $meta,
+                'total_vendas' => (float) $totalVendas,
+                'salario_fixo' => $fixo,
+                'percentual_comissao' => $pct,
+                'comissao_valor' => round($comissao, 2),
+                'diferenca' => round($diferenca, 2),
+                'total_periodo' => round($total, 2),
+            ];
+        }
+
+        usort($results, fn($a, $b) => $b['total_vendas'] <=> $a['total_vendas']);
+
+        return $results;
+    }
+
     protected function getDateRange(string $period): array
     {
         $now = now();

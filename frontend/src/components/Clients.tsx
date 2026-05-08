@@ -30,9 +30,10 @@ interface ClientPJ {
 }
 
 export default function Clients() {
-  const [activeTab, setActiveTab] = useState<'pf' | 'pj'>('pf');
+  const [activeTab, setActiveTab] = useState<'pf' | 'pj' | 'fornecedor'>('pf');
   const [clientsPF, setClientsPF] = useState<ClientPF[]>([]);
   const [clientsPJ, setClientsPJ] = useState<ClientPJ[]>([]);
+  const [suppliers, setSuppliers] = useState<ClientPJ[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -63,6 +64,50 @@ export default function Clients() {
     contact_phone: '',
   });
 
+  const [formDataFornecedor, setFormDataFornecedor] = useState({
+    corporate_name: '',
+    fantasy_name: '',
+    cnpj: '',
+    municipal_registration: '',
+    state_registration: '',
+    address: '',
+    contact_name: '',
+    contact_email: '',
+    contact_position: '',
+    contact_phone: '',
+  });
+
+  const [searchingSupplierCNPJ, setSearchingSupplierCNPJ] = useState(false);
+
+  const searchSupplierCNPJ = async () => {
+    const cnpj = formDataFornecedor.cnpj.replace(/\D/g, '');
+    if (!cnpj || cnpj.length !== 14) {
+      toast.error('CNPJ inválido');
+      return;
+    }
+
+    setSearchingSupplierCNPJ(true);
+    try {
+      const res = await api.get(`/api/cnpj/${cnpj}`);
+      const data = res.data;
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+      setFormDataFornecedor(prev => ({
+        ...prev,
+        corporate_name: data.razao_social || prev.corporate_name,
+        fantasy_name: data.nome_fantasia || prev.fantasy_name,
+        address: data.endereco || prev.address,
+      }));
+      toast.success('Dados preenchidos automaticamente');
+    } catch (error) {
+      toast.error('Erro ao buscar CNPJ');
+    } finally {
+      setSearchingSupplierCNPJ(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -73,9 +118,12 @@ export default function Clients() {
       if (activeTab === 'pf') {
         const res = await api.get('/api/individual-clients');
         setClientsPF(res.data.data || []);
-      } else {
+      } else if (activeTab === 'pj') {
         const res = await api.get('/api/company-clients');
         setClientsPJ(res.data.data || []);
+      } else if (activeTab === 'fornecedor') {
+        const res = await api.get('/api/suppliers');
+        setSuppliers(res.data.data || []);
       }
     } catch (error) {
       toast.error('Erro ao carregar dados estratégicos');
@@ -120,6 +168,24 @@ export default function Clients() {
     }
   };
 
+  const handleSubmitFornecedor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (isEditing && editingId) {
+        await api.put(`/api/suppliers/${editingId}`, formDataFornecedor);
+        toast.success('Fornecedor atualizado!');
+      } else {
+        await api.post('/api/suppliers', formDataFornecedor);
+        toast.success('Fornecedor registrado!');
+      }
+      setIsModalOpen(false);
+      resetForm();
+      fetchData();
+    } catch (error) {
+      toast.error('Erro na operação');
+    }
+  };
+
   const handleEditPF = (client: ClientPF) => {
     setFormDataPF({
       name: client.name || '',
@@ -153,8 +219,26 @@ export default function Clients() {
     setIsModalOpen(true);
   };
 
+  const handleEditFornecedor = (client: ClientPJ) => {
+    setFormDataFornecedor({
+      corporate_name: client.corporate_name || '',
+      fantasy_name: client.fantasy_name || '',
+      cnpj: client.cnpj || '',
+      municipal_registration: client.municipal_registration || '',
+      state_registration: client.state_registration || '',
+      address: client.address || '',
+      contact_name: client.contact_name || '',
+      contact_email: client.contact_email || '',
+      contact_position: client.contact_position || '',
+      contact_phone: client.contact_phone || '',
+    });
+    setEditingId(client.id);
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async (id: number) => {
-    const endpoint = activeTab === 'pf' ? 'individual-clients' : 'company-clients';
+    const endpoint = activeTab === 'pf' ? 'individual-clients' : activeTab === 'pj' ? 'company-clients' : 'suppliers';
     if (!confirm(`Confirmar exclusão definitiva deste registro?`)) return;
 
     try {
@@ -189,7 +273,7 @@ export default function Clients() {
   const searchCNPJ = async () => {
     const cnpj = formDataPJ.cnpj.replace(/\D/g, '');
     if (!cnpj || cnpj.length !== 14) {
-      toast.error('CNPJ inválido');
+      toast.error('CNPJ inválido. Digite 14 dígitos.');
       return;
     }
 
@@ -197,15 +281,22 @@ export default function Clients() {
     try {
       const res = await api.get(`/api/cnpj/${cnpj}`);
       const data = res.data;
+      
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+      
       setFormDataPJ(prev => ({
         ...prev,
         corporate_name: data.razao_social || prev.corporate_name,
         fantasy_name: data.nome_fantasia || prev.fantasy_name,
         address: data.endereco || prev.address,
       }));
-      toast.success('Dados validados via RPA');
-    } catch (error) {
-      toast.error('Erro na consulta RPA');
+      toast.success('Dados preenchidos automaticamente');
+    } catch (error: any) {
+      console.error('Erro ao buscar CNPJ:', error);
+      toast.error(error.response?.data?.error || 'Erro ao buscar CNPJ. Tente novamente.');
     } finally {
       setSearchingCNPJ(false);
     }
@@ -241,6 +332,11 @@ export default function Clients() {
   const resetForm = () => {
     setFormDataPF({ name: '', cpf: '', rg: '', email: '', phone: '', address: '', position: '' });
     setFormDataPJ({
+      corporate_name: '', fantasy_name: '', cnpj: '', municipal_registration: '',
+      state_registration: '', address: '', contact_name: '', contact_email: '',
+      contact_position: '', contact_phone: '',
+    });
+    setFormDataFornecedor({
       corporate_name: '', fantasy_name: '', cnpj: '', municipal_registration: '',
       state_registration: '', address: '', contact_name: '', contact_email: '',
       contact_position: '', contact_phone: '',
@@ -299,6 +395,14 @@ export default function Clients() {
           >
             <Building2 size={16} /> Entidades Jurídicas
           </button>
+          <button
+            onClick={() => setActiveTab('fornecedor')}
+            className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-colors border-b-2 ${
+              activeTab === 'fornecedor' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
+            }`}
+          >
+            <Building2 size={16} /> Fornecedores
+          </button>
         </div>
 
         <div className="p-4 border-b border-border bg-bg-secondary">
@@ -306,7 +410,7 @@ export default function Clients() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
             <input
               type="text"
-              placeholder={`Pesquisar na base ${activeTab === 'pf' ? 'PF' : 'PJ'}...`}
+              placeholder={`Pesquisar na base ${activeTab === 'pf' ? 'PF' : activeTab === 'pj' ? 'PJ' : 'Fornecedores'}...`}
               className="input w-full pl-9"
             />
           </div>
@@ -362,7 +466,38 @@ export default function Clients() {
                       </td>
                     </tr>
                   ))
-                ) : (
+                ) : activeTab === 'pj' ? (
+                  clientsPJ.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PJ localizado</td></tr>
+                  ) : clientsPJ.map(client => (
+                    <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.name}</div>
+                        <div className="text-xs text-text-muted mt-0.5">{client.position || 'Cliente PF'}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-text-secondary flex items-center gap-1.5"><Hash size={14} className="text-text-muted" /> {client.cpf || '-'}</div>
+                        <div className="text-xs text-text-muted mt-1">RG: {client.rg || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4 space-y-1.5">
+                        <div className="flex items-center gap-2 text-sm text-text-primary"><Mail size={14} className="text-text-muted" /> {client.email || '-'}</div>
+                        <div className="flex items-center gap-2 text-sm text-text-secondary"><Phone size={14} className="text-text-muted" /> {client.phone || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-start gap-2 max-w-xs">
+                          <MapPin size={14} className="text-text-muted mt-0.5 shrink-0" />
+                          <span className="text-sm text-text-secondary truncate">{client.address || '-'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
+                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : activeTab === 'pj' ? (
                   clientsPJ.length === 0 ? (
                     <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PJ localizado</td></tr>
                   ) : clientsPJ.map(client => (
@@ -388,6 +523,37 @@ export default function Clients() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => handleEditPJ(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
+                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  suppliers.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum fornecedor localizado</td></tr>
+                  ) : suppliers.map(client => (
+                    <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.corporate_name}</div>
+                        <div className="text-xs text-text-muted mt-0.5">{client.fantasy_name || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-text-secondary font-medium flex items-center gap-1.5"><ShieldCheck size={14} className="text-primary" /> {client.cnpj || '-'}</div>
+                        <div className="text-xs text-text-muted mt-1">IM: {client.municipal_registration || '-'} | IE: {client.state_registration || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4 space-y-1.5">
+                        <div className="font-medium text-sm text-text-primary flex items-center gap-2"><User size={14} className="text-text-muted" /> {client.contact_name || '-'}</div>
+                        <div className="flex items-center gap-2 text-xs text-text-secondary"><Mail size={14} className="text-text-muted" /> {client.contact_email || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-start gap-2 max-w-xs">
+                          <MapPin size={14} className="text-text-muted mt-0.5 shrink-0" />
+                          <span className="text-sm text-text-secondary truncate">{client.address || '-'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditFornecedor(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
                           <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
                         </div>
                       </td>
@@ -452,7 +618,7 @@ export default function Clients() {
               <button type="submit" className="btn btn-primary">{isEditing ? 'Atualizar Perfil' : 'Salvar Registro'}</button>
             </div>
           </form>
-        ) : (
+        ) : activeTab === 'pj' ? (
           <form onSubmit={handleSubmitPJ} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
@@ -467,6 +633,10 @@ export default function Clients() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-text-primary">Inscrição Municipal</label>
                 <input type="text" value={formDataPJ.municipal_registration} onChange={e => setFormDataPJ({ ...formDataPJ, municipal_registration: e.target.value })} className="input w-full font-mono" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Inscrição Estadual</label>
+                <input type="text" value={formDataPJ.state_registration} onChange={e => setFormDataPJ({ ...formDataPJ, state_registration: e.target.value })} className="input w-full font-mono" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -514,6 +684,69 @@ export default function Clients() {
             <div className="flex justify-end gap-3 pt-6 border-t border-border">
               <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-outline">Cancelar</button>
               <button type="submit" className="btn btn-primary">{isEditing ? 'Atualizar Empresa' : 'Salvar Empresa'}</button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmitFornecedor} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">CNPJ</label>
+                <div className="flex gap-2">
+                  <input type="text" value={formDataFornecedor.cnpj} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, cnpj: e.target.value })} className="input flex-1 font-mono" placeholder="00.000.000/0001-00" />
+                  <button type="button" onClick={searchSupplierCNPJ} disabled={searchingSupplierCNPJ} className="btn btn-primary px-3 flex items-center justify-center">
+                    {searchingSupplierCNPJ ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Inscrição Municipal</label>
+                <input type="text" value={formDataFornecedor.municipal_registration} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, municipal_registration: e.target.value })} className="input w-full font-mono" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Inscrição Estadual</label>
+                <input type="text" value={formDataFornecedor.state_registration} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, state_registration: e.target.value })} className="input w-full font-mono" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Razão Social <span className="text-danger">*</span></label>
+                <input type="text" value={formDataFornecedor.corporate_name} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, corporate_name: e.target.value })} className="input w-full" required />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Nome Fantasia</label>
+                <input type="text" value={formDataFornecedor.fantasy_name} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, fantasy_name: e.target.value })} className="input w-full" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Endereço</label>
+              <input type="text" value={formDataFornecedor.address} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, address: e.target.value })} className="input w-full" />
+            </div>
+            
+            <div className="bg-bg-tertiary p-5 rounded-xl border border-border space-y-4">
+              <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2"><User size={16} className="text-primary" /> Contato Principal</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Nome Completo</label>
+                  <input type="text" value={formDataFornecedor.contact_name} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, contact_name: e.target.value })} className="input w-full" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Cargo / Departamento</label>
+                  <input type="text" value={formDataFornecedor.contact_position} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, contact_position: e.target.value })} className="input w-full" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Email de Contato</label>
+                  <input type="email" value={formDataFornecedor.contact_email} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, contact_email: e.target.value })} className="input w-full" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-text-primary">Telefone Direto</label>
+                  <input type="text" value={formDataFornecedor.contact_phone} onChange={e => setFormDataFornecedor({ ...formDataFornecedor, contact_phone: e.target.value })} className="input w-full font-mono" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-6 border-t border-border">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-outline">Cancelar</button>
+              <button type="submit" className="btn btn-primary">{isEditing ? 'Atualizar Fornecedor' : 'Salvar Fornecedor'}</button>
             </div>
           </form>
         )}

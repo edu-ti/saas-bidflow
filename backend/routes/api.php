@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FunnelController;
 use App\Http\Controllers\CompanyManagementController;
+use App\Http\Controllers\SupplierController;
 
 // Public routes (no auth needed)
 Route::post('/login', [AuthController::class, 'login']);
@@ -69,6 +70,11 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
     Route::get('/reports/financial-timeline', [ReportController::class, 'financialTimeline']);
     Route::get('/reports/team-performance', [ReportController::class, 'teamPerformance']);
     Route::get('/reports/market-evolution', [ReportController::class, 'marketEvolution']);
+    Route::get('/reports/commission-analysis', [ReportController::class, 'commissionAnalysis']);
+    Route::get('/commission-configs', [ReportController::class, 'getCommissionConfigs']);
+    Route::post('/commission-configs', [ReportController::class, 'saveCommissionConfigs']);
+    Route::get('/supplier-targets-all', [ReportController::class, 'getSupplierTargetsAll']);
+    Route::post('/supplier-targets-all', [ReportController::class, 'saveSupplierTargetsAll']);
     Route::get('/reports/users', [ReportController::class, 'users']);
     Route::get('/reports/available-suppliers', [ReportController::class, 'availableSuppliers']);
     Route::post('/goals', [\App\Http\Controllers\GoalController::class, 'store']);
@@ -114,6 +120,7 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
         Route::apiResource('contacts', \App\Http\Controllers\ContactController::class);
         Route::apiResource('individual-clients', \App\Http\Controllers\IndividualClientController::class);
         Route::apiResource('company-clients', \App\Http\Controllers\CompanyClientController::class);
+        Route::apiResource('suppliers', \App\Http\Controllers\SupplierController::class);
         Route::apiResource('products', \App\Http\Controllers\ProductController::class);
         Route::apiResource('events', \App\Http\Controllers\EventController::class);
     });

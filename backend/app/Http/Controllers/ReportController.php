@@ -85,6 +85,93 @@ class ReportController extends Controller
         return response()->json($evolution);
     }
 
+    public function commissionAnalysis(Request $request)
+    {
+        $data = $this->reportService->getCommissionAnalysis($request);
+        return response()->json($data);
+    }
+
+    public function getCommissionConfigs(Request $request)
+    {
+        $year = $request->get('year', now()->year);
+        $configs = \App\Models\CommissionConfig::where('company_id', \Illuminate\Support\Facades\Auth::user()->company_id)
+            ->where('year', $year)
+            ->with('user:id,name')
+            ->get();
+        return response()->json($configs);
+    }
+
+    public function saveCommissionConfigs(Request $request)
+    {
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
+        $configs = $request->input('configs', []);
+        $year = $request->input('year', now()->year);
+
+        foreach ($configs as $cfg) {
+            \App\Models\CommissionConfig::updateOrCreate(
+                [
+                    'company_id' => $companyId,
+                    'user_id' => $cfg['user_id'],
+                    'year' => $year,
+                ],
+                [
+                    'meta_mensal' => $cfg['meta_mensal'] ?? 0,
+                    'salario_fixo' => $cfg['salario_fixo'] ?? 0,
+                    'percentual_comissao' => $cfg['percentual_comissao'] ?? 1,
+                    'ativo' => $cfg['ativo'] ?? true,
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Configurações salvas com sucesso']);
+    }
+
+    public function getSupplierTargetsAll(Request $request)
+    {
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
+        $year = $request->input('year', now()->year);
+
+        $targets = \App\Models\SupplierTarget::where('company_id', $companyId)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('supplier')
+            ->map(function ($group) {
+                return $group->groupBy('month')->map(function ($monthGroup) {
+                    return $monthGroup->pluck('value', 'uf')->toArray();
+                })->toArray();
+            })->toArray();
+
+        return response()->json(['success' => true, 'data' => $targets]);
+    }
+
+    public function saveSupplierTargetsAll(Request $request)
+    {
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
+        $year = $request->input('year', now()->year);
+        $fornecedorMetas = $request->input('fornecedor_metas', []);
+
+        foreach ($fornecedorMetas as $supplier => $months) {
+            foreach ($months as $month => $ufs) {
+                if (is_array($ufs)) {
+                    foreach ($ufs as $uf => $value) {
+                        \App\Models\SupplierTarget::updateOrCreate(
+                            [
+                                'company_id' => $companyId,
+                                'supplier' => $supplier,
+                                'uf' => $uf,
+                                'month' => $month,
+                                'year' => $year,
+                            ],
+                            ['value' => $value ?? 0]
+                        );
+                    }
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Metas salvas com sucesso']);
+    }
+
     public function lossAnalysis(Request $request)
     {
         $analysis = $this->reportService->getLossAnalysis($request);

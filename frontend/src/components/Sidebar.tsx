@@ -7,11 +7,11 @@ import {
   MessageSquare, Bot, Link2, Wallet, Box, CreditCard, Wrench,
   LogOut, Sun, Moon, Star, Bell, Zap, Menu, ShieldCheck, Map,
   Radar, Activity, List, Sparkles, Briefcase, Send, MessageCircle,
-  FileBarChart2, Mail, UserSquare
+  Mail, UserSquare
 } from 'lucide-react';
 import { useTheme, useThemeIcon } from '../context/ThemeContext';
 
-export type Page = 'dashboard' | 'company' | 'users' | 'reports' | 'reports-dashboard' |
+export type Page = 'dashboard' | 'company' | 'users' | 'reports' |
   'sales-funnel' | 'leads' | 'clients' | 'products' | 'proposals' |
   'email-marketing' | 'agenda' | 'bidding-hub' | 'bidding-search' |
   'bidding-bulletin' | 'bidding-manage' | 'documents' | 'legal-consultant' |
@@ -35,7 +35,6 @@ const navGroups = [
       { id: 'dashboard' as Page, icon: LayoutDashboard, label: 'Dashboard' },
       { id: 'users' as Page, icon: Users, label: 'Equipe / Utilizadores' },
       { id: 'reports' as Page, icon: BarChart3, label: 'Relatórios & BI' },
-      { id: 'reports-dashboard' as Page, icon: FileBarChart2, label: 'BI Inteligente' },
       { id: 'licenses' as Page, icon: FileText, label: 'Licenças e Certidões' },
     ]
   },
@@ -91,7 +90,6 @@ const navGroups = [
 
 const iconMap: Record<string, React.ElementType> = {
   'reports': BarChart3,
-  'reports-dashboard': BarChart3,
   'products': Package,
   'agenda': Calendar,
   'bidding-bulletin': FileSearch,
