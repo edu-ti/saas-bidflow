@@ -150,7 +150,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
         {!isCollapsed ? (
           <div className="flex items-center gap-3 overflow-hidden animate-fade-in">
             {companyLogo ? (
-              <img src={companyLogo} alt="Logo" className="h-10 max-w-[180px] rounded-lg object-contain shrink-0" />
+              <img src={companyLogo} alt="Logo" className="h-32 max-w-[180px] rounded-lg object-contain shrink-0" />
             ) : (
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
                 <Zap className="w-4 h-4 text-primary-foreground" />
@@ -164,7 +164,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
           </div>
         ) : (
           companyLogo ? (
-            <img src={companyLogo} alt="Logo" className="w-8 h-8 rounded-lg object-contain shrink-0 mx-auto animate-fade-in" />
+            <img src={companyLogo} alt="Logo" className="w-40 h-40 rounded-lg object-contain shrink-0 mx-auto animate-fade-in" />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0 mx-auto animate-fade-in">
               <Zap className="w-4 h-4 text-primary-foreground" />
