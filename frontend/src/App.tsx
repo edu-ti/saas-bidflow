@@ -468,7 +468,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage={getPageFromPath()}
         onNavigate={(page) => navigate(`/${page}`)}
@@ -495,7 +495,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-background">
       <Sidebar
         activePage="dashboard"
         onNavigate={(page) => navigate(`/${page}`)}

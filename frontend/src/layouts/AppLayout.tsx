@@ -37,7 +37,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-bg-primary">
+    <div className="h-screen flex overflow-hidden bg-bg-primary">
       <Sidebar
         activePage={getPageFromPath()}
         onNavigate={(page) => navigate(`/${page === 'dashboard' ? '' : page}`)}
