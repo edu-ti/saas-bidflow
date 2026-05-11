@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PlusCircle, List, Eye, Download, Trash2, Save, FileCheck, Calendar, Lock, ShieldCheck, FileWarning, Sparkles, ChevronRight, Layout, FileText, Loader2, AlertTriangle, X } from 'lucide-react';
+import { ArrowLeft, PlusCircle, List, Eye, Download, Trash2, Save, FileCheck, ShieldCheck, FileWarning, Loader2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
@@ -48,7 +48,6 @@ export default function Licenses() {
     }
 
     setIsSaving(true);
-    toast.loading('Sincronizando com o Repositório Neural...', { duration: 1500 });
 
     setTimeout(() => {
       const expirationDate = new Date(newDoc.expirationDate);
@@ -67,86 +66,76 @@ export default function Licenses() {
       setDocuments([addedDoc, ...documents]);
       setNewDoc({ title: '', expirationDate: '' });
       setIsSaving(false);
-      toast.success('Certidão arquivada com sucesso!');
-    }, 1500);
+      toast.success('Documento salvo com sucesso!');
+    }, 500);
   };
 
   const handleView = (doc: LicenseDocument) => {
-    toast.success(`Visualizando: ${doc.title}`, { icon: '👁️' });
+    toast.success(`Visualizando: ${doc.title}`);
   };
 
   const handleDownload = (doc: LicenseDocument) => {
-    toast.success(`Download iniciado: ${doc.title}`, { icon: '📥' });
+    toast.success(`Download iniciado: ${doc.title}`);
   };
 
   const handleDelete = (id: string) => {
     setDocuments(documents.filter(d => d.id !== id));
-    toast.success('Documento removido do repositório.');
+    toast.success('Documento removido.');
   };
 
   return (
-    <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Gestão de <span className="text-gradient-gold">Licenças & Certidões</span>
+    <div className="space-y-6 animate-fade-in">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Licenças & Certidões
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
+          <p className="text-text-secondary text-sm mt-1 flex items-center gap-2">
             <ShieldCheck size={14} className="text-primary" />
-            Controle estratégico de conformidade e validade documental para licitações.
+            Controle de conformidade e validade documental para licitações.
           </p>
         </div>
         
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center gap-3 px-8 py-3.5 bg-surface-elevated/40 text-text-primary font-black rounded-2xl border border-border-subtle hover:bg-surface-elevated transition-all text-[10px] uppercase tracking-widest shadow-platinum-glow-sm"
+          className="btn btn-outline text-xs"
         >
-          <ArrowLeft size={16} className="text-primary" />
-          Retornar ao Painel Core
+          <ArrowLeft size={14} />
+          Voltar ao Dashboard
         </button>
       </header>
 
-      {/* Novo Documento - Platinum Form */}
-      <section className="platinum-card p-10 space-y-8 relative overflow-hidden bg-surface-elevated/10 backdrop-blur-xl border-border-subtle/30">
-        <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-          <Sparkles size={180} className="text-primary" />
-        </div>
-        
-        <div className="flex items-center gap-4 border-b border-border-subtle/20 pb-6">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-platinum-glow-sm">
-            <PlusCircle size={24} />
+      <section className="card p-6 space-y-6">
+        <div className="flex items-center gap-3 border-b border-border pb-4">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <PlusCircle size={20} />
           </div>
-          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-text-primary">Upload de Inteligência Documental</h3>
+          <h3 className="text-sm font-semibold text-text-primary">Novo Documento</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end relative z-10">
-          <div className="md:col-span-4 space-y-2 group">
-            <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Título / Designação Comercial</label>
-            <div className="relative">
-               <FileText className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5 opacity-40" />
-               <input 
-                 type="text" 
-                 placeholder="Ex: CND Federal - Receita" 
-                 value={newDoc.title}
-                 onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
-                 className="w-full bg-background/50 border border-border-medium rounded-2xl pl-14 pr-6 py-4 text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/30 shadow-inner-platinum" 
-               />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+          <div className="md:col-span-4 space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Título do Documento</label>
+            <input 
+              type="text" 
+              placeholder="Ex: CND Federal - Receita" 
+              value={newDoc.title}
+              onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
+              className="input" 
+            />
           </div>
-          <div className="md:col-span-3 space-y-2 group">
-            <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2 group-focus-within:text-primary transition-colors">Data de Vencimento</label>
-            <div className="relative">
-              <DatePicker
-                selected={newDoc.expirationDate ? new Date(`${newDoc.expirationDate}T12:00:00`) : null}
-                onChange={date => setNewDoc({ ...newDoc, expirationDate: date ? format(date, "yyyy-MM-dd") : '' })}
-              />
-            </div>
+          <div className="md:col-span-3 space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Data de Vencimento</label>
+            <DatePicker
+              selected={newDoc.expirationDate ? new Date(`${newDoc.expirationDate}T12:00:00`) : null}
+              onChange={date => setNewDoc({ ...newDoc, expirationDate: date ? format(date, "yyyy-MM-dd") : '' })}
+            />
           </div>
-          <div className="md:col-span-3 space-y-2">
-            <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] px-2">Repositório de Arquivo</label>
-            <label className="flex items-center justify-center w-full h-[52px] bg-surface-elevated/20 border-2 border-dashed border-border-medium rounded-2xl cursor-pointer hover:bg-surface-elevated/40 hover:border-primary/40 transition-all text-[10px] text-text-muted font-black uppercase tracking-widest group shadow-inner-platinum">
-              <Download size={14} className="mr-3 group-hover:text-primary transition-colors" />
-              Upload PDF / Objeto Digital
+          <div className="md:col-span-3 space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Arquivo</label>
+            <label className="flex items-center justify-center w-full h-[42px] bg-bg-tertiary border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-all text-xs text-text-muted font-medium gap-2">
+              <Download size={14} />
+              Upload PDF
               <input type="file" className="hidden" />
             </label>
           </div>
@@ -154,102 +143,80 @@ export default function Licenses() {
             <button 
               onClick={handleSave}
               disabled={isSaving}
-              className="btn-primary w-full py-4 px-6 shadow-platinum-glow flex items-center justify-center gap-3 uppercase text-[10px] tracking-widest"
+              className="btn btn-primary w-full"
             >
-              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              Salvar Certidão Platinum
+              {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Salvar Documento
             </button>
           </div>
         </div>
       </section>
 
-      {/* Documentos Cadastrados - Platinum List */}
-      <section className="platinum-card overflow-hidden bg-surface-elevated/10 backdrop-blur-md border-border-subtle/30">
-        <div className="p-8 border-b border-border-subtle/30 flex items-center justify-between bg-surface-elevated/10">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-               <List size={20} />
+      <section className="card overflow-hidden">
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+               <List size={18} />
             </div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-text-primary">Repositório Neural de Conformidade</h3>
+            <h3 className="text-sm font-semibold text-text-primary">Documentos Cadastrados</h3>
           </div>
-          <span className="bg-surface-elevated/40 px-6 py-2 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border border-border-subtle shadow-inner-platinum">
-            {documents.length} Objetos Digitais Ativos
+          <span className="badge badge-default">
+            {documents.length} documentos
           </span>
         </div>
 
-        <div className="overflow-x-auto scrollbar-platinum">
-          <table className="w-full text-left border-collapse text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-elevated/40 border-b border-border-subtle">
-                <th className="px-10 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60">Documento Estratégico</th>
-                <th className="px-10 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60 text-center">Vencimento</th>
-                <th className="px-10 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60 text-center">Status de Risco Core</th>
-                <th className="px-10 py-6 text-[10px] font-black text-text-muted uppercase tracking-[0.3em] opacity-60 text-right">Ações</th>
+              <tr className="border-b border-border">
+                <th className="px-6 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Documento</th>
+                <th className="px-6 py-3 text-xs font-medium text-text-muted uppercase tracking-wider text-center">Vencimento</th>
+                <th className="px-6 py-3 text-xs font-medium text-text-muted uppercase tracking-wider text-center">Status</th>
+                <th className="px-6 py-3 text-xs font-medium text-text-muted uppercase tracking-wider text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-subtle/20">
+            <tbody className="divide-y divide-border">
               {documents.map((doc) => (
-                <tr key={doc.id} className="hover:bg-surface-elevated/20 transition-all group border-b border-border-subtle/10 duration-300">
-                  <td className="px-10 py-8">
-                    <div className="flex items-center gap-5">
-                      <div className={`p-3 rounded-2xl shadow-platinum-glow-sm ${doc.status === 'vencido' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
-                        {doc.status === 'vencido' ? <FileWarning size={20} className="animate-pulse" /> : <FileCheck size={20} />}
+                <tr key={doc.id} className="hover:bg-bg-tertiary/50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${doc.status === 'vencido' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                        {doc.status === 'vencido' ? <FileWarning size={16} /> : <FileCheck size={16} />}
                       </div>
-                      <div className="space-y-1">
-                        <span className="font-black text-text-primary group-hover:text-primary transition-colors text-sm uppercase tracking-tight leading-none">{doc.title}</span>
-                        <p className="text-[9px] text-text-muted font-black uppercase tracking-widest opacity-40">REF_CODE: DOCUMENT_{doc.id.padStart(3, '0')}</p>
-                      </div>
+                      <span className="font-medium text-text-primary text-sm">{doc.title}</span>
                     </div>
                   </td>
-                  <td className="px-10 py-8 text-center font-black text-[11px] text-text-secondary tracking-widest opacity-80">{doc.expirationDate}</td>
-                  <td className="px-10 py-8">
-                    <div className="flex flex-col items-center gap-2">
+                  <td className="px-6 py-4 text-center text-sm text-text-secondary">{doc.expirationDate}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col items-center gap-1">
                       {doc.status === 'vencido' ? (
                         <>
-                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest shadow-platinum-glow-sm animate-pulse">
-                            VENCIDO_CRITICAL
-                          </span>
-                          <span className="text-[10px] text-red-500/60 font-black italic uppercase tracking-tighter">Há {doc.daysDiff} dias fora do SLA</span>
+                          <span className="badge badge-danger">Vencido</span>
+                          <span className="text-xs text-red-500/80">Há {doc.daysDiff} dias</span>
                         </>
                       ) : doc.daysDiff <= 5 ? (
                         <>
-                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 uppercase tracking-widest shadow-platinum-glow-sm animate-bounce">
-                            VENCIMENTO_PRÓXIMO
-                          </span>
-                          <span className="text-[10px] text-amber-600 font-black italic uppercase tracking-tighter">Restam apenas {doc.daysDiff} dias</span>
+                          <span className="badge badge-warning">Próximo</span>
+                          <span className="text-xs text-amber-500/80">Restam {doc.daysDiff} dias</span>
                         </>
                       ) : (
                         <>
-                          <span className="px-4 py-1.5 text-[9px] font-black rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest shadow-platinum-glow-sm">
-                            OPERACIONAL
-                          </span>
-                          <span className="text-[10px] text-emerald-500/60 font-black italic uppercase tracking-tighter">Vigente por {doc.daysDiff} dias</span>
+                          <span className="badge badge-success">Vigente</span>
+                          <span className="text-xs text-emerald-500/80">{doc.daysDiff} dias restantes</span>
                         </>
                       )}
                     </div>
                   </td>
-                  <td className="px-10 py-8 text-right">
-                    <div className="flex items-center justify-end gap-3 transition-all duration-300 transform">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleView(doc); }}
-                        className="p-3 bg-surface-elevated/40 hover:text-primary text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
-                        title="Visualizar Camada Digital"
-                      >
-                        <Eye size={18} />
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={(e) => { e.stopPropagation(); handleView(doc); }} className="btn btn-ghost p-2" title="Visualizar">
+                        <Eye size={16} />
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDownload(doc); }}
-                        className="p-3 bg-surface-elevated/40 hover:text-blue-500 text-text-muted rounded-xl border border-border-subtle transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
-                        title="Baixar Objeto"
-                      >
-                        <Download size={18} />
+                      <button onClick={(e) => { e.stopPropagation(); handleDownload(doc); }} className="btn btn-ghost p-2" title="Baixar">
+                        <Download size={16} />
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
-                        className="p-3 bg-red-500/5 hover:text-red-500 text-red-500/60 rounded-xl border border-red-500/10 transition-all shadow-inner-platinum hover:scale-110 active:scale-95" 
-                        title="Remover Registro"
-                      >
-                        <Trash2 size={18} />
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }} className="btn btn-ghost p-2 text-red-500 hover:bg-red-500/10" title="Remover">
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -260,52 +227,52 @@ export default function Licenses() {
         </div>
       </section>
 
-      {/* Alerta de Conformidade Platinum - Popup Modal */}
       <Modal 
         isOpen={showPopup} 
         onClose={() => setShowPopup(false)} 
-        title="CENTRAL DE ALERTAS: RISCO DOCUMENTAL"
+        title="Alertas de Risco Documental"
+        description="Certidões vencidas ou próximas do vencimento que podem impactar participações em licitações."
         size="lg"
       >
-        <div className="space-y-8 p-2">
-          <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center gap-6 shadow-platinum-glow-sm">
-            <div className="w-16 h-16 rounded-2xl bg-red-500 flex items-center justify-center text-white shadow-lg animate-pulse">
-              <AlertTriangle size={32} />
+        <div className="space-y-4 p-2">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center text-white shrink-0">
+              <AlertTriangle size={24} />
             </div>
             <div>
-              <h4 className="text-sm font-black text-red-500 uppercase tracking-tighter">Ação Corretiva Imediata Necessária</h4>
-              <p className="text-[11px] text-text-muted font-medium mt-1">Identificamos certidões vencidas ou em zona crítica de expiração (5 dias) que podem impactar a participação em novos certames.</p>
+              <h4 className="text-sm font-semibold text-red-500">Ação Corretiva Necessária</h4>
+              <p className="text-xs text-text-muted mt-0.5">Certidões vencidas ou próximas do vencimento podem impactar participações em licitações.</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {criticalDocs.map(doc => (
-              <div key={doc.id} className="p-5 bg-surface-elevated/40 border border-border-subtle rounded-2xl flex items-center justify-between group hover:border-primary/40 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${doc.status === 'vencido' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'}`}>
-                    <FileWarning size={18} />
+              <div key={doc.id} className="p-4 bg-bg-tertiary/50 border border-border rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg shrink-0 ${doc.status === 'vencido' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                    <FileWarning size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-text-primary uppercase tracking-tight">{doc.title}</p>
-                    <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${doc.status === 'vencido' ? 'text-red-500' : 'text-amber-500'}`}>
+                    <p className="text-sm font-medium text-text-primary">{doc.title}</p>
+                    <p className={`text-xs font-medium mt-0.5 ${doc.status === 'vencido' ? 'text-red-500' : 'text-amber-500'}`}>
                       {doc.status === 'vencido' ? `Vencido há ${doc.daysDiff} dias` : `Vence em ${doc.daysDiff} dias`}
                     </p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setShowPopup(false)}
-                  className="p-2 bg-surface-elevated/60 text-text-muted hover:text-primary rounded-lg transition-colors"
-                >
-                  <ChevronRight size={16} />
-                </button>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t border-border-subtle">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button 
               onClick={() => setShowPopup(false)}
-              className="px-10 py-4 bg-primary text-background text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-platinum-glow hover:scale-105 transition-transform"
+              className="btn btn-outline"
+            >
+              Fechar
+            </button>
+            <button 
+              onClick={() => setShowPopup(false)}
+              className="btn btn-primary"
             >
               Compreendido
             </button>

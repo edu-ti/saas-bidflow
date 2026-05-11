@@ -4,7 +4,7 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { setDefaultOptions } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Pencil, Trash2, X, Loader2, Save, Calendar as CalendarIcon, Clock, Lock, MapPin, AlignLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Loader2, Save, Calendar as CalendarIcon, MapPin, AlignLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
@@ -65,7 +65,7 @@ export default function Agenda() {
       }));
       setEvents(formattedEvents);
     } catch (error) {
-      toast.error('Erro ao sincronizar cronograma');
+      toast.error('Erro ao carregar agenda');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function Agenda() {
     try {
       if (isEditing && editingId) {
         await api.put(`/api/events/${editingId}`, formData);
-        toast.success('Prazos atualizados!');
+        toast.success('Evento atualizado!');
       } else {
         await api.post('/api/events', formData);
         toast.success('Evento agendado!');
@@ -85,7 +85,7 @@ export default function Agenda() {
       resetForm();
       fetchEvents();
     } catch (error) {
-      toast.error('Erro na sincronização');
+      toast.error('Erro ao salvar evento');
     }
   };
 
@@ -104,7 +104,7 @@ export default function Agenda() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Eliminar este compromisso estratégico?')) return;
+    if (!confirm('Remover este evento?')) return;
     try {
       await api.delete(`/api/events/${id}`);
       toast.success('Evento removido.');
@@ -123,81 +123,74 @@ export default function Agenda() {
   const eventStyleGetter = (event: BigCalendarEvent) => {
     const isOpp = event.resource === 'opportunity';
     return {
-      className: isOpp ? 'calendar-event-gold' : 'calendar-event-blue',
       style: {
-        borderRadius: '12px',
+        borderRadius: '8px',
         border: 'none',
         padding: '4px 10px',
-        fontSize: '11px',
-        fontWeight: '800',
-        textTransform: 'uppercase' as const,
-        letterSpacing: '0.05em',
-        boxShadow: isOpp ? '0 4px 12px rgba(var(--color-primary-rgb), 0.2)' : '0 4px 12px rgba(var(--color-secondary-rgb), 0.2)',
-        color: isOpp ? '#0a0a0b' : '#ffffff'
+        fontSize: '12px',
+        fontWeight: '600',
+        backgroundColor: isOpp ? 'var(--primary)' : 'var(--color-secondary)',
+        color: isOpp ? '#ffffff' : '#ffffff',
       }
     };
   };
 
   return (
-    <div className="p-8 h-screen flex flex-col bg-background space-y-10 text-text-primary overflow-hidden animate-in fade-in duration-700">
+    <div className="flex flex-col h-[calc(100vh-64px)] space-y-4 animate-fade-in overflow-hidden">
       <style>{`
-        .rbc-calendar { background: transparent; color: var(--text-primary) !important; font-family: inherit; }
-        .rbc-header { padding: 20px !important; font-weight: 900 !important; text-transform: uppercase; font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle) !important; }
-        .rbc-month-view { border: 1px solid var(--border-subtle) !important; border-radius: 2.5rem; background: var(--surface-elevated-low); overflow: hidden; }
-        .rbc-day-bg { border-left: 1px solid var(--border-subtle) !important; transition: background 0.2s; }
-        .rbc-day-bg:hover { background: var(--surface-elevated); }
-        .rbc-month-row { border-top: 1px solid var(--border-subtle) !important; }
-        .rbc-today { background: var(--color-primary-faint) !important; }
-        .rbc-off-range-bg { background: var(--surface-elevated-muted) !important; opacity: 0.5; }
-        .rbc-toolbar button { color: var(--text-primary) !important; border: 1px solid var(--border-subtle) !important; background: var(--surface-elevated) !important; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; padding: 10px 20px !important; border-radius: 12px !important; margin: 0 4px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); shadow: var(--platinum-glow-sm); }
-        .rbc-toolbar button:hover { background: var(--color-primary-faint) !important; border-color: var(--color-primary-muted) !important; color: var(--color-primary) !important; transform: translateY(-1px); }
-        .rbc-toolbar button.rbc-active { background: var(--color-primary) !important; color: #0a0a0b !important; border-color: var(--color-primary) !important; box-shadow: var(--platinum-glow); }
-        .rbc-event { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 4px !important; }
-        .rbc-event:hover { transform: scale(1.03) translateY(-1px); filter: brightness(1.1); z-index: 10; }
-        .calendar-event-gold { background: var(--color-primary) !important; border: 1px solid rgba(0,0,0,0.1) !important; }
-        .calendar-event-blue { background: var(--color-secondary) !important; border: 1px solid rgba(0,0,0,0.1) !important; }
-        .rbc-show-more { color: var(--color-primary) !important; font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px; }
-        .rbc-date-cell { padding: 12px !important; font-weight: 800; font-size: 13px; color: var(--text-muted); }
-        .rbc-now .rbc-date-cell { color: var(--color-primary) !important; }
+        .rbc-calendar { background: transparent; color: var(--text-primary); font-family: inherit; }
+        .rbc-header { padding: 16px !important; font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 1px solid var(--border) !important; }
+        .rbc-month-view { border: 1px solid var(--border) !important; border-radius: 12px; background: var(--bg-secondary); overflow: hidden; }
+        .rbc-day-bg { border-left: 1px solid var(--border) !important; transition: background 0.2s; }
+        .rbc-day-bg:hover { background: var(--bg-tertiary); }
+        .rbc-month-row { border-top: 1px solid var(--border) !important; }
+        .rbc-today { background: color-mix(in srgb, var(--primary) 5%, transparent) !important; }
+        .rbc-off-range-bg { background: var(--bg-tertiary) !important; opacity: 0.5; }
+        .rbc-toolbar button { color: var(--text-primary) !important; border: 1px solid var(--border) !important; background: var(--bg-secondary) !important; font-weight: 600; font-size: 12px; padding: 8px 16px !important; border-radius: 8px !important; margin: 0 4px; transition: all 0.2s; }
+        .rbc-toolbar button:hover { background: var(--bg-tertiary) !important; border-color: var(--primary) !important; color: var(--primary) !important; }
+        .rbc-toolbar button.rbc-active { background: var(--primary) !important; color: #ffffff !important; border-color: var(--primary) !important; }
+        .rbc-event { transition: all 0.2s; margin-bottom: 3px !important; }
+        .rbc-event:hover { filter: brightness(1.1); }
+        .rbc-show-more { color: var(--primary) !important; font-weight: 600; font-size: 11px; padding: 4px; }
+        .rbc-date-cell { padding: 10px !important; font-weight: 500; font-size: 13px; color: var(--text-secondary); }
+        .rbc-now .rbc-date-cell { color: var(--primary) !important; font-weight: 600; }
       `}</style>
 
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-text-primary sm:text-4xl uppercase">
-            Cronograma <span className="text-gradient-gold">Estratégico</span>
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Agenda
           </h1>
-          <p className="text-text-secondary max-w-prose-ui flex items-center gap-2 text-sm font-medium">
-            <Lock size={14} className="text-primary" />
-            Agenda unificada de CRM, prazos fatais e sessões públicas Platinum.
+          <p className="text-text-secondary text-sm mt-1">
+            Compromissos, reuniões e prazos estratégicos.
           </p>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="hidden lg:flex items-center gap-8 bg-surface-elevated/40 px-8 py-3.5 rounded-2xl border border-border-subtle shadow-platinum-glow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_10px_rgba(var(--color-secondary-rgb),0.5)]"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Business / CRM</span>
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 px-4 py-2 rounded-lg border border-border bg-bg-secondary">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
+              <span className="text-xs text-text-muted font-medium">Editais / Prazos</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--color-primary-rgb),0.5)]"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Editais / Prazos</span>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--color-secondary)' }}></div>
+              <span className="text-xs text-text-muted font-medium">CRM / Reuniões</span>
             </div>
           </div>
           <button
             onClick={() => { resetForm(); setIsModalOpen(true); }}
-            aria-label="Agendar novo compromisso"
-            className="btn-primary py-3.5 px-10 shadow-platinum-glow"
+            className="btn btn-primary text-xs"
           >
-            <Plus className="w-4 h-4" />
+            <Plus size={14} />
             Novo Evento
           </button>
         </div>
       </header>
 
-      <div className="platinum-card p-10 flex-1 min-h-[500px] flex flex-col overflow-hidden bg-surface-elevated/10 backdrop-blur-md">
+      <div className="card p-4 flex-1 min-h-[500px] flex flex-col overflow-hidden">
         {loading ? (
-          <div className="h-full flex flex-col items-center justify-center gap-6 opacity-40">
-            <Loader2 className="animate-spin text-primary w-12 h-12" />
-            <p className="font-black uppercase tracking-[0.4em] text-[10px]">Sincronizando Agenda Global...</p>
+          <div className="h-full flex flex-col items-center justify-center gap-4">
+            <Loader2 className="animate-spin text-primary w-8 h-8" />
+            <p className="text-sm text-text-muted">Carregando agenda...</p>
           </div>
         ) : (
           <Calendar
@@ -218,26 +211,23 @@ export default function Agenda() {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'REFINAR COMPROMISSO' : 'NOVA DATA ESTRATÉGICA'} size="3xl">
-        <form onSubmit={handleSubmit} className="space-y-8 p-2">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Título do Compromisso *</label>
-            <div className="relative">
-              <CalendarIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/60 w-5 h-5" />
-              <input
-                type="text"
-                value={formData.title}
-                onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full pl-14 pr-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40"
-                placeholder="Ex: Reunião de Alinhamento / Prazo Limite Edital X"
-                required
-              />
-            </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditing ? 'Editar Evento' : 'Novo Evento'} size="lg">
+        <form onSubmit={handleSubmit} className="space-y-5 p-2">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Título *</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={e => setFormData({ ...formData, title: e.target.value })}
+              className="input"
+              placeholder="Ex: Reunião de Alinhamento / Prazo Limite Edital X"
+              required
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Início do Evento *</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Início *</label>
               <DatePicker
                 selected={formData.start_date ? new Date(formData.start_date) : null}
                 onChange={date => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd'T'HH:mm") : '' })}
@@ -245,8 +235,8 @@ export default function Agenda() {
                 placeholderText="dd/mm/aaaa --:--"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Conclusão Estimada</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Término</label>
               <DatePicker
                 selected={formData.end_date ? new Date(formData.end_date) : null}
                 onChange={date => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd'T'HH:mm") : '' })}
@@ -256,71 +246,63 @@ export default function Agenda() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Classificação</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Tipo</label>
               <Select
                 value={formData.type}
                 onChange={v => setFormData({ ...formData, type: v as 'event' | 'opportunity' })}
                 options={[
                   { value: 'event', label: 'Evento / Reunião (CRM)' },
-                  { value: 'opportunity', label: 'Prazo / Edital (Strategic)' }
+                  { value: 'opportunity', label: 'Prazo / Edital (Estratégico)' }
                 ]}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Localidade / Link</label>
-              <div className="relative">
-                <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={e => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full pl-14 pr-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40"
-                  placeholder="Presencial ou Meet/Teams..."
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Briefing do Evento</label>
-            <div className="relative">
-              <AlignLeft className="absolute left-5 top-5 text-text-muted w-5 h-5" />
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                className="w-full pl-14 pr-5 py-4 bg-background border border-border-medium rounded-xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all resize-none placeholder:text-text-muted/40"
-                rows={4}
-                placeholder="Detalhes adicionais e objetivos da agenda..."
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary">Local</label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                className="input"
+                placeholder="Presencial ou Meet/Teams..."
               />
             </div>
           </div>
 
-          <div className="flex justify-between items-center pt-8 border-t border-border-subtle">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-primary">Descrição</label>
+            <textarea
+              value={formData.description}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
+              className="input resize-none"
+              rows={4}
+              placeholder="Detalhes adicionais e objetivos..."
+            />
+          </div>
+
+          <div className="flex justify-between items-center pt-4 border-t border-border">
             {isEditing && (
               <button
                 type="button"
                 onClick={() => handleDelete(editingId!)}
-                className="px-8 py-4 bg-red-500/10 text-red-500 border border-red-500/20 font-black rounded-xl hover:bg-red-500/20 transition-all text-[10px] uppercase tracking-widest flex items-center gap-3"
+                className="btn btn-ghost text-red-500 hover:bg-red-500/10"
               >
-                <Trash2 className="w-4 h-4" />
-                Eliminar
+                <Trash2 size={14} />
+                Excluir
               </button>
             )}
-            <div className="flex gap-6 ml-auto">
+            <div className="flex gap-3 ml-auto">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-8 py-3 text-text-muted font-black hover:text-text-primary transition-all text-[10px] uppercase tracking-widest"
+                className="btn btn-outline"
               >
-                Descartar
+                Cancelar
               </button>
-              <button
-                type="submit"
-                className="btn-primary py-4 px-12 uppercase text-[10px] tracking-widest shadow-platinum-glow"
-              >
-                {isEditing ? 'Atualizar Evento' : 'Confirmar Agenda'}
+              <button type="submit" className="btn btn-primary">
+                <Save size={14} />
+                {isEditing ? 'Atualizar' : 'Salvar'}
               </button>
             </div>
           </div>

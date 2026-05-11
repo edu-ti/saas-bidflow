@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BarChart3, FileBarChart2, Target } from 'lucide-react';
 import ReportsDashboardBI from './reports/ReportsDashboardBI';
 import ReportsDetailed from './reports/ReportsDetailed';
@@ -12,8 +13,13 @@ const tabs = [
   { id: 'goals' as TabType, label: 'Metas e Comissões', icon: Target },
 ];
 
+const validTabs: TabType[] = ['dashboard', 'detailed', 'goals'];
+
 export default function ReportsBIPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab') as TabType | null;
+  const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : 'dashboard';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)] bg-bg-primary">
@@ -35,7 +41,7 @@ export default function ReportsBIPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => { setActiveTab(tab.id); setSearchParams({ tab: tab.id }); }}
                 className={`
                   relative whitespace-nowrap py-4 px-4 text-sm font-semibold transition-all duration-200
                   flex items-center gap-2

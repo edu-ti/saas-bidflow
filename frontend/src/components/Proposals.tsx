@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PreProposalsList from './proposals/PreProposalsList';
 import ProposalsTable from './proposals/ProposalsTable';
 import CreateProposalForm from './proposals/CreateProposalForm';
 
 export default function Proposals() {
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreating, setIsCreating] = React.useState(false);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      
+    <div className="space-y-6 animate-fade-in">
       {!isCreating ? (
         <>
           <PreProposalsList />
@@ -17,7 +16,6 @@ export default function Proposals() {
       ) : (
         <CreateProposalForm onClose={() => setIsCreating(false)} />
       )}
-      
     </div>
   );
 }

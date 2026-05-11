@@ -198,7 +198,7 @@ export default function LeadsDashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Registrar Nova Oportunidade"
-        size="md"
+        size="xl"
       >
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="space-y-1.5">
