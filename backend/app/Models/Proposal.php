@@ -14,6 +14,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'status',
     'total_value',
     'notes',
+    'numero_proposta',
+    'data_validade',
+    'motivo_status',
+    'faturamento',
+    'treinamento',
+    'condicoes_pagamento',
+    'prazo_entrega',
+    'garantia_equipamentos',
+    'garantia_acessorios',
+    'instalacao',
+    'assistencia_tecnica',
+    'frete_tipo',
+    'frete_valor',
 ])]
 class Proposal extends Model
 {

@@ -102,30 +102,18 @@ export default function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [roleForm, setRoleForm] = useState({
     name: '',
     permissions: {} as any
   });
-
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const allowedModules = currentUser.allowed_modules || [];
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [usersRes, rolesRes] = await Promise.all([
-        api.get('/api/tenant/users'),
-        api.get('/api/roles')
-      ]);
-      setUsers(usersRes.data.data || usersRes.data || []);
-      setRoles(rolesRes.data || []);
-    } catch (err) {
-      toast.error('Falha na orquestração de dados.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [userForm, setUserForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role_id: '' as string
+  });
 
   useEffect(() => {
     fetchData();
@@ -215,6 +203,29 @@ export default function UsersManagement() {
     }
   };
 
+  const handleOpenUserModal = () => {
+    setUserForm({ name: '', email: '', password: '', role_id: '' });
+    setShowUserModal(true);
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        name: userForm.name,
+        email: userForm.email,
+        password: userForm.password,
+        role_id: userForm.role_id || null,
+      };
+      await api.post('/api/tenant/users', payload);
+      toast.success('Usuário criado com sucesso!');
+      setShowUserModal(false);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.response?.data?.error || 'Erro ao criar usuário.');
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -230,7 +241,7 @@ export default function UsersManagement() {
         
         <div className="flex gap-3">
           {activeTab === 'users' ? (
-            <button className="btn btn-primary flex items-center gap-2">
+            <button onClick={handleOpenUserModal} className="btn btn-primary flex items-center gap-2">
               <Plus size={16} /> <span>Novo Usuário</span>
             </button>
           ) : (
@@ -375,7 +386,7 @@ export default function UsersManagement() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {MODULES.filter(m => m.id === 'management' || allowedModules.includes(m.id)).map(mod => (
+                      {MODULES.map(mod => (
                         <Fragment key={mod.id}>
                           <tr className="bg-bg-secondary">
                             <td colSpan={6} className="px-6 py-2.5">
@@ -427,6 +438,79 @@ export default function UsersManagement() {
                 <button type="button" onClick={() => setShowRoleModal(false)} className="btn btn-outline">Cancelar</button>
                 <button type="submit" className="btn btn-primary flex items-center gap-2">
                   <Save size={16} /> <span>Salvar Perfil</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* User Creation Modal */}
+      {showUserModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
+          <div className="bg-bg-primary border border-border rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-bg-secondary">
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">Novo Usuário</h2>
+                <p className="text-sm text-text-secondary">Cadastrar membro da equipe</p>
+              </div>
+              <button onClick={() => setShowUserModal(false)} className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors"><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleCreateUser} className="p-6 space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Nome*</label>
+                <input
+                  required
+                  value={userForm.name}
+                  onChange={e => setUserForm({ ...userForm, name: e.target.value })}
+                  className="input w-full"
+                  placeholder="Nome completo"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">E-mail*</label>
+                <input
+                  required
+                  type="email"
+                  value={userForm.email}
+                  onChange={e => setUserForm({ ...userForm, email: e.target.value })}
+                  className="input w-full"
+                  placeholder="usuario@empresa.com"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Senha*</label>
+                <input
+                  required
+                  type="password"
+                  value={userForm.password}
+                  onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                  className="input w-full"
+                  placeholder="Mínimo 8 caracteres"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary">Perfil de Acesso</label>
+                <select
+                  value={userForm.role_id}
+                  onChange={e => setUserForm({ ...userForm, role_id: e.target.value })}
+                  className="input w-full"
+                >
+                  <option value="">Sem perfil (acesso básico)</option>
+                  {roles.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <button type="button" onClick={() => setShowUserModal(false)} className="btn btn-outline">Cancelar</button>
+                <button type="submit" className="btn btn-primary flex items-center gap-2">
+                  <Save size={16} /> <span>Criar Usuário</span>
                 </button>
               </div>
             </form>

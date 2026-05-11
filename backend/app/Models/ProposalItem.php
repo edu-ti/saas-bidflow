@@ -18,6 +18,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'total_price',
     'brand',
     'model',
+    'status',
+    'meses_locacao',
+    'desconto_percent',
+    'unidade_medida',
+    'parametros',
+    'descricao_detalhada',
+    'imagem_url',
 ])]
 class ProposalItem extends Model
 {
@@ -29,6 +36,9 @@ class ProposalItem extends Model
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:4',
             'total_price' => 'decimal:2',
+            'desconto_percent' => 'decimal:2',
+            'meses_locacao' => 'integer',
+            'parametros' => 'array',
         ];
     }
 
