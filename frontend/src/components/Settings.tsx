@@ -21,7 +21,12 @@ import {
   History,
   Mail,
   Phone,
-  Plus
+  Plus,
+  Volume2,
+  BarChart3,
+  TrendingUp,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
@@ -307,6 +312,143 @@ const Settings = () => {
                     <LogOut size={16} /> Encerrar Sessão
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "notifications" && (
+            <div className="space-y-8 max-w-3xl animate-in fade-in duration-500">
+              <div className="border-b border-border pb-6">
+                <h2 className="text-xl font-semibold text-text-primary">Alertas e Business Intelligence</h2>
+                <p className="text-text-secondary text-sm mt-1">Configure suas preferências de notificação e alertas estratégicos.</p>
+              </div>
+
+              {/* Alertas de Sistema */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Canais de Notificação</h3>
+                <p className="text-xs text-text-muted">Escolha como deseja receber os alertas do sistema.</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Email */}
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                      <Mail size={20} className="text-blue-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Notificações por Email</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Relatórios diários e alertas de alto impacto</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-primary transition-colors">
+                    <span className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform" />
+                  </button>
+                </div>
+
+                {/* Push */}
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                      <Smartphone size={20} className="text-green-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Push no Navegador</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Alertas instantâneos enquanto estiver logado</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-primary transition-colors">
+                    <span className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform" />
+                  </button>
+                </div>
+
+                {/* Som */}
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                      <Volume2 size={20} className="text-amber-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Aviso Sonoro</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Som para alertas de prioridade crítica</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-bg-tertiary border border-border transition-colors">
+                    <span className="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-text-muted shadow-sm transition-transform" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Tipos de Alerta */}
+              <div className="space-y-2 pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Tipos de Alerta</h3>
+                <p className="text-xs text-text-muted">Selecione quais eventos acionam notificações.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                      <AlertTriangle size={20} className="text-red-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Licitações com Prazo Crítico</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Alertas quando o prazo for menor que 48h</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-primary transition-colors">
+                    <span className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform" />
+                  </button>
+                </div>
+
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                      <TrendingUp size={20} className="text-purple-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Novos Concorrentes Detectados</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Monitoramento de mercado e concorrência</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-primary transition-colors">
+                    <span className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform" />
+                  </button>
+                </div>
+
+                <div className="card p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                      <RefreshCw size={20} className="text-cyan-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary">Atualização de Editais</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Mudanças em licitações que você acompanha</p>
+                    </div>
+                  </div>
+                  <button className="relative w-12 h-7 rounded-full bg-primary transition-colors">
+                    <span className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform" />
+                  </button>
+                </div>
+              </div>
+
+              {/* BI Link */}
+              <div className="pt-4 border-t border-border">
+                <a
+                  href="/reports"
+                  className="card p-5 flex items-center justify-between hover:border-primary transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <BarChart3 size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-text-primary group-hover:text-primary transition-colors">Relatórios de BI</h4>
+                      <p className="text-xs text-text-muted mt-0.5">Acesse dashboards e relatórios estratégicos completos</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-text-muted group-hover:text-primary transition-all group-hover:translate-x-1" />
+                </a>
               </div>
             </div>
           )}

@@ -172,6 +172,7 @@ function Topbar({ title }: { title?: string }) {
       '/accounts-payable-receivable': 'Contas',
       '/chatbot': 'Chatbot',
       '/conversations': 'Conversas',
+      '/support': 'Central de Atendimento',
       '/admin': 'Administração',
       '/settings': 'Configurações',
     };
@@ -464,6 +465,10 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/accounts-payable-receivable') return 'accounts-payable-receivable';
     if (path === '/finance') return 'finance';
     if (path === '/admin') return 'admin';
+    if (path === '/chatbot') return 'chatbot';
+    if (path === '/conversations') return 'conversations';
+    if (path === '/support') return 'support';
+    if (path === '/settings') return 'settings';
     return 'dashboard';
   };
 
@@ -914,6 +919,16 @@ function AppContent() {
         } />
 
         <Route path="/conversations" element={
+          <ProtectedRoute>
+            <PermissionRoute permission="chatbot">
+              <AuthenticatedLayout>
+                <Conversations />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/support" element={
           <ProtectedRoute>
             <PermissionRoute permission="chatbot">
               <AuthenticatedLayout>
