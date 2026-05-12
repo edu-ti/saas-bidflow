@@ -27,20 +27,26 @@ Route::post('/webhook/payments', [\App\Http\Controllers\SubscriptionWebhookContr
 Route::post('/webhook/asaas', [\App\Http\Controllers\AsaasWebhookController::class, 'handle']);
 
 Route::get('/user', function (Request $request) {
-    $user = $request->user();
+    $user = $request->user()->load('role');
     $company = $user->company;
     $plan = $company ? $company->plan : null;
-    $role = $user->role;
-    
+
     $features = $plan && is_array($plan->features) ? $plan->features : [];
     $addons = $company && is_array($company->addons) ? $company->addons : [];
-    
-    $userData = $user->toArray();
-    $userData['allowed_modules'] = array_values(array_unique(array_merge($features, $addons)));
-    $userData['role_name'] = $role ? $role->name : ($user->is_admin ? 'Administrador' : 'Usuário');
-    $userData['permissions'] = $role ? $role->permissions : ($user->is_admin ? null : []);
-    
-    return $userData;
+    $allowed_modules = array_values(array_unique(array_merge($features, $addons)));
+
+    return response()->json([
+        'id'              => $user->id,
+        'name'            => $user->name,
+        'email'           => $user->email,
+        'role_id'         => $user->role_id,
+        'role_name'       => $user->role?->name ?? ($user->is_admin ? 'Administrador' : 'Usuário'),
+        'permissions'     => $user->role?->permissions ?? ($user->is_admin ? null : []),
+        'company_id'      => $user->company_id,
+        'is_superadmin'   => (bool) $user->is_superadmin,
+        'is_admin'        => (bool) $user->is_admin,
+        'allowed_modules' => $allowed_modules,
+    ]);
 })->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->group(function () {
