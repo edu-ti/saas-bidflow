@@ -31,7 +31,6 @@ class AuthController extends Controller
         $features = is_array($plan?->features) ? $plan->features : [];
         $addons = is_array($company?->addons) ? $company->addons : [];
         $allowed_modules = array_values(array_unique(array_merge($features, $addons)));
-        $role = $user->role_id ? \App\Models\Role::find($user->role_id) : null;
 
         return response()->json([
             'token' => $token,
@@ -40,8 +39,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role_id' => $user->role_id,
-                'role_name' => $role?->name ?? ($user->is_admin ? 'Administrador' : 'Usuário'),
-                'permissions' => $role?->permissions ?? ($user->is_admin ? null : []),
+                'role_name' => $user->role?->name ?? ($user->is_admin ? 'Administrador' : 'Usuário'),
+                'permissions' => $user->role?->permissions ?? null,
                 'company_id' => $user->company_id,
                 'is_superadmin' => (bool) $user->is_superadmin,
                 'is_admin' => (bool) $user->is_admin,

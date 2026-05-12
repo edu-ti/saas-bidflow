@@ -9,7 +9,7 @@ import {
     Radar, Activity, List, Sparkles, Briefcase, Send, MessageCircle,
     Mail, UserSquare, Lock
 } from 'lucide-react';
-import { useTheme, useThemeIcon } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 
 export type Page = 'dashboard' | 'company' | 'users' | 'reports' |
     'sales-funnel' | 'leads' | 'clients' | 'products' | 'proposals' |
@@ -72,36 +72,29 @@ const pagePermissionMap: Record<Page, { module: string; page: string }> = {
     'conversations': { module: 'modules', page: 'conversations' },
 };
 
-const hasPagePermission = (page: Page): boolean => {
+const hasPagePermission = (page: Page, user: any): boolean => {
     if (page === 'dashboard') return true;
 
-    const userStr = localStorage.getItem('user');
-    if (!userStr) return false;
+    if (!user) return false;
 
-    try {
-        const user = JSON.parse(userStr);
+    if (user.is_superadmin || user.is_admin) return true;
 
-        if (user.is_superadmin || user.is_admin) return true;
-
-        if (!user.permissions || Object.keys(user.permissions).length === 0) {
-            return false;
-        }
-
-        const permConfig = pagePermissionMap[page];
-        if (!permConfig) return false;
-
-        const { module, page: pageId } = permConfig;
-
-        const modulePerms = user.permissions[module];
-        if (!modulePerms) return false;
-
-        const pagePerms = modulePerms[pageId];
-        if (!pagePerms) return false;
-
-        return pagePerms.view === true;
-    } catch {
+    if (!user.permissions || Object.keys(user.permissions).length === 0) {
         return false;
     }
+
+    const permConfig = pagePermissionMap[page];
+    if (!permConfig) return false;
+
+    const { module, page: pageId } = permConfig;
+
+    const modulePerms = user.permissions[module];
+    if (!modulePerms) return false;
+
+    const pagePerms = modulePerms[pageId];
+    if (!pagePerms) return false;
+
+    return pagePerms.view === true;
 };
 
 const navGroups = [
@@ -184,6 +177,16 @@ const iconMap: Record<string, React.ElementType> = {
     'admin': Settings,
 };
 
+function getUserPermissions() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+        return JSON.parse(userStr);
+    } catch {
+        return null;
+    }
+}
+
 export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -192,14 +195,21 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
     const [companyLogo, setCompanyLogo] = useState<string>(localStorage.getItem('company_logo') || '');
     const [showLockedToast, setShowLockedToast] = useState(false);
     const [lockedLabel, setLockedLabel] = useState('');
+    const [userPerms, setUserPerms] = useState<ReturnType<typeof getUserPermissions>>(getUserPermissions());
 
     useEffect(() => {
         const handleStorageChange = () => {
             setCompanyLogo(localStorage.getItem('company_logo') || '');
+            setUserPerms(getUserPermissions());
         };
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
+
+    // Atualiza permissões sempre que o componente montar (útil após login/logout)
+    useEffect(() => {
+        setUserPerms(getUserPermissions());
+    }, [activePage]);
 
     const toggleGroup = (title: string) => {
         setExpandedGroups(prev =>
@@ -279,7 +289,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }: SidebarPro
                                     {group.items.map((item) => {
                                         const Icon = item.icon;
                                         const active = isActive(item.id);
-                                        const permitted = hasPagePermission(item.id);
+                                        const permitted = hasPagePermission(item.id, userPerms);
 
                                         const handleClick = () => {
                                             if (!permitted) {
