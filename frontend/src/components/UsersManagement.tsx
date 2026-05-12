@@ -498,6 +498,17 @@ export default function UsersManagement() {
       if (editingRole) {
         await api.put(`/api/roles/${editingRole.id}`, roleForm);
         toast.success('Perfil de acesso atualizado.');
+        // Se o usuário logado tem esse perfil, atualiza o localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (Number(storedUser.role_id) === Number(editingRole.id)) {
+          try {
+            const { data: refreshedUser } = await api.get('/api/user');
+            localStorage.setItem('user', JSON.stringify(refreshedUser));
+            window.dispatchEvent(new Event('storage'));
+          } catch (e) {
+            // ignorar
+          }
+        }
       } else {
         await api.post('/api/roles', roleForm);
         toast.success('Novo perfil de acesso consolidado.');
@@ -578,16 +589,20 @@ export default function UsersManagement() {
         payload.password = userForm.password;
       }
       await api.put(`/api/tenant/users/${editingUser.id}`, payload);
-      toast.success('Usuário atualizado com sucesso!');
+      toast.success('Usuário atualizado! O usuário precisará refazer o login para aplicar as novas permissões.');
       setShowUserModal(false);
       fetchData().catch(() => {});
 
-      // Se o usuário editado for o próprio usuário logado, atualiza o localStorage
+      // Atualiza localStorage SEMPRE que o usuário editado for o próprio logado
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      if (storedUser.id === editingUser.id) {
-        const { data: refreshedUser } = await api.get('/api/user');
-        localStorage.setItem('user', JSON.stringify(refreshedUser));
-        window.dispatchEvent(new Event('storage'));
+      if (Number(storedUser.id) === Number(editingUser.id)) {
+        try {
+          const { data: refreshedUser } = await api.get('/api/user');
+          localStorage.setItem('user', JSON.stringify(refreshedUser));
+          window.dispatchEvent(new Event('storage'));
+        } catch (e) {
+          console.warn('Não foi possível atualizar permissões automaticamente.');
+        }
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.response?.data?.error || 'Erro ao atualizar usuário.');
