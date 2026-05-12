@@ -53,6 +53,7 @@ class CompanyManagementController extends Controller
         $validated['company_id'] = $authUser->company_id;
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = 'active';
+        $validated['is_admin'] = false;
 
         $newUser = User::create($validated);
 
@@ -78,6 +79,7 @@ class CompanyManagementController extends Controller
         ]);
 
         $targetUser->update($validated);
+        $targetUser->load('role');
 
         return response()->json(['data' => $targetUser, 'message' => 'Utilizador atualizado com sucesso']);
     }

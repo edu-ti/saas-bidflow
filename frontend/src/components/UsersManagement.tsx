@@ -581,6 +581,14 @@ export default function UsersManagement() {
       toast.success('Usuário atualizado com sucesso!');
       setShowUserModal(false);
       fetchData().catch(() => {});
+
+      // Se o usuário editado for o próprio usuário logado, atualiza o localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (storedUser.id === editingUser.id) {
+        const { data: refreshedUser } = await api.get('/api/user');
+        localStorage.setItem('user', JSON.stringify(refreshedUser));
+        window.dispatchEvent(new Event('storage'));
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.response?.data?.error || 'Erro ao atualizar usuário.');
     }
