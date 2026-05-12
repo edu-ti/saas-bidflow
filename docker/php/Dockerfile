@@ -1,10 +1,9 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
     libxml2-dev \
     zip \
     unzip \
@@ -12,7 +11,7 @@ RUN apk add --no-cache \
     postgresql-client \
     redis \
     bash \
-    cron
+    fcron || true
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd
 

@@ -26,11 +26,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('spa-session')->plainTextToken;
 
-        $company = $user->company;
-        $plan = $company ? $company->plan : null;
-        $features = $plan && is_array($plan->features) ? $plan->features : [];
-        $addons = $company && is_array($company->addons) ? $company->addons : [];
+        $company = $user->company ?? null;
+        $plan = $company?->plan ?? null;
+        $features = is_array($plan?->features) ? $plan->features : [];
+        $addons = is_array($company?->addons) ? $company->addons : [];
         $allowed_modules = array_values(array_unique(array_merge($features, $addons)));
+        $role = $user->role_id ? \App\Models\Role::find($user->role_id) : null;
 
         return response()->json([
             'token' => $token,
@@ -38,9 +39,12 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role_id' => $user->role_id,
+                'role_name' => $role?->name ?? ($user->is_admin ? 'Administrador' : 'Usuário'),
+                'permissions' => $role?->permissions ?? ($user->is_admin ? null : []),
                 'company_id' => $user->company_id,
                 'is_superadmin' => (bool) $user->is_superadmin,
+                'is_admin' => (bool) $user->is_admin,
                 'allowed_modules' => $allowed_modules,
             ]
         ]);

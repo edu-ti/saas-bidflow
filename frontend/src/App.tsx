@@ -24,6 +24,7 @@ import BiddingBulletin from './components/BiddingBulletin';
 import ManageBiddings from './components/ManageBiddings';
 import ManageDocuments from './components/ManageDocuments';
 import LegalConsultant from './components/LegalConsultant';
+import BidAnalyst from './components/BidAnalyst';
 import ChatMonitor from './components/ChatMonitor';
 import ChatMonitorSettings from './components/ChatMonitorSettings';
 import MarketAnalysis from './components/MarketAnalysis';
@@ -90,8 +91,8 @@ const hasPermission = (module?: string, page?: string, action: string = 'view') 
   
   try {
     const user = JSON.parse(storedUser);
-    if (user.is_superadmin || user.is_admin || !user.role_id) return true;
-    if (!user.permissions || !module || !page) return true; 
+    if (user.is_superadmin || user.is_admin) return true;
+    if (!user.permissions || !module || !page) return false; 
     
     // Suporte ao formato antigo (fallback) se necessário, mas focado no novo
     if (typeof user.permissions[module] === 'object') {
@@ -105,17 +106,12 @@ const hasPermission = (module?: string, page?: string, action: string = 'view') 
 };
 
 // Componente para rotas com permissão específica
-function PermissionRoute({ children, module, page, permission }: { 
+function PermissionRoute({ children, module, page }: { 
   children: React.ReactNode, 
-  module?: string, 
-  page?: string,
-  permission?: string 
+  module: string, 
+  page: string
 }) {
-  // Support legacy permission prop (treated as module)
-  const effectiveModule = permission || module || '';
-  const effectivePage = page || 'view';
-  
-  if (!hasPermission(effectiveModule, effectivePage, 'view')) {
+  if (!hasPermission(module, page, 'view')) {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -153,6 +149,7 @@ function Topbar({ title }: { title?: string }) {
       '/bidding-manage': 'Gerenciar Licitações',
       '/documents': 'Documentos',
       '/legal-consultant': 'Consultor Jurídico',
+      '/bid-analyst': 'Analista de Edital',
       '/chat-monitor': 'Monitoramento',
       '/chat-monitor-settings': 'Configurações Chat',
       '/market-analysis': 'Análise de Mercado',
@@ -446,6 +443,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/bidding-manage') return 'bidding-manage';
     if (path === '/documents') return 'documents';
     if (path === '/legal-consultant') return 'legal-consultant';
+    if (path === '/bid-analyst') return 'bid-analyst';
     if (path === '/chat-monitor') return 'chat-monitor';
     if (path === '/chat-monitor-settings') return 'chat-monitor-settings';
     if (path === '/market-analysis') return 'market-analysis';
@@ -585,7 +583,7 @@ function AppContent() {
         {/* Rotas protegidas - Comercial */}
         <Route path="/sales-funnel" element={
           <ProtectedRoute>
-            <PermissionRoute module="commercial" page="opportunities">
+            <PermissionRoute module="commercial" page="sales-funnel">
               <AuthenticatedLayout>
                 <SalesFunnel />
               </AuthenticatedLayout>
@@ -605,7 +603,7 @@ function AppContent() {
 
         <Route path="/clients" element={
           <ProtectedRoute>
-            <PermissionRoute module="commercial" page="clients">
+            <PermissionRoute module="commercial" page="contacts-pf">
               <AuthenticatedLayout>
                 <Clients />
               </AuthenticatedLayout>
@@ -635,7 +633,7 @@ function AppContent() {
 
         <Route path="/agenda" element={
           <ProtectedRoute>
-            <PermissionRoute module="commercial" page="opportunities">
+            <PermissionRoute module="commercial" page="agenda">
               <AuthenticatedLayout>
                 <Agenda />
               </AuthenticatedLayout>
@@ -699,6 +697,16 @@ function AppContent() {
             <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
                 <LegalConsultant />
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/bid-analyst" element={
+          <ProtectedRoute>
+            <PermissionRoute module="bidding" page="radar">
+              <AuthenticatedLayout>
+                <BidAnalyst />
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -817,7 +825,7 @@ function AppContent() {
 
         <Route path="/consignment" element={
           <ProtectedRoute>
-            <PermissionRoute permission="inventory">
+            <PermissionRoute module="inventory" page="consignments">
               <AuthenticatedLayout>
                 <Consignment />
               </AuthenticatedLayout>
@@ -827,7 +835,7 @@ function AppContent() {
 
         <Route path="/contracts" element={
           <ProtectedRoute>
-            <PermissionRoute permission="contracts">
+            <PermissionRoute module="financial" page="contracts">
               <AuthenticatedLayout>
                 <Contracts />
               </AuthenticatedLayout>
@@ -838,7 +846,7 @@ function AppContent() {
         {/* Rotas protegidas - Estoque */}
         <Route path="/products" element={
           <ProtectedRoute>
-            <PermissionRoute permission="inventory">
+            <PermissionRoute module="commercial" page="products">
               <AuthenticatedLayout>
                 <Products />
               </AuthenticatedLayout>
@@ -848,7 +856,7 @@ function AppContent() {
 
         <Route path="/inventory" element={
           <ProtectedRoute>
-            <PermissionRoute permission="inventory">
+            <PermissionRoute module="inventory" page="inventory-page">
               <AuthenticatedLayout>
                 <Inventory />
               </AuthenticatedLayout>
@@ -868,7 +876,7 @@ function AppContent() {
 
         <Route path="/tasks" element={
           <ProtectedRoute>
-            <PermissionRoute permission="dashboard">
+            <PermissionRoute module="modules" page="tasks">
               <AuthenticatedLayout>
                 <Tasks />
               </AuthenticatedLayout>
@@ -879,7 +887,7 @@ function AppContent() {
         {/* Rotas protegidas - Financeiro */}
         <Route path="/accounts-payable-receivable" element={
           <ProtectedRoute>
-            <PermissionRoute permission="accounts">
+            <PermissionRoute module="financial" page="accounts-payable">
               <AuthenticatedLayout>
                 <AccountsPayableReceivable />
               </AuthenticatedLayout>
@@ -889,7 +897,7 @@ function AppContent() {
 
         <Route path="/finance" element={
           <ProtectedRoute>
-            <PermissionRoute permission="finance">
+            <PermissionRoute module="financial" page="financial-manager">
               <AuthenticatedLayout>
                 <Finance />
               </AuthenticatedLayout>
@@ -910,7 +918,7 @@ function AppContent() {
 
         <Route path="/chatbot" element={
           <ProtectedRoute>
-            <PermissionRoute permission="chatbot">
+            <PermissionRoute module="modules" page="chatbot">
               <AuthenticatedLayout>
                 <ChatbotBuilder />
               </AuthenticatedLayout>
@@ -920,7 +928,7 @@ function AppContent() {
 
         <Route path="/conversations" element={
           <ProtectedRoute>
-            <PermissionRoute permission="chatbot">
+            <PermissionRoute module="modules" page="conversations">
               <AuthenticatedLayout>
                 <Conversations />
               </AuthenticatedLayout>
@@ -930,7 +938,7 @@ function AppContent() {
 
         <Route path="/support" element={
           <ProtectedRoute>
-            <PermissionRoute permission="chatbot">
+            <PermissionRoute module="modules" page="support-center">
               <AuthenticatedLayout>
                 <Conversations />
               </AuthenticatedLayout>
@@ -940,7 +948,7 @@ function AppContent() {
 
         <Route path="/settings" element={
           <ProtectedRoute>
-            <PermissionRoute permission="dashboard">
+            <PermissionRoute module="modules" page="settings">
               <AuthenticatedLayout>
                 <Settings />
               </AuthenticatedLayout>

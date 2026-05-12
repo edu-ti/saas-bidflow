@@ -12,7 +12,8 @@ import {
   ChevronRight,
   ArrowLeft,
   TrendingUp,
-  Users
+  Users,
+  FileSearch
 } from 'lucide-react';
 
 interface HubCardProps {
@@ -156,10 +157,12 @@ export default function BiddingHub() {
             onClick={() => navigate('/legal-consultant')}
           />
           <HubCard
-            icon={<Brain size={18} />}
-            title="Resumo de Edital"
-            description="IA extrai pontos do edital"
-            onClick={() => {}}
+            icon={<FileSearch size={18} />}
+            title="Analista de Edital"
+            description="IA especialista em anexos"
+            badge="Novo"
+            variant="highlight"
+            onClick={() => navigate('/bid-analyst')}
           />
         </HubSection>
 

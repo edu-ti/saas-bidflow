@@ -48,6 +48,8 @@ services:
       - QUEUE_CONNECTION=redis
       - CACHE_STORE=redis
       - SESSION_DRIVER=redis
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - COMPOSER_DISABLE_PLATFORM_CHECK=1
     depends_on:
       db:
         condition: service_healthy
@@ -92,12 +94,13 @@ services:
       - SESSION_DRIVER=redis
       - MASTER_DOMAIN=${MASTER_DOMAIN:-master.localhost}
       - APP_DOMAIN=${APP_DOMAIN:-app.localhost}
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - COMPOSER_DISABLE_PLATFORM_CHECK=1
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-
   cron:
     build:
       context: .
@@ -132,6 +135,8 @@ services:
       - SESSION_DRIVER=redis
       - MASTER_DOMAIN=${MASTER_DOMAIN:-master.localhost}
       - APP_DOMAIN=${APP_DOMAIN:-app.localhost}
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - COMPOSER_DISABLE_PLATFORM_CHECK=1
     depends_on:
       db:
         condition: service_healthy

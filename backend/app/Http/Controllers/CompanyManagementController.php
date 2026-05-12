@@ -15,7 +15,7 @@ class CompanyManagementController extends Controller
     public function usersIndex(Request $request)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['admin', 'manager'])) {
+        if (!$user->is_admin && !in_array($user->role?->name, ['admin', 'manager'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -26,7 +26,7 @@ class CompanyManagementController extends Controller
     public function userStore(Request $request)
     {
         $authUser = Auth::user();
-        if (!in_array($authUser->role, ['admin', 'manager'])) {
+        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin', 'manager'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -45,7 +45,7 @@ class CompanyManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,manager,user,analyst',
+            'role_id' => 'nullable|exists:roles,id',
             'position' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -55,14 +55,14 @@ class CompanyManagementController extends Controller
         $validated['status'] = 'active';
 
         $newUser = User::create($validated);
-        
+
         return response()->json(['data' => $newUser, 'message' => 'Utilizador criado com sucesso'], 201);
     }
 
     public function userUpdate(Request $request, $id)
     {
         $authUser = Auth::user();
-        if (!in_array($authUser->role, ['admin', 'manager'])) {
+        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin', 'manager'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -71,32 +71,32 @@ class CompanyManagementController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email',
-            'role' => 'sometimes|required|in:admin,manager,user,analyst',
+            'role_id' => 'nullable|exists:roles,id',
             'status' => 'sometimes|required|in:active,inactive',
             'position' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:20',
         ]);
 
         $targetUser->update($validated);
-        
+
         return response()->json(['data' => $targetUser, 'message' => 'Utilizador atualizado com sucesso']);
     }
 
     public function userDestroy(Request $request, $id)
     {
         $authUser = Auth::user();
-        if (!in_array($authUser->role, ['admin'])) {
+        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $targetUser = User::where('company_id', $authUser->company_id)->findOrFail($id);
-        
+
         if ($targetUser->id === $authUser->id) {
             return response()->json(['message' => 'Não pode eliminar o próprio utilizador'], 422);
         }
 
         $targetUser->delete();
-        
+
         return response()->json(['message' => 'Utilizador eliminado com sucesso']);
     }
 
@@ -109,7 +109,7 @@ class CompanyManagementController extends Controller
     public function companyUpdate(Request $request, $id)
     {
         $authUser = Auth::user();
-        if (!in_array($authUser->role, ['admin'])) {
+        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin'])) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
