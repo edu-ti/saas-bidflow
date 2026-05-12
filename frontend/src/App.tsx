@@ -552,7 +552,7 @@ function AppContent() {
 
         <Route path="/company" element={
           <ProtectedRoute>
-            <PermissionRoute module="admin" page="settings">
+            <PermissionRoute module="management" page="company">
               <AuthenticatedLayout>
                 <Company />
               </AuthenticatedLayout>
@@ -562,7 +562,7 @@ function AppContent() {
 
         <Route path="/users" element={
           <ProtectedRoute>
-            <PermissionRoute module="admin" page="users">
+            <PermissionRoute module="management" page="users-management">
               <AuthenticatedLayout>
                 <UsersManagement />
               </AuthenticatedLayout>
@@ -572,7 +572,7 @@ function AppContent() {
 
         <Route path="/reports" element={
           <ProtectedRoute>
-            <PermissionRoute module="admin" page="logs">
+            <PermissionRoute module="management" page="reports-dashboard">
               <AuthenticatedLayout>
                 <ReportsBIPage />
               </AuthenticatedLayout>
@@ -593,7 +593,7 @@ function AppContent() {
 
         <Route path="/leads" element={
           <ProtectedRoute>
-            <PermissionRoute module="commercial" page="opportunities">
+            <PermissionRoute module="commercial" page="leads">
               <AuthenticatedLayout>
                 <Leads />
               </AuthenticatedLayout>
@@ -623,7 +623,7 @@ function AppContent() {
 
         <Route path="/email-marketing" element={
           <ProtectedRoute>
-            <PermissionRoute module="marketing" page="campaigns">
+            <PermissionRoute module="modules" page="email-marketing">
               <AuthenticatedLayout>
                 <EmailMarketing />
               </AuthenticatedLayout>
@@ -644,7 +644,7 @@ function AppContent() {
         {/* Rotas protegidas - Licitações */}
         <Route path="/bidding-hub" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="bidding-manager">
               <AuthenticatedLayout>
                 <BiddingHub />
               </AuthenticatedLayout>
@@ -654,7 +654,7 @@ function AppContent() {
 
         <Route path="/bidding-search" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="search-bids">
               <AuthenticatedLayout>
                 <BiddingSearch />
               </AuthenticatedLayout>
@@ -664,7 +664,7 @@ function AppContent() {
 
         <Route path="/bidding-bulletin" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="bulletins">
               <AuthenticatedLayout>
                 <BiddingBulletin />
               </AuthenticatedLayout>
@@ -674,7 +674,7 @@ function AppContent() {
 
         <Route path="/bidding-manage" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="manage-bids">
               <AuthenticatedLayout>
                 <ManageBiddings />
               </AuthenticatedLayout>
@@ -684,7 +684,7 @@ function AppContent() {
 
         <Route path="/documents" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="documents">
               <AuthenticatedLayout>
                 <ManageDocuments />
               </AuthenticatedLayout>
@@ -694,7 +694,7 @@ function AppContent() {
 
         <Route path="/legal-consultant" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="legal-consultant">
               <AuthenticatedLayout>
                 <LegalConsultant />
               </AuthenticatedLayout>
@@ -704,7 +704,7 @@ function AppContent() {
 
         <Route path="/bid-analyst" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="bid-analyst">
               <AuthenticatedLayout>
                 <BidAnalyst />
               </AuthenticatedLayout>
@@ -714,7 +714,7 @@ function AppContent() {
 
         <Route path="/chat-monitor" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="chat-monitor">
               <AuthenticatedLayout>
                 <ChatMonitor />
               </AuthenticatedLayout>
@@ -724,7 +724,7 @@ function AppContent() {
 
         <Route path="/chat-monitor-settings" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="chat-monitor">
               <AuthenticatedLayout>
                 <ChatMonitorSettings />
               </AuthenticatedLayout>
@@ -734,7 +734,7 @@ function AppContent() {
 
         <Route path="/market-analysis" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="market-analysis">
               <AuthenticatedLayout>
                 <MarketAnalysis />
               </AuthenticatedLayout>
@@ -744,7 +744,7 @@ function AppContent() {
 
         <Route path="/competitor-analysis" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="competitors">
               <AuthenticatedLayout>
                 <CompetitorAnalysis />
               </AuthenticatedLayout>
@@ -764,7 +764,7 @@ function AppContent() {
 
         <Route path="/bidding-monitoring" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="monitoring">
               <AuthenticatedLayout>
                 <BiddingMonitoring />
               </AuthenticatedLayout>
@@ -774,7 +774,7 @@ function AppContent() {
 
         <Route path="/bidding-funnel" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="funnel">
+            <PermissionRoute module="bidding" page="bidding-funnel">
               <AuthenticatedLayout>
                 <BiddingFunnel />
               </AuthenticatedLayout>
@@ -784,7 +784,7 @@ function AppContent() {
 
         <Route path="/bidding-capture" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="capture">
               <AuthenticatedLayout>
                 <BiddingCapture />
               </AuthenticatedLayout>
@@ -794,7 +794,7 @@ function AppContent() {
 
         <Route path="/auction-details" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="auction-details">
               <AuthenticatedLayout>
                 <AuctionDetails />
               </AuthenticatedLayout>
@@ -804,7 +804,7 @@ function AppContent() {
 
         <Route path="/ai-generator" element={
           <ProtectedRoute>
-            <PermissionRoute module="bidding" page="radar">
+            <PermissionRoute module="bidding" page="ai-generator">
               <AuthenticatedLayout>
                 <AIGenerator />
               </AuthenticatedLayout>
@@ -815,7 +815,7 @@ function AppContent() {
         {/* Rotas protegidas - Operacional */}
         <Route path="/licenses" element={
           <ProtectedRoute>
-            <PermissionRoute module="admin" page="settings">
+            <PermissionRoute module="management" page="licenses">
               <AuthenticatedLayout>
                 <Licenses />
               </AuthenticatedLayout>
@@ -866,7 +866,7 @@ function AppContent() {
 
         <Route path="/campaigns" element={
           <ProtectedRoute>
-            <PermissionRoute module="marketing" page="campaigns">
+            <PermissionRoute module="modules" page="campaigns">
               <AuthenticatedLayout>
                 <Campaigns />
               </AuthenticatedLayout>
@@ -908,7 +908,7 @@ function AppContent() {
         {/* Rotas protegidas - Configurações */}
         <Route path="/admin" element={
           <ProtectedRoute>
-            <PermissionRoute module="admin" page="settings">
+            <PermissionRoute module="modules" page="settings-admin">
               <AuthenticatedLayout>
                 <Admin />
               </AuthenticatedLayout>
