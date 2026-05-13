@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Select } from './ui/Select';
 import { DatePicker } from './ui/DatePicker';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface BiddingResult {
  id: string;
@@ -105,6 +106,11 @@ function formatCurrency(value: number) {
 }
 
 export default function BiddingSearch() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'search-bids', 'create');
+ const canEdit = hasPermission('bidding', 'search-bids', 'edit');
+ const canDelete = hasPermission('bidding', 'search-bids', 'delete');
+
  const navigate = useNavigate();
  const [searchPerformed, setSearchPerformed] = useState(false);
  const [notes, setNotes] = useState<Record<string, string>>({});

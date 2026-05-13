@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->trustProxies(at: '*');
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->expectsJson() ? null : route('login'));
         $middleware->alias([
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
             'tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,

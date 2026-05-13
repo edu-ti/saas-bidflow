@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { usePermissions } from '../hooks/usePermissions';
 import { FileText, Send, XCircle, Plus, Loader2, Search, Zap, ShieldCheck, ChevronRight, Layout, DollarSign, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
@@ -30,6 +31,11 @@ function fmt(v: string | number) {
 }
 
 export default function InvoiceManager() {
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('financial', 'invoices', 'create');
+  const canTransmit = hasPermission('financial', 'invoices', 'transmit');
+  const canCancel = hasPermission('financial', 'invoices', 'cancel');
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -117,12 +123,14 @@ export default function InvoiceManager() {
             ]}
           />
         </div>
-        <button 
-          onClick={() => { setForm({ type:'output', number:'', total_value:'', recipient_name:'', recipient_document:'', notes:'', items_json:'[]' }); setModalOpen(true); }}
-          className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
-        >
-          <Plus size={16} /> <span>Nova NF-e</span>
-        </button>
+        {canCreate && (
+          <button 
+            onClick={() => { setForm({ type:'output', number:'', total_value:'', recipient_name:'', recipient_document:'', notes:'', items_json:'[]' }); setModalOpen(true); }}
+            className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <Plus size={16} /> <span>Nova NF-e</span>
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -172,12 +180,12 @@ export default function InvoiceManager() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {inv.status === 'draft' && (
+                        {inv.status === 'draft' && canTransmit && (
                           <button onClick={() => handleTransmit(inv.id)} className="btn btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5">
                             <Send className="w-3.5 h-3.5" /> Transmitir
                           </button>
                         )}
-                        {['sent','authorized'].includes(inv.status) && (
+                        {['sent','authorized'].includes(inv.status) && canCancel && (
                           <button onClick={() => handleCancel(inv.id)} className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors" title="Cancelar Nota">
                             <XCircle className="w-4 h-4" />
                           </button>

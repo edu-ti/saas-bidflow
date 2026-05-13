@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../../lib/axios';
 import Modal from '../ui/Modal';
 import { Select } from '../ui/Select';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface Lead {
   id: number;
@@ -27,6 +28,9 @@ export default function LeadsDashboard() {
     source: '',
     temperature: 'Frio',
   });
+
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('commercial', 'leads', 'create');
 
   useEffect(() => {
     fetchLeads();
@@ -76,13 +80,15 @@ export default function LeadsDashboard() {
             Central de inteligência comercial e prospecção ativa.
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary flex items-center gap-2"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Novo Lead</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Novo Lead</span>
+          </button>
+        )}
       </header>
 
       <div className="card p-4">
@@ -284,12 +290,14 @@ export default function LeadsDashboard() {
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-            >
-              Salvar Lead
-            </button>
+            {canCreate && (
+              <button
+                type="submit"
+                className="btn btn-primary"
+              >
+                Salvar Lead
+              </button>
+            )}
           </div>
         </form>
       </Modal>

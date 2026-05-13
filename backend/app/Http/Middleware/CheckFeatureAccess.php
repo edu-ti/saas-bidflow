@@ -33,7 +33,12 @@ class CheckFeatureAccess
 
         $plan = $company->plan;
 
-        $features = $plan && is_array($plan->features) ? $plan->features : [];
+        // Se não houver plano configurado, libera todos os módulos (fallback para testes/novas instalações)
+        if (!$plan) {
+            return $next($request);
+        }
+
+        $features = is_array($plan->features) ? $plan->features : [];
         $addons = is_array($company->addons) ? $company->addons : [];
 
         if (in_array($feature, $features) || in_array($feature, $addons)) {

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Message {
  id: number;
@@ -42,6 +43,8 @@ const Conversations = () => {
  const [searchTerm, setSearchTerm] = useState("");
  const [stats, setStats] = useState({ total: 0, active: 0, pending: 0, closed: 0, messages_today: 0 });
  const messagesEndRef = useRef<HTMLDivElement>(null);
+ const { hasPermission } = usePermissions();
+ const canSend = hasPermission('modules', 'conversations', 'send');
 
  const fetchConversations = useCallback(async () => {
  setIsLoading(true);
@@ -262,6 +265,7 @@ const Conversations = () => {
  <button className="p-2 text-text-muted hover:text-primary transition-all group-hover:scale-110"><Smile size={22} /></button>
  </div>
  </div>
+ {canSend && (
  <button
  onClick={handleSendMessage}
  disabled={!messageInput.trim() || isSending}
@@ -269,6 +273,7 @@ const Conversations = () => {
  >
  {isSending ? <Loader2 size={28} className="animate-spin" /> : <Send size={28} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
  </button>
+ )}
  </div>
  </>
  ) : (

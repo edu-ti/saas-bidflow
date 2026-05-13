@@ -16,6 +16,7 @@ import {
  ChevronDown,
  MoreHorizontal
 } from 'lucide-react';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface ManagedBidding {
  id: string;
@@ -128,6 +129,11 @@ function PhaseIndicator({ phase }: { phase: string }) {
 }
 
 export default function ManageBiddings() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'manage-bids', 'create');
+ const canEdit = hasPermission('bidding', 'manage-bids', 'edit');
+ const canDelete = hasPermission('bidding', 'manage-bids', 'delete');
+
  const navigate = useNavigate();
  const [notes, setNotes] = useState<Record<string, string>>({});
  const [sentNotes, setSentNotes] = useState<Record<string, string[]>>({});

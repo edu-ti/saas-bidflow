@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   Users, Building2, Settings as SettingsIcon, Plus, Search, Loader2, Pencil, Trash2,
   MoreVertical, Check, X, Mail, Phone, Shield, UserCheck, UserX, Save, ShieldCheck,
@@ -30,6 +31,12 @@ interface Company {
 }
 
 export default function Admin() {
+  const { hasPermission } = usePermissions();
+  const canCreateUser = hasPermission('modules', 'settings-admin', 'create');
+  const canUpdateUser = hasPermission('modules', 'settings-admin', 'update');
+  const canDeleteUser = hasPermission('modules', 'settings-admin', 'delete');
+  const canUpdateCompany = hasPermission('modules', 'settings-admin', 'update');
+
   const [activeTab, setActiveTab] = useState<'users' | 'company' | 'security'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [company, setCompany] = useState<Company | null>(null);
@@ -166,12 +173,14 @@ export default function Admin() {
                     className="input w-full pl-9"
                   />
                 </div>
-                <button
-                  onClick={() => handleOpenModal()}
-                  className="btn btn-primary flex items-center gap-2 w-full md:w-auto justify-center"
-                >
-                  <Plus className="w-4 h-4" /> <span>Adicionar Utilizador</span>
-                </button>
+                {canCreateUser && (
+                  <button
+                    onClick={() => handleOpenModal()}
+                    className="btn btn-primary flex items-center gap-2 w-full md:w-auto justify-center"
+                  >
+                    <Plus className="w-4 h-4" /> <span>Adicionar Utilizador</span>
+                  </button>
+                )}
               </div>
 
               <div className="card overflow-hidden">
@@ -221,12 +230,16 @@ export default function Admin() {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => handleOpenModal(user)} className="p-2 text-text-muted hover:text-primary hover:bg-bg-secondary rounded-lg transition-colors">
-                                  <Pencil size={16} />
-                                </button>
-                                <button className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
-                                  <Trash2 size={16} />
-                                </button>
+                                {canUpdateUser && (
+                                  <button onClick={() => handleOpenModal(user)} className="p-2 text-text-muted hover:text-primary hover:bg-bg-secondary rounded-lg transition-colors">
+                                    <Pencil size={16} />
+                                  </button>
+                                )}
+                                {canDeleteUser && (
+                                  <button className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -305,9 +318,11 @@ export default function Admin() {
                     </div>
                   </div>
                   <div className="flex justify-end pt-6 border-t border-border">
-                    <button className="btn btn-primary flex items-center gap-2">
-                      <Save className="w-4 h-4" /> <span>Salvar Alterações</span>
-                    </button>
+                    {canUpdateCompany && (
+                      <button className="btn btn-primary flex items-center gap-2">
+                        <Save className="w-4 h-4" /> <span>Salvar Alterações</span>
+                      </button>
+                    )}
                   </div>
                </div>
 
@@ -391,9 +406,11 @@ export default function Admin() {
 
           <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">Cancelar</button>
-            <button type="submit" className="btn btn-primary">
-               Salvar
-            </button>
+            {(editingUser ? canUpdateUser : canCreateUser) && (
+              <button type="submit" className="btn btn-primary">
+                 Salvar
+              </button>
+            )}
           </div>
         </form>
       </Modal>

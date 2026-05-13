@@ -18,6 +18,7 @@ import {
  ChevronDown
 } from 'lucide-react';
 import { Select } from './ui/Select';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface BiddingResult {
  id: string;
@@ -129,6 +130,11 @@ function getDaysText(days: number) {
 }
 
 export default function BiddingBulletin() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'bulletins', 'create');
+ const canEdit = hasPermission('bidding', 'bulletins', 'edit');
+ const canDelete = hasPermission('bidding', 'bulletins', 'delete');
+
  const navigate = useNavigate();
  const [favorited, setFavorited] = useState<Set<string>>(new Set());
  const [situation, setSituation] = useState('');

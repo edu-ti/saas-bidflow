@@ -9,6 +9,7 @@ import Modal from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
 import { format } from 'date-fns';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Task {
  id: number;
@@ -37,6 +38,11 @@ export default function Tasks() {
  priority: 'medium' as 'high' | 'medium' | 'low',
  assignee: '',
  });
+
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('modules', 'tasks', 'create');
+ const canEdit = hasPermission('modules', 'tasks', 'update');
+ const canDelete = hasPermission('modules', 'tasks', 'delete');
 
  const fetchTasks = useCallback(async () => {
  setLoading(true);
@@ -144,6 +150,7 @@ export default function Tasks() {
  Gestão operacional e acompanhamento de metas críticas.
  </p>
  </div>
+ {canCreate && (
  <button
  onClick={() => handleOpenModal()}
  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
@@ -151,6 +158,7 @@ export default function Tasks() {
  <Plus className="w-5 h-5" />
  Nova Missão 
  </button>
+ )}
  </header>
 
  {/* Metrics Row */}
@@ -222,6 +230,7 @@ export default function Tasks() {
  key={task.id}
  className={`card p-8 flex items-center gap-8 group hover:border-primary/30 transition-all duration-500 bg-bg-tertiary/10 ${task.status === 'completed' ? 'opacity-40 grayscale' : ''}`}
  >
+ {canEdit && (
  <button
  onClick={() => handleToggleStatus(task)}
  className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center transition-all duration-500 ${
@@ -232,6 +241,7 @@ export default function Tasks() {
  >
  <CheckCircle2 size={24} />
  </button>
+ )}
 
  <div className="flex-1 min-w-0 space-y-3">
  <div className="flex items-center gap-5">
@@ -269,12 +279,16 @@ export default function Tasks() {
  </div>
 
  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+ {canEdit && (
  <button onClick={() => handleOpenModal(task)} className="p-4 bg-bg-tertiary/40 border border-border rounded-2xl text-text-muted hover:text-primary hover:scale-110 transition-all ">
  <Edit2 size={18} />
  </button>
+ )}
+ {canDelete && (
  <button onClick={() => handleDelete(task.id)} className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-500/60 hover:text-red-500 hover:scale-110 transition-all ">
  <Trash2 size={18} />
  </button>
+ )}
  </div>
  </div>
  ))

@@ -7,6 +7,7 @@ import { DatePicker } from '../ui/DatePicker';
 import type { Consignee, Product, WizardItem } from './types';
 import { fmt } from './types';
 import { format } from 'date-fns';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface Props {
  isOpen: boolean;
@@ -15,8 +16,11 @@ interface Props {
 }
 
 export default function ConsignmentWizard({ isOpen, onClose, onSuccess }: Props) {
- const [step, setStep] = useState(1);
- const [saving, setSaving] = useState(false);
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('inventory', 'consignments', 'create');
+
+  const [step, setStep] = useState(1);
+  const [saving, setSaving] = useState(false);
 
  // Step 1
  const [consignees, setConsignees] = useState<Consignee[]>([]);
@@ -361,14 +365,16 @@ export default function ConsignmentWizard({ isOpen, onClose, onSuccess }: Props)
  >
  PRÓXIMA FASE<ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
  </button>
- ) : (
- <button onClick={handleSubmit} disabled={saving}
- className="btn btn-primary py-5 px-16 uppercase text-[12px] flex items-center gap-5 disabled:opacity-60"
- >
- {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck size={24} className="" />}
- CONFIRMAR EXPEDIÇÃO
- </button>
- )}
+  ) : (
+  canCreate ? (
+  <button onClick={handleSubmit} disabled={saving}
+  className="btn btn-primary py-5 px-16 uppercase text-[12px] flex items-center gap-5 disabled:opacity-60"
+  >
+  {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck size={24} className="" />}
+  CONFIRMAR EXPEDIÇÃO
+  </button>
+  ) : null
+  )}
  </div>
  </div>
  </Modal>

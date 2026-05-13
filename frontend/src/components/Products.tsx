@@ -3,6 +3,7 @@ import { Plus, Package, Search, Filter, Loader2, ShieldCheck } from 'lucide-reac
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Product {
   id: number;
@@ -23,6 +24,9 @@ export default function Products() {
     category: '',
     base_price: '',
   });
+
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('commercial', 'products', 'create');
 
   useEffect(() => {
     fetchProducts();
@@ -82,13 +86,15 @@ export default function Products() {
             Gestão de ativos, precificação e inteligência de catálogo.
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary text-xs"
-        >
-          <Plus size={14} />
-          Novo Produto
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="btn btn-primary text-xs"
+          >
+            <Plus size={14} />
+            Novo Produto
+          </button>
+        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -233,9 +239,11 @@ export default function Products() {
             >
               Cancelar
             </button>
-            <button type="submit" className="btn btn-primary">
-              Salvar Produto
-            </button>
+            {canCreate && (
+              <button type="submit" className="btn btn-primary">
+                Salvar Produto
+              </button>
+            )}
           </div>
         </form>
       </Modal>

@@ -8,6 +8,7 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { Select } from './ui/Select';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Campaign {
  id: number;
@@ -48,6 +49,12 @@ export default function Campaigns() {
  target_audience: 'all_leads' as 'all_leads' | 'all_clients' | 'manual',
  recipient_emails: [] as string[],
  });
+
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('modules', 'campaigns', 'create');
+ const canEdit = hasPermission('modules', 'campaigns', 'update');
+ const canDelete = hasPermission('modules', 'campaigns', 'delete');
+ const canSend = hasPermission('modules', 'campaigns', 'send');
 
  const fetchCampaigns = useCallback(async () => {
  setLoading(true);
@@ -150,12 +157,14 @@ export default function Campaigns() {
  Gestão de disparos em massa e automação de marketing.
  </p>
  </div>
+ {canCreate && (
  <button
  onClick={() => handleOpenModal()}
  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
  >
  <Plus size={16} /> Nova Campanha
  </button>
+ )}
  </header>
 
  {/* Listagem */}
@@ -234,11 +243,15 @@ export default function Campaigns() {
  </td>
  <td className="px-10 py-8 text-right">
  <div className="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-all">
- {campaign.status === 'draft' && (
+ {campaign.status === 'draft' && canSend && (
  <button onClick={() => handleSend(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 text-primary transition-all" title="Disparar Agora"><Send size={18} /></button>
  )}
+ {canEdit && (
  <button onClick={() => handleOpenModal(campaign)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl hover:bg-primary/10 text-text-muted transition-all"><Settings size={18} /></button>
+ )}
+ {canDelete && (
  <button onClick={() => handleDelete(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 transition-all"><Trash2 size={18} /></button>
+ )}
  </div>
  </td>
  </tr>

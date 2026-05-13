@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/axios';
 import { Select } from './ui/Select';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Bidding {
  id: number;
@@ -46,6 +47,11 @@ const mockBidding: Bidding = {
 };
 
 export default function AuctionDetails() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'auction-details', 'create');
+ const canEdit = hasPermission('bidding', 'auction-details', 'edit');
+ const canDelete = hasPermission('bidding', 'auction-details', 'delete');
+
  const [searchParams, setSearchParams] = useSearchParams();
  const opportunityId = searchParams.get('id');
  const navigate = useNavigate();
@@ -151,13 +157,15 @@ export default function AuctionDetails() {
  Gestão estratégica e monitoramento de sessões públicas em tempo real.
  </p>
  </div>
- <button 
- onClick={() => navigate('/bidding-capture')}
- className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
- >
- <Plus className="w-5 h-5" />
- Nova Oportunidade
- </button>
+  {canCreate && (
+  <button 
+  onClick={() => navigate('/bidding-capture')}
+  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
+  >
+  <Plus className="w-5 h-5" />
+  Nova Oportunidade
+  </button>
+  )}
  </header>
 
  <div className="card overflow-hidden bg-bg-tertiary/10 backdrop-blur-md border-border/30 ">
@@ -217,11 +225,15 @@ export default function AuctionDetails() {
  </span>
  </td>
  <td className="px-10 py-10 text-right">
- <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
- <button onClick={() => handleViewDetails(bid.id)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Analisar"><Eye size={18} /></button>
- <button className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit size={18} /></button>
- <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
- </div>
+  <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+  <button onClick={() => handleViewDetails(bid.id)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Analisar"><Eye size={18} /></button>
+  {canEdit && (
+  <button className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit size={18} /></button>
+  )}
+  {canDelete && (
+  <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
+  )}
+  </div>
  </td>
  </tr>
  ))}
@@ -285,23 +297,29 @@ export default function AuctionDetails() {
  <span className="text-xs font-semibold text-text-muted uppercase opacity-60">Valuation de Referência</span>
  <p className="text-2xl font-semibold text-primary tracking-tight ">{parseFloat(bidding.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
  </div>
- <div className="space-y-3 relative z-20">
- <span className="text-xs font-semibold text-text-muted uppercase opacity-60">Governança de Status</span>
- <div className="relative group mt-1">
- <Activity size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary opacity-60 group-focus-within:opacity-100 transition-opacity z-10" />
- <Select 
- value={currentStatus}
- onChange={setCurrentStatus}
- options={[
- { value: 'Em análise', label: 'Em análise' },
- { value: 'Aguardando', label: 'Aguardando' },
- { value: 'Ativa', label: 'Ativa' },
- { value: 'Encerrada', label: 'Encerrada' }
- ]}
- className="pl-8"
- />
- </div>
- </div>
+  <div className="space-y-3 relative z-20">
+  <span className="text-xs font-semibold text-text-muted uppercase opacity-60">Governança de Status</span>
+  <div className="relative group mt-1">
+  <Activity size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary opacity-60 group-focus-within:opacity-100 transition-opacity z-10" />
+  {canEdit ? (
+  <Select 
+  value={currentStatus}
+  onChange={setCurrentStatus}
+  options={[
+  { value: 'Em análise', label: 'Em análise' },
+  { value: 'Aguardando', label: 'Aguardando' },
+  { value: 'Ativa', label: 'Ativa' },
+  { value: 'Encerrada', label: 'Encerrada' }
+  ]}
+  className="pl-8"
+  />
+  ) : (
+  <div className="w-full pl-8 pr-6 py-4 bg-background/50 border border-border rounded-2xl text-sm font-bold text-text-primary">
+  {currentStatus}
+  </div>
+  )}
+  </div>
+  </div>
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-3 gap-10 border-t border-border/30 pt-10">
@@ -422,10 +440,12 @@ export default function AuctionDetails() {
  className="w-full bg-background/50 border border-border rounded-xl pl-16 pr-6 py-6 text-xs font-semibold text-text-primary placeholder:text-text-muted/40 uppercase tracking-tight focus:border-primary/40 outline-none resize-none transition-all "
  ></textarea>
  </div>
- <button className="w-full py-4 bg-bg-tertiary/40 hover:bg-primary hover:text-white border border-border hover:border-primary/20 rounded-2xl text-xs font-semibold uppercase text-text-primary transition-all duration-500 flex items-center justify-center gap-3 group">
- <Check size={16} className="group-hover:scale-125 transition-transform" />
- Registrar Parecer
- </button>
+  {(canCreate || canEdit) && (
+  <button className="w-full py-4 bg-bg-tertiary/40 hover:bg-primary hover:text-white border border-border hover:border-primary/20 rounded-2xl text-xs font-semibold uppercase text-text-primary transition-all duration-500 flex items-center justify-center gap-3 group">
+  <Check size={16} className="group-hover:scale-125 transition-transform" />
+  Registrar Parecer
+  </button>
+  )}
  </div>
  </div>
 

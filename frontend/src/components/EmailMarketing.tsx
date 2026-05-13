@@ -6,6 +6,7 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { Select } from './ui/Select';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface EmailCampaign {
  id: number;
@@ -63,6 +64,12 @@ export default function EmailMarketing() {
  const [leadResults, setLeadResults] = useState<Lead[]>([]);
  const [selectedLeads, setSelectedLeads] = useState<Lead[]>([]);
  const [loadingLeads, setLoadingLeads] = useState(false);
+
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('modules', 'email-marketing', 'create');
+ const canEdit = hasPermission('modules', 'email-marketing', 'update');
+ const canDelete = hasPermission('modules', 'email-marketing', 'delete');
+ const canSend = hasPermission('modules', 'email-marketing', 'send');
 
  const fetchCampaigns = useCallback(async () => {
  setLoading(true);
@@ -187,6 +194,7 @@ export default function EmailMarketing() {
  Engajamento neural e régua de relacionamento automatizada.
  </p>
  </div>
+ {canCreate && (
  <button
  onClick={() => handleOpenCompose()}
  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
@@ -194,6 +202,7 @@ export default function EmailMarketing() {
  <Plus className="w-5 h-5" />
  Configurar Nova Campanha
  </button>
+ )}
  </header>
 
  <div className="card overflow-hidden bg-bg-secondary/10 backdrop-blur-md border-border/30 ">
@@ -276,11 +285,15 @@ export default function EmailMarketing() {
  </td>
  <td className="px-10 py-10 text-right">
  <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+ {canEdit && (
  <button onClick={() => handleOpenCompose(campaign)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit2 size={18} /></button>
- {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
+ )}
+ {(campaign.status === 'draft' || campaign.status === 'scheduled') && canSend && (
  <button onClick={() => handleSendCampaign(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl text-primary hover:bg-primary hover:text-white transition-all " title="Disparar"><Send size={18} /></button>
  )}
+ {canDelete && (
  <button onClick={() => handleDelete(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
+ )}
  </div>
  </td>
  </tr>

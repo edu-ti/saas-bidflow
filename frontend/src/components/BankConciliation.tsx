@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { usePermissions } from '../hooks/usePermissions';
 import { Upload, Check, X, Link2, Loader2, FileSpreadsheet, Landmark, ArrowRightLeft, Sparkles, Database, Globe, Activity, ShieldCheck, Zap, ChevronRight, Target } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
@@ -23,6 +24,10 @@ interface Reconciliation { id: number; file_name: string; status: string; total_
 function fmt(v: string|number) { return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
 export default function BankConciliation() {
+  const { hasPermission } = usePermissions();
+  const canUpload = hasPermission('financial', 'bank-reconciliation', 'create');
+  const canReconcile = hasPermission('financial', 'bank-reconciliation', 'update');
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -159,31 +164,33 @@ export default function BankConciliation() {
           </div>
         </div>
 
-        <div className="lg:col-span-2"
-          onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-          onDragLeave={() => setIsDragOver(false)}
-          onDrop={handleDrop}
-        >
-          <div className={`h-full border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-4 ${isDragOver ? 'border-primary bg-primary/5' : 'border-border bg-bg-secondary hover:border-text-muted hover:bg-bg-tertiary'}`}
-            onClick={() => fileRef.current?.click()}>
-            <input ref={fileRef} type="file" accept=".ofx,.xml" className="hidden" onChange={e => { if (e.target.files?.[0]) handleUpload(e.target.files[0]); }} />
-            
-            {uploading ? (
-              <div className="p-4 rounded-full bg-bg-tertiary">
-                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        {canUpload && (
+          <div className="lg:col-span-2"
+            onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleDrop}
+          >
+            <div className={`h-full border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-4 ${isDragOver ? 'border-primary bg-primary/5' : 'border-border bg-bg-secondary hover:border-text-muted hover:bg-bg-tertiary'}`}
+              onClick={() => fileRef.current?.click()}>
+              <input ref={fileRef} type="file" accept=".ofx,.xml" className="hidden" onChange={e => { if (e.target.files?.[0]) handleUpload(e.target.files[0]); }} />
+              
+              {uploading ? (
+                <div className="p-4 rounded-full bg-bg-tertiary">
+                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="p-4 rounded-full bg-bg-tertiary text-text-muted group-hover:text-primary transition-colors">
+                   <Upload className="w-8 h-8" />
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm font-semibold text-text-primary">Transmissão de Ledger OFX</p>
+                <p className="text-xs text-text-muted mt-1">Arraste para o grid ou clique para navegar no repositório</p>
               </div>
-            ) : (
-              <div className="p-4 rounded-full bg-bg-tertiary text-text-muted group-hover:text-primary transition-colors">
-                 <Upload className="w-8 h-8" />
-              </div>
-            )}
-            
-            <div>
-              <p className="text-sm font-semibold text-text-primary">Transmissão de Ledger OFX</p>
-              <p className="text-xs text-text-muted mt-1">Arraste para o grid ou clique para navegar no repositório</p>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Active Reconciliation Workflow */}
@@ -262,7 +269,7 @@ export default function BankConciliation() {
                         {item.match_status === 'ignored' && <span className="text-xs font-medium text-text-muted bg-bg-tertiary border border-border px-2.5 py-1 rounded-md">Ignorado</span>}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        {!isMatched && isSuggested && (
+                        {!isMatched && isSuggested && canReconcile && (
                           <button onClick={() => handleReconcile(item)} className="btn btn-primary py-1.5 px-3 text-xs inline-flex items-center gap-1.5">
                             <Check size={14} /> Confirmar
                           </button>

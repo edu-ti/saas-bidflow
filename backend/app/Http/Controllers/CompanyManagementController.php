@@ -15,7 +15,7 @@ class CompanyManagementController extends Controller
     public function usersIndex(Request $request)
     {
         $user = Auth::user();
-        if (!$user->is_admin && !in_array($user->role?->name, ['admin', 'manager'])) {
+        if (!$user->is_admin && !$user->is_superadmin) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -26,7 +26,7 @@ class CompanyManagementController extends Controller
     public function userStore(Request $request)
     {
         $authUser = Auth::user();
-        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin', 'manager'])) {
+        if (!$authUser->is_admin && !$authUser->is_superadmin) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -52,7 +52,7 @@ class CompanyManagementController extends Controller
 
         $validated['company_id'] = $authUser->company_id;
         $validated['password'] = Hash::make($validated['password']);
-        $validated['status'] = 'active';
+        $validated['status'] = 'Active';
         $validated['is_admin'] = false;
 
         $newUser = User::create($validated);
@@ -63,7 +63,7 @@ class CompanyManagementController extends Controller
     public function userUpdate(Request $request, $id)
     {
         $authUser = Auth::user();
-        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin', 'manager'])) {
+        if (!$authUser->is_admin && !$authUser->is_superadmin) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -73,7 +73,7 @@ class CompanyManagementController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email',
             'role_id' => 'nullable|exists:roles,id',
-            'status' => 'sometimes|required|in:active,inactive',
+            'status' => 'sometimes|required|in:Active,Inactive',
             'position' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -87,7 +87,7 @@ class CompanyManagementController extends Controller
     public function userDestroy(Request $request, $id)
     {
         $authUser = Auth::user();
-        if (!$authUser->is_admin && !in_array($authUser->role?->name, ['admin'])) {
+        if (!$authUser->is_admin && !$authUser->is_superadmin) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

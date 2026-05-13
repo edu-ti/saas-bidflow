@@ -17,10 +17,15 @@ interface Props {
  onSearchChange: (s: string) => void;
  filterStatus: string;
  onFilterChange: (s: string) => void;
+ canCreate?: boolean;
+ canSend?: boolean;
+ canClose?: boolean;
+ canDelete?: boolean;
 }
 
 export default function ConsignmentDashboard({
  onOpenWizard, onOpenReconcile, onSend, onClose, onDelete, records, loading, search, onSearchChange, filterStatus, onFilterChange,
+ canCreate, canSend, canClose, canDelete,
 }: Props) {
  const [stats, setStats] = useState<DashboardStats>({ total_active_value: 0, pending_reconcile_count: 0, total_closed_count: 0 });
 
@@ -81,14 +86,16 @@ export default function ConsignmentDashboard({
  />
  </div>
  </div>
- <button
- id="btn-nova-consignacao"
- onClick={onOpenWizard}
- className="btn btn-primary py-5 px-12 w-full lg:w-auto uppercase text-sm tracking-widest flex items-center justify-center gap-4"
- >
- <Plus className="w-6 h-6" />
- Registrar Remessa Neural
- </button>
+  {canCreate && (
+  <button
+  id="btn-nova-consignacao"
+  onClick={onOpenWizard}
+  className="btn btn-primary py-5 px-12 w-full lg:w-auto uppercase text-sm tracking-widest flex items-center justify-center gap-4"
+  >
+  <Plus className="w-6 h-6" />
+  Registrar Remessa Neural
+  </button>
+  )}
  </div>
 
  {/* Main Ledger */}
@@ -164,23 +171,25 @@ export default function ConsignmentDashboard({
  </td>
  <td className="px-10 py-10 text-right">
  <div className="flex items-center justify-end gap-5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-6 group-hover:translate-x-0">
- {r.status === 'active' && (
- <>
- <button
- onClick={() => onOpenReconcile(r)}
- className="flex items-center gap-3 px-8 py-3.5 bg-primary/10 text-primary hover:bg-primary text-xs font-semibold uppercase tracking-widest rounded-xl transition-all border border-primary/20 hover:text-white group/btn"
- >
- Acertar Ciclo <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
- </button>
- <button
- onClick={() => onDelete(r.id)}
- className="p-4 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-all hover:scale-110 "
- title="Arquivar Registro"
- >
- <Trash2 size={20} />
- </button>
- </>
- )}
+  {r.status === 'active' && (
+  <>
+  <button
+  onClick={() => onOpenReconcile(r)}
+  className="flex items-center gap-3 px-8 py-3.5 bg-primary/10 text-primary hover:bg-primary text-xs font-semibold uppercase tracking-widest rounded-xl transition-all border border-primary/20 hover:text-white group/btn"
+  >
+  Acertar Ciclo <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+  </button>
+  {canDelete && (
+  <button
+  onClick={() => onDelete(r.id)}
+  className="p-4 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-all hover:scale-110 "
+  title="Arquivar Registro"
+  >
+  <Trash2 size={20} />
+  </button>
+  )}
+  </>
+  )}
  <button className="p-4 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all hover:scale-110">
  <Layout size={20} />
  </button>

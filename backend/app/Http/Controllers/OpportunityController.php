@@ -94,9 +94,8 @@ class OpportunityController extends Controller
         // Basic filtering based on user role handled by Policy natively?
         // Actually, Policy only handles specific models, so if user is Sale, scope query here
         $user = $request->user();
-        if (!in_array($user->role, ['Admin', 'Manager'])) {
-            $query->where('user_id', $user->id);
-        }
+        // Filter by company - all users in same company see all opportunities
+        $query->where('company_id', $user->company_id);
         
         // Basically no-op for mock
         return response()->json(['data' => $query->get()]);

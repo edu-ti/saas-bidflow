@@ -10,6 +10,7 @@ import api from '../lib/axios';
 import Modal from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
+import { usePermissions } from '../hooks/usePermissions';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -34,6 +35,11 @@ interface APIEvent {
 }
 
 export default function Agenda() {
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('commercial', 'agenda', 'create');
+  const canEdit = hasPermission('commercial', 'agenda', 'edit');
+  const canDelete = hasPermission('commercial', 'agenda', 'delete');
+
   const [events, setEvents] = useState<BigCalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,13 +130,15 @@ export default function Agenda() {
     const isOpp = event.resource === 'opportunity';
     return {
       style: {
-        borderRadius: '8px',
+        borderRadius: '4px',
         border: 'none',
-        padding: '4px 10px',
-        fontSize: '12px',
+        padding: '1px 5px',
+        fontSize: '10px',
         fontWeight: '600',
-        backgroundColor: isOpp ? 'var(--primary)' : 'var(--color-secondary)',
-        color: isOpp ? '#ffffff' : '#ffffff',
+        lineHeight: '1.3',
+        backgroundColor: isOpp ? 'var(--primary)' : 'color-mix(in srgb, var(--primary) 15%, var(--bg-tertiary))',
+        color: isOpp ? '#ffffff' : 'var(--text-primary)',
+        boxShadow: 'none',
       }
     };
   };
@@ -149,8 +157,8 @@ export default function Agenda() {
         .rbc-toolbar button { color: var(--text-primary) !important; border: 1px solid var(--border) !important; background: var(--bg-secondary) !important; font-weight: 600; font-size: 12px; padding: 8px 16px !important; border-radius: 8px !important; margin: 0 4px; transition: all 0.2s; }
         .rbc-toolbar button:hover { background: var(--bg-tertiary) !important; border-color: var(--primary) !important; color: var(--primary) !important; }
         .rbc-toolbar button.rbc-active { background: var(--primary) !important; color: #ffffff !important; border-color: var(--primary) !important; }
-        .rbc-event { transition: all 0.2s; margin-bottom: 3px !important; }
-        .rbc-event:hover { filter: brightness(1.1); }
+        .rbc-event { transition: filter 0.15s ease; margin-bottom: 2px !important; cursor: pointer; }
+        .rbc-event:hover { filter: brightness(1.2); }
         .rbc-show-more { color: var(--primary) !important; font-weight: 600; font-size: 11px; padding: 4px; }
         .rbc-date-cell { padding: 10px !important; font-weight: 500; font-size: 13px; color: var(--text-secondary); }
         .rbc-now .rbc-date-cell { color: var(--primary) !important; font-weight: 600; }
@@ -176,13 +184,15 @@ export default function Agenda() {
               <span className="text-xs text-text-muted font-medium">CRM / Reuniões</span>
             </div>
           </div>
-          <button
-            onClick={() => { resetForm(); setIsModalOpen(true); }}
-            className="btn btn-primary text-xs"
-          >
-            <Plus size={14} />
-            Novo Evento
-          </button>
+          {canCreate && (
+            <button
+              onClick={() => { resetForm(); setIsModalOpen(true); }}
+              className="btn btn-primary text-xs"
+            >
+              <Plus size={14} />
+              Novo Evento
+            </button>
+          )}
         </div>
       </header>
 
@@ -206,7 +216,7 @@ export default function Agenda() {
               allDay: "Dia Inteiro", date: "Data", time: "Hora", event: "Evento"
             }}
             className="flex-1"
-            onSelectEvent={handleEdit}
+            onSelectEvent={canEdit ? handleEdit : undefined}
           />
         )}
       </div>
@@ -282,7 +292,7 @@ export default function Agenda() {
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-border">
-            {isEditing && (
+            {isEditing && canDelete && (
               <button
                 type="button"
                 onClick={() => handleDelete(editingId!)}
@@ -292,7 +302,7 @@ export default function Agenda() {
                 Excluir
               </button>
             )}
-            <div className="flex gap-3 ml-auto">
+            <div className={`flex gap-3 ${isEditing && canDelete ? 'ml-auto' : 'ml-auto'}`}>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -300,10 +310,12 @@ export default function Agenda() {
               >
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-primary">
-                <Save size={14} />
-                {isEditing ? 'Atualizar' : 'Salvar'}
-              </button>
+              {(canCreate || (isEditing && canEdit)) && (
+                <button type="submit" className="btn btn-primary">
+                  <Save size={14} />
+                  {isEditing ? 'Atualizar' : 'Salvar'}
+                </button>
+              )}
             </div>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { usePermissions } from '../hooks/usePermissions';
 import {
   User,
   Bell,
@@ -39,6 +40,9 @@ const Settings = () => {
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : { role: 'Admin' };
   const isAdmin = user?.role === 'Admin' || user?.is_superadmin;
+
+  const { hasPermission } = usePermissions();
+  const canUpdateProfile = hasPermission('modules', 'settings-profile', 'update');
 
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -268,16 +272,18 @@ const Settings = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-6 border-t border-border">
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={loading}
-                  className="btn btn-primary flex items-center gap-2"
-                >
-                  {loading ? <Loader2 size={16} className="animate-spin" /> : saveSuccess ? <Check size={16} /> : <Save size={16} />}
-                  <span>{saveSuccess ? "Salvo" : "Salvar Alterações"}</span>
-                </button>
-              </div>
+              {canUpdateProfile && (
+                <div className="flex justify-end pt-6 border-t border-border">
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={loading}
+                    className="btn btn-primary flex items-center gap-2"
+                  >
+                    {loading ? <Loader2 size={16} className="animate-spin" /> : saveSuccess ? <Check size={16} /> : <Save size={16} />}
+                    <span>{saveSuccess ? "Salvo" : "Salvar Alterações"}</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -473,21 +479,25 @@ const Settings = () => {
                       </p>
                     </div>
                   </div>
-                  <button onClick={handle2FAToggle} disabled={loading2FA} className={`btn ${twoFactorEnabled ? 'btn-outline text-danger border-danger/20 hover:bg-danger/10 hover:text-danger' : 'btn-primary'}`}>
-                    {loading2FA ? 'Processando...' : twoFactorEnabled ? 'Desativar' : 'Ativar Proteção'}
-                  </button>
+                  {canUpdateProfile && (
+                    <button onClick={handle2FAToggle} disabled={loading2FA} className={`btn ${twoFactorEnabled ? 'btn-outline text-danger border-danger/20 hover:bg-danger/10 hover:text-danger' : 'btn-primary'}`}>
+                      {loading2FA ? 'Processando...' : twoFactorEnabled ? 'Desativar' : 'Ativar Proteção'}
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <button onClick={handlePasswordReset} className="card p-8 flex flex-col items-center justify-center gap-4 hover:border-primary transition-colors text-center">
-                    <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center text-primary mb-2">
-                      <Lock size={28} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-text-primary">Alterar Senha</h4>
-                      <p className="text-xs text-text-muted mt-1">Reset seguro via link de email</p>
-                    </div>
-                  </button>
+                  {canUpdateProfile && (
+                    <button onClick={handlePasswordReset} className="card p-8 flex flex-col items-center justify-center gap-4 hover:border-primary transition-colors text-center">
+                      <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center text-primary mb-2">
+                        <Lock size={28} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-text-primary">Alterar Senha</h4>
+                        <p className="text-xs text-text-muted mt-1">Reset seguro via link de email</p>
+                      </div>
+                    </button>
+                  )}
                   <button onClick={() => setShowDevices(!showDevices)} className="card p-8 flex flex-col items-center justify-center gap-4 hover:border-primary transition-colors text-center">
                     <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center text-primary mb-2">
                       <Monitor size={28} />

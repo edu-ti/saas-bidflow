@@ -18,16 +18,19 @@ class CheckUserPermission
 
         // 1. Verificar trava do Plano/Empresa (Módulo)
         // Se for superadmin (Master), ignora trava de plano
-        if (!$user->is_superadmin) {
+        if (!$user->is_superadmin && !$user->is_admin) {
             $company = $user->company;
             $plan = $company ? $company->plan : null;
-            $features = $plan && is_array($plan->features) ? $plan->features : [];
-            $addons = $company && is_array($company->addons) ? $company->addons : [];
+            // Se não houver plano configurado, libera todos os módulos (fallback para testes/novas instalações)
+            if ($plan) {
+                $features = is_array($plan->features) ? $plan->features : [];
+                $addons = is_array($company->addons) ? $company->addons : [];
 
-            if (!in_array($module, $features) && !in_array($module, $addons)) {
-                return response()->json([
-                    'message' => 'Seu plano atual não permite acesso a este módulo.'
-                ], 403);
+                if (!in_array($module, $features) && !in_array($module, $addons)) {
+                    return response()->json([
+                        'message' => 'Seu plano atual não permite acesso a este módulo. Por favor, faça um upgrade ou contrate o add-on.'
+                    ], 403);
+                }
             }
         }
 

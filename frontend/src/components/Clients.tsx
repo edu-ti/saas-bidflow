@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Upload, Save, X, Search, Loader2, Lock, User, Bui
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface ClientPF {
   id: number;
@@ -78,6 +79,12 @@ export default function Clients() {
   });
 
   const [searchingSupplierCNPJ, setSearchingSupplierCNPJ] = useState(false);
+
+  const { hasPermission } = usePermissions();
+  const pageKey = activeTab === 'pf' ? 'contacts-pf' : activeTab === 'pj' ? 'contacts-pj' : 'contacts-suppliers';
+  const canCreate = hasPermission('commercial', pageKey, 'create');
+  const canEdit = hasPermission('commercial', pageKey, 'edit');
+  const canDelete = hasPermission('commercial', pageKey, 'delete');
 
   const searchSupplierCNPJ = async () => {
     const cnpj = formDataFornecedor.cnpj.replace(/\D/g, '');
@@ -362,18 +369,22 @@ export default function Clients() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <label className="btn btn-outline flex items-center gap-2 cursor-pointer">
-            <Upload className="w-4 h-4" />
-            <span>Importar</span>
-            <input type="file" accept=".csv,.xlsx" onChange={handleImport} className="hidden" />
-          </label>
-          <button
-            onClick={openModal}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Novo Registro</span>
-          </button>
+          {canCreate && (
+            <label className="btn btn-outline flex items-center gap-2 cursor-pointer">
+              <Upload className="w-4 h-4" />
+              <span>Importar</span>
+              <input type="file" accept=".csv,.xlsx" onChange={handleImport} className="hidden" />
+            </label>
+          )}
+          {canCreate && (
+            <button
+              onClick={openModal}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Novo Registro</span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -438,7 +449,7 @@ export default function Clients() {
                 {activeTab === 'pf' ? (
                   clientsPF.length === 0 ? (
                     <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PF localizado</td></tr>
-                  ) : clientsPF.map(client => (
+                  ) :                   clientsPF.map(client => (
                     <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
                       <td className="px-6 py-4">
                         <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.name}</div>
@@ -460,8 +471,8 @@ export default function Clients() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
-                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                          {canEdit && <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
+                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -469,7 +480,7 @@ export default function Clients() {
                 ) : activeTab === 'pj' ? (
                   clientsPJ.length === 0 ? (
                     <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PJ localizado</td></tr>
-                  ) : clientsPJ.map(client => (
+                  ) :                   clientsPJ.map(client => (
                     <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
                       <td className="px-6 py-4">
                         <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.name}</div>
@@ -491,8 +502,8 @@ export default function Clients() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
-                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                          {canEdit && <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
+                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -500,7 +511,7 @@ export default function Clients() {
                 ) : activeTab === 'pj' ? (
                   clientsPJ.length === 0 ? (
                     <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PJ localizado</td></tr>
-                  ) : clientsPJ.map(client => (
+                  ) :                   clientsPJ.map(client => (
                     <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
                       <td className="px-6 py-4">
                         <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.corporate_name}</div>
@@ -522,8 +533,8 @@ export default function Clients() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditPJ(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
-                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                          {canEdit && <button onClick={() => handleEditPJ(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
+                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -531,7 +542,7 @@ export default function Clients() {
                 ) : (
                   suppliers.length === 0 ? (
                     <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum fornecedor localizado</td></tr>
-                  ) : suppliers.map(client => (
+                  ) :                   suppliers.map(client => (
                     <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
                       <td className="px-6 py-4">
                         <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.corporate_name}</div>
@@ -553,8 +564,8 @@ export default function Clients() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditFornecedor(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>
-                          <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>
+                          {canEdit && <button onClick={() => handleEditFornecedor(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
+                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>

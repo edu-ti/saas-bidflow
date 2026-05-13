@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../hooks/usePermissions';
 import type { ConsignmentRecord } from './consignment/types';
 import ConsignmentDashboard from './consignment/ConsignmentDashboard';
 import ConsignmentWizard from './consignment/ConsignmentWizard';
@@ -9,6 +10,12 @@ import ReconcileModal from './consignment/ReconcileModal';
 
 export default function Consignment() {
   const { theme } = useTheme();
+
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('inventory', 'consignments', 'create');
+  const canSend = hasPermission('inventory', 'consignments', 'send');
+  const canClose = hasPermission('inventory', 'consignments', 'close');
+  const canDelete = hasPermission('inventory', 'consignments', 'delete');
 
   const [records, setRecords] = useState<ConsignmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +47,7 @@ export default function Consignment() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleSend = async (c: ConsignmentRecord) => {
+    if (!canSend) return;
     if (!confirm(`Enviar remessa #${c.id}? O estoque será deduzido.`)) return;
     try {
       await api.post(`/api/consignments/${c.id}/send`);
@@ -54,6 +62,7 @@ export default function Consignment() {
   };
 
   const handleClose = async (c: ConsignmentRecord) => {
+    if (!canClose) return;
     if (!confirm(`Fechar consignação #${c.id}? Itens pendentes serão devolvidos ao estoque e o financeiro será gerado.`)) return;
     try {
       await api.post(`/api/consignments/${c.id}/close`);
@@ -68,6 +77,7 @@ export default function Consignment() {
   };
 
   const handleDelete = async (id: number) => {
+    if (!canDelete) return;
     if (!confirm('Excluir este rascunho?')) return;
     try {
       await api.delete(`/api/consignments/${id}`);
@@ -97,6 +107,10 @@ export default function Consignment() {
         onSend={handleSend}
         onClose={handleClose}
         onDelete={handleDelete}
+        canCreate={canCreate}
+        canSend={canSend}
+        canClose={canClose}
+        canDelete={canDelete}
       />
 
       <ConsignmentWizard

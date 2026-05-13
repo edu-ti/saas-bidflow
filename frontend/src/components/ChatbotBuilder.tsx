@@ -20,6 +20,7 @@ import {
 import { MessageNode, QuestionNode, CaptureNode, ActionNode } from './chatbot/nodes/CustomNodes';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
+import { usePermissions } from '../hooks/usePermissions';
 
 const nodeTypes = {
  message: MessageNode,
@@ -45,6 +46,8 @@ function ChatbotBuilderInner() {
  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
  const [isSaving, setIsSaving] = useState(false);
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('modules', 'chatbot', 'create');
  const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
  // Load data
@@ -173,6 +176,7 @@ function ChatbotBuilderInner() {
  <button className="px-6 py-2.5 bg-bg-tertiary/40 border border-border rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-bg-tertiary transition-all flex items-center gap-3">
  <Play size={14} className="text-emerald-500" /> Simular Fluxo
  </button>
+ {canCreate && (
  <button 
  onClick={handleSave} 
  disabled={isSaving}
@@ -181,6 +185,7 @@ function ChatbotBuilderInner() {
  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} 
  Salvar Fluxo
  </button>
+ )}
  </div>
  </header>
 

@@ -6,6 +6,7 @@ import {
 import api from '../lib/axios';
 import { Select } from './ui/Select';
 import toast from 'react-hot-toast';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface InventoryProduct {
  id: number;
@@ -100,8 +101,14 @@ export default function Inventory() {
  
  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
 
- const [showSettingsModal, setShowSettingsModal] = useState(false);
- const [settingsModalType, setSettingsModalType] = useState('');
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('inventory', 'inventory-page', 'create');
+  const canEdit = hasPermission('inventory', 'inventory-page', 'edit');
+  const canDelete = hasPermission('inventory', 'inventory-page', 'delete');
+  const canSettings = hasPermission('inventory', 'inventory-page', 'settings');
+
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsModalType, setSettingsModalType] = useState('');
  const [settingsFormData, setSettingsFormData] = useState({
  name: '',
  code: '',
@@ -421,13 +428,15 @@ export default function Inventory() {
  className="w-full pl-16 pr-6 py-4 bg-background/50 border border-border rounded-2xl text-sm font-bold text-text-primary focus:border-primary/40 outline-none transition-all placeholder:text-text-muted/40 "
  />
  </div>
- <button
- onClick={() => handleOpenModal()}
- className="btn btn-primary py-4 px-10 flex items-center gap-4 uppercase text-xs tracking-widest"
- >
- <Plus className="w-5 h-5" />
- Registrar Ativo Neural
- </button>
+          {canCreate && (
+          <button
+          onClick={() => handleOpenModal()}
+          className="btn btn-primary py-4 px-10 flex items-center gap-4 uppercase text-xs tracking-widest"
+          >
+          <Plus className="w-5 h-5" />
+          Registrar Ativo Neural
+          </button>
+          )}
  </div>
 
  <div className="overflow-x-auto ">
@@ -483,10 +492,14 @@ export default function Inventory() {
  <td className="px-10 py-10 text-right text-text-muted font-semibold text-xs tracking-tight">{formatCurrency(product.cost_price)}</td>
  <td className="px-10 py-10 text-right font-semibold text-text-primary text-sm tracking-tight group-hover:text-primary transition-colors">{formatCurrency(product.sale_price)}</td>
  <td className="px-10 py-10 text-right">
- <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
- <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit2 size={18} /></button>
- <button onClick={() => handleDelete(product.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
- </div>
+              <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+              {canEdit && (
+              <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit2 size={18} /></button>
+              )}
+              {canDelete && (
+              <button onClick={() => handleDelete(product.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
+              )}
+              </div>
  </td>
  </tr>
  );
@@ -561,7 +574,9 @@ export default function Inventory() {
  <div className={`w-16 h-16 rounded-xl ${item.bg} border border-border flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform duration-700 `}>
  <item.icon size={32} className="" />
  </div>
- <button onClick={() => openSettingsModal(item.type)} className="text-xs font-semibold text-primary uppercase tracking-widest hover:text-primary-hover transition-all flex items-center gap-2 border-b border-primary/20 pb-1">+ Gerenciar</button>
+              {canSettings && (
+              <button onClick={() => openSettingsModal(item.type)} className="text-xs font-semibold text-primary uppercase tracking-widest hover:text-primary-hover transition-all flex items-center gap-2 border-b border-primary/20 pb-1">+ Gerenciar</button>
+              )}
  </div>
  <div className="space-y-3">
  <p className="text-xs font-semibold text-text-muted uppercase opacity-60">{item.label}</p>

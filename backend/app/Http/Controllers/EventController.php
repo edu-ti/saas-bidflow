@@ -18,17 +18,13 @@ class EventController extends Controller
         $this->authorize('viewAny', Event::class);
         $user = Auth::user();
 
-        // Get standard events
-        $events = Event::where('user_id', $user->id)
-            ->orWhereNull('user_id') // Company-wide events
-            ->get();
+        // Get standard events - ALL events from the same company
+        $events = Event::where('company_id', $user->company_id)->get();
             
         $eventsData = EventResource::collection($events)->resolve();
 
-        // Get opportunities to mix into calendar
-        $opportunities = Opportunity::where('user_id', $user->id)
-            ->orWhereIn('role', ['Admin', 'Manager'] ? [$user->role] : []) // If admin, load all? Let's just load the ones the user can see.
-            ->get();
+        // Get opportunities to mix into calendar - ALL from same company
+        $opportunities = Opportunity::where('company_id', $user->company_id)->get();
             
         // Assuming we have a due date in bidding_metadata or we just use created_at for now
         // A better approach is checking if 'bidding_metadata->due_date' exists, but let's map what we have.
@@ -58,6 +54,7 @@ class EventController extends Controller
         ]);
         
         $validated['user_id'] = Auth::id();
+        $validated['company_id'] = Auth::user()->company_id;
 
         $event = Event::create($validated);
         return new EventResource($event);

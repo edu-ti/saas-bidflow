@@ -5,6 +5,7 @@ import { Sparkles, Loader2, FileWarning, Clock, FileText, Plus, Settings, Trash2
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../lib/axios';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { usePermissions } from '../hooks/usePermissions';
 
 // Modals
 import StageModal from './ui/StageModal';
@@ -39,9 +40,12 @@ export default function SalesFunnel() {
  const [isOppModalOpen, setIsOppModalOpen] = useState(false);
  const [stageToEdit, setStageToEdit] = useState<FunnelStage | null>(null);
  const [initialStageForOpp, setInitialStageForOpp] = useState<number | null>(null);
- const [oppToEdit, setOppToEdit] = useState<Opportunity | null>(null);
+  const [oppToEdit, setOppToEdit] = useState<Opportunity | null>(null);
 
- // WebSocket hook for real-time updates
+  const { hasPermission } = usePermissions();
+  const canDeleteStage = hasPermission('commercial', 'sales-funnel', 'delete');
+
+  // WebSocket hook for real-time updates
  const { sendMessage } = useWebSocket(
  import.meta.env.VITE_WS_URL || 'ws://localhost:8080',
  {
@@ -228,14 +232,16 @@ export default function SalesFunnel() {
  <span className="bg-bg-tertiary text-text-muted text-xs px-2 py-0.5 rounded font-medium border border-border">
  {opportunities.filter(opp => opp.funnel_stage_id === stage.id).length}
  </span>
- <div className="hidden group-hover:flex items-center gap-1">
- <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1 hover:bg-bg-tertiary rounded transition-colors" title="Editar">
- <Edit2 size={12} />
- </button>
- <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-danger p-1 hover:bg-danger/10 rounded transition-colors" title="Excluir">
- <Trash2 size={12} />
- </button>
- </div>
+  <div className="hidden group-hover:flex items-center gap-1">
+  <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1 hover:bg-bg-tertiary rounded transition-colors" title="Editar">
+  <Edit2 size={12} />
+  </button>
+  {canDeleteStage && (
+  <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-danger p-1 hover:bg-danger/10 rounded transition-colors" title="Excluir">
+  <Trash2 size={12} />
+  </button>
+  )}
+  </div>
  </div>
  </div>
 

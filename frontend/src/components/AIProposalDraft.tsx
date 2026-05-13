@@ -77,7 +77,7 @@ export default function AIProposalDraft() {
  };
 
  const handleGeneratePDF = () => {
- window.open(`http://localhost:8000/api/opportunities/${opportunityId}/proposal-draft/pdf`, '_blank');
+ window.open(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost'}/api/opportunities/${opportunityId}/proposal-draft/pdf`, '_blank');
  };
 
  return (

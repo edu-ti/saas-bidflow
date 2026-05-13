@@ -8,4 +8,16 @@ export default defineConfig({
     globals: true,
     environment: 'node',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost',
+        changeOrigin: true,
+      },
+      '/sanctum': {
+        target: 'http://localhost',
+        changeOrigin: true,
+      },
+    },
+  },
 })

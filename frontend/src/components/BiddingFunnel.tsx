@@ -8,6 +8,7 @@ import Modal from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
 import { format } from 'date-fns';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Bidding {
  id: number;
@@ -47,6 +48,11 @@ const defaultStages = [
 ];
 
 export default function BiddingFunnel() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'bidding-funnel', 'create');
+ const canEdit = hasPermission('bidding', 'bidding-funnel', 'edit');
+ const canDelete = hasPermission('bidding', 'bidding-funnel', 'delete');
+
  const [biddings, setBiddings] = useState<Bidding[]>([]);
  const [stages, setStages] = useState<FunnelStage[]>(defaultStages);
  const [loading, setLoading] = useState(true);
@@ -168,14 +174,16 @@ export default function BiddingFunnel() {
  Fluxo estratégico de participação e conformidade jurídica.
  </p>
  </div>
- <button
- onClick={() => { resetForm(); setIsModalOpen(true); }}
- aria-label="Registrar nova licitação no pipeline"
- className="btn btn-primary py-4 px-10 rounded-full flex items-center gap-3 uppercase text-xs tracking-widest"
- >
- <Plus className="w-5 h-5" />
- Novo Processo
- </button>
+  {canCreate && (
+  <button
+  onClick={() => { resetForm(); setIsModalOpen(true); }}
+  aria-label="Registrar nova licitação no pipeline"
+  className="btn btn-primary py-4 px-10 rounded-full flex items-center gap-3 uppercase text-xs tracking-widest"
+  >
+  <Plus className="w-5 h-5" />
+  Novo Processo
+  </button>
+  )}
  </header>
 
  {loading ? (
@@ -228,10 +236,14 @@ export default function BiddingFunnel() {
  <h3 className={`font-semibold text-xs text-text-primary leading-relaxed uppercase tracking-tight transition-all duration-500 ${snapshot.isDragging ? 'text-primary' : 'group-hover:text-primary'} line-clamp-2`}>
  {bidding.title}
  </h3>
- <div className="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
- <button onClick={() => handleEdit(bidding)} className="p-2.5 bg-bg-tertiary/40 border border-border text-text-muted hover:text-primary hover:scale-110 rounded-xl transition-all "><Pencil size={14} /></button>
- <button onClick={() => handleDelete(bidding.id)} className="p-2.5 bg-red-500/5 border border-red-500/10 text-text-muted hover:text-red-500 hover:scale-110 rounded-xl transition-all "><Trash2 size={14} /></button>
- </div>
+  <div className="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+  {canEdit && (
+  <button onClick={() => handleEdit(bidding)} className="p-2.5 bg-bg-tertiary/40 border border-border text-text-muted hover:text-primary hover:scale-110 rounded-xl transition-all "><Pencil size={14} /></button>
+  )}
+  {canDelete && (
+  <button onClick={() => handleDelete(bidding.id)} className="p-2.5 bg-red-500/5 border border-red-500/10 text-text-muted hover:text-red-500 hover:scale-110 rounded-xl transition-all "><Trash2 size={14} /></button>
+  )}
+  </div>
  </div>
 
  <div className="space-y-3 border-t border-border/20 pt-5">

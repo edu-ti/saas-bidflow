@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import { usePermissions } from '../../hooks/usePermissions';
 import Modal from '../ui/Modal';
 
 interface InventoryProduct {
@@ -46,7 +47,12 @@ const InventoryDashboard = () => {
  const [searchTerm, setSearchTerm] = useState('');
  const [showModal, setShowModal] = useState(false);
  const [editingProduct, setEditingProduct] = useState<InventoryProduct | null>(null);
- const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('inventory', 'inventory-page', 'create');
+  const canEdit = hasPermission('inventory', 'inventory-page', 'edit');
+  const canDelete = hasPermission('inventory', 'inventory-page', 'delete');
+
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
 
  const [brands, setBrands] = useState<any[]>([]);
  const [categories, setCategories] = useState<any[]>([]);
@@ -160,13 +166,15 @@ const InventoryDashboard = () => {
  Gestão estratégica de ativos, SKUs e movimentações logísticas.
  </p>
  </div>
- <button
- onClick={() => handleOpenModal()}
- className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest whitespace-nowrap"
- >
- <Plus className="w-5 h-5" />
- Registrar Ativo Neural
- </button>
+  {canCreate && (
+  <button
+  onClick={() => handleOpenModal()}
+  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest whitespace-nowrap"
+  >
+  <Plus className="w-5 h-5" />
+  Registrar Ativo Neural
+  </button>
+  )}
  </header>
 
  {/* Metrics Grid */}
@@ -270,10 +278,14 @@ const InventoryDashboard = () => {
  </div>
  </td>
  <td className="px-10 py-8 text-right">
- <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
- <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Editar Ativo"><Edit2 size={18} /></button>
- <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Remover Ativo"><Trash2 size={18} /></button>
- </div>
+  <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+  {canEdit && (
+  <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Editar Ativo"><Edit2 size={18} /></button>
+  )}
+  {canDelete && (
+  <button className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Remover Ativo"><Trash2 size={18} /></button>
+  )}
+  </div>
  </td>
  </tr>
  ))}

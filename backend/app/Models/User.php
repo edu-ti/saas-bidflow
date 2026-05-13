@@ -43,4 +43,36 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class)->withTrashed();
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->is_admin || $this->is_superadmin;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_superadmin;
+    }
+
+    /**
+     * Override getAttribute to resolve the conflict between the 'role' database column
+     * and the 'role' Eloquent relationship. When role_id is set, the relationship wins.
+     */
+    public function getAttribute($key)
+    {
+        if ($key === 'role') {
+            // If the relationship is already loaded, return it
+            if ($this->relationLoaded('role')) {
+                return $this->relations['role'];
+            }
+            // If role_id is set, try to load and return the relationship
+            if ($this->role_id) {
+                $relationValue = $this->getRelationValue('role');
+                if ($relationValue !== null) {
+                    return $relationValue;
+                }
+            }
+        }
+        return parent::getAttribute($key);
+    }
 }

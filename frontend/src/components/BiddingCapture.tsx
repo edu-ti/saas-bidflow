@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Search, RefreshCw, Ex
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import Modal from './ui/Modal';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Bidding {
  id: number;
@@ -29,6 +30,10 @@ const defaultModalities = [
 ];
 
 export default function BiddingCapture() {
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('bidding', 'capture', 'create');
+ const canEdit = hasPermission('bidding', 'capture', 'edit');
+
  const navigate = useNavigate();
  const [biddings, setBiddings] = useState<Bidding[]>([]);
  const [loading, setLoading] = useState(true);
@@ -195,18 +200,20 @@ export default function BiddingCapture() {
  </div>
  </div>
 
- <div className="flex items-center justify-between border-b border-border pb-4">
- <h2 className="text-base font-semibold text-text-primary">Registros Capturados</h2>
- <button
- onClick={() => { setFormData({
- title: '', process_number: '', agency: '', modality: '',
- opening_date: '', value: '', status: 'ativa', source_url: '', description: '',
- }); setIsEditing(false); setIsModalOpen(true); }}
- className="btn btn-outline flex items-center gap-2 py-2"
- >
- <Plus className="w-4 h-4" /> Inserção Manual
- </button>
- </div>
+  <div className="flex items-center justify-between border-b border-border pb-4">
+  <h2 className="text-base font-semibold text-text-primary">Registros Capturados</h2>
+  {canCreate && (
+  <button
+  onClick={() => { setFormData({
+  title: '', process_number: '', agency: '', modality: '',
+  opening_date: '', value: '', status: 'ativa', source_url: '', description: '',
+  }); setIsEditing(false); setIsModalOpen(true); }}
+  className="btn btn-outline flex items-center gap-2 py-2"
+  >
+  <Plus className="w-4 h-4" /> Inserção Manual
+  </button>
+  )}
+  </div>
 
  <div className="card overflow-hidden">
  {loading ? (
@@ -254,10 +261,12 @@ export default function BiddingCapture() {
  </div>
  </td>
  <td className="px-6 py-4 text-right">
- <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
- <button onClick={() => navigate(`/auction-details?id=${bidding.id}`)} className="p-1.5 text-text-muted hover:text-primary transition-colors" title="Detalhes"><ExternalLink size={16} /></button>
- <button onClick={() => handleEdit(bidding)} className="p-1.5 text-text-muted hover:text-primary transition-colors" title="Editar"><Pencil size={16} /></button>
- </div>
+  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+  <button onClick={() => navigate(`/auction-details?id=${bidding.id}`)} className="p-1.5 text-text-muted hover:text-primary transition-colors" title="Detalhes"><ExternalLink size={16} /></button>
+  {canEdit && (
+  <button onClick={() => handleEdit(bidding)} className="p-1.5 text-text-muted hover:text-primary transition-colors" title="Editar"><Pencil size={16} /></button>
+  )}
+  </div>
  </td>
  </tr>
  ))}

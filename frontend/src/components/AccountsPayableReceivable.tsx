@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePermissions } from '../hooks/usePermissions';
 import { Plus, CreditCard, Search, Zap, Calendar, DollarSign, Filter, ArrowUpRight, ArrowDownLeft, ShieldCheck, X, Loader2, ChevronRight, TrendingUp, TrendingDown, Layout, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
@@ -24,6 +25,9 @@ interface AccountsReceivable {
 }
 
 export default function AccountsPayableReceivable() {
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('financial', 'accounts-payable', 'create');
+
   const [payables, setPayables] = useState<AccountsPayable[]>([]);
   const [receivables, setReceivables] = useState<AccountsReceivable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,13 +155,15 @@ export default function AccountsPayableReceivable() {
           </button>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Novo Lançamento</span>
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Novo Lançamento</span>
+          </button>
+        )}
       </div>
 
       {/* Filters */}

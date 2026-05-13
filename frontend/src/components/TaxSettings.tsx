@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePermissions } from '../hooks/usePermissions';
 import { Settings, Upload, Save, Loader2, Shield, Landmark, ShieldCheck, Lock, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
@@ -20,6 +21,9 @@ const REGIMES = [
 ];
 
 export default function TaxSettings() {
+  const { hasPermission } = usePermissions();
+  const canSave = hasPermission('financial', 'tax-settings', 'update');
+
   const [config, setConfig] = useState<TaxConfig>({ regime_especial: '', aliquota_padrao: '0', certificado_path: null, permite_saldo_negativo: false });
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -151,16 +155,18 @@ export default function TaxSettings() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <button 
-            type="submit" 
-            disabled={saving}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            <span>Salvar Configurações</span>
-          </button>
-        </div>
+        {canSave && (
+          <div className="flex justify-end">
+            <button 
+              type="submit" 
+              disabled={saving}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>Salvar Configurações</span>
+            </button>
+          </div>
+        )}
       </form>
 
       {/* Certificate Card */}
@@ -204,13 +210,15 @@ export default function TaxSettings() {
                 />
               </div>
               
-              <label className="cursor-pointer group flex-shrink-0">
-                <input type="file" accept=".pfx,.p12" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCertUpload(e.target.files[0]); }} />
-                <span className="btn btn-outline w-full md:w-auto flex items-center justify-center gap-2">
-                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  <span>{config.certificado_path ? 'Substituir Certificado' : 'Selecionar Arquivo'}</span>
-                </span>
-              </label>
+              {canSave && (
+                <label className="cursor-pointer group flex-shrink-0">
+                  <input type="file" accept=".pfx,.p12" className="hidden" onChange={e => { if (e.target.files?.[0]) handleCertUpload(e.target.files[0]); }} />
+                  <span className="btn btn-outline w-full md:w-auto flex items-center justify-center gap-2">
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    <span>{config.certificado_path ? 'Substituir Certificado' : 'Selecionar Arquivo'}</span>
+                  </span>
+                </label>
+              )}
             </div>
           </div>
         </div>

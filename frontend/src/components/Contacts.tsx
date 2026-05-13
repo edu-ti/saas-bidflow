@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Upload, Save, X, User, Briefcase, Mail, Phone, ShieldCheck, Search, Loader2, Target, Globe, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface Contact {
  id: number;
@@ -24,6 +25,11 @@ export default function Contacts() {
  phone: '',
  position: '',
  });
+
+ const { hasPermission } = usePermissions();
+ const canCreate = hasPermission('commercial', 'contacts-pf', 'create');
+ const canEdit = hasPermission('commercial', 'contacts-pf', 'edit');
+ const canDelete = hasPermission('commercial', 'contacts-pf', 'delete');
 
  useEffect(() => {
  fetchContacts();
@@ -135,11 +141,14 @@ export default function Contacts() {
  </p>
  </div>
  <div className="flex items-center gap-4">
+ {canCreate && (
  <label className="flex items-center gap-3 px-6 py-4 bg-bg-tertiary/20 border border-border/30 text-text-primary font-semibold rounded-2xl transition-all text-xs uppercase tracking-widest cursor-pointer hover:bg-bg-tertiary/40 group">
  <Upload className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
  Sincronizar CSV/XLSX
  <input type="file" accept=".csv,.xlsx" onChange={handleImport} className="hidden" />
  </label>
+ )}
+ {canCreate && (
  <button
  onClick={openModal}
  className="btn btn-primary py-4 px-10 flex items-center gap-3 uppercase text-xs tracking-widest"
@@ -147,6 +156,7 @@ export default function Contacts() {
  <Plus className="w-5 h-5" />
  Novo Contato Global
  </button>
+ )}
  </div>
  </header>
 
@@ -219,8 +229,12 @@ export default function Contacts() {
  </td>
  <td className="px-10 py-10 text-right">
  <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+ {canEdit && (
  <button onClick={() => handleEdit(contact)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Pencil size={18} /></button>
+ )}
+ {canDelete && (
  <button onClick={() => handleDelete(contact.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Excluir"><Trash2 size={18} /></button>
+ )}
  </div>
  </td>
  </tr>

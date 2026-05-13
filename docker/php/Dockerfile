@@ -1,6 +1,6 @@
 FROM php:8.4-fpm-alpine
 
-RUN apk add --no-cache \
+RUN apk add --no-cache icu-data-full\
     git \
     curl \
     libpng-dev \
@@ -11,7 +11,8 @@ RUN apk add --no-cache \
     postgresql-client \
     redis \
     bash \
-    fcron || true
+    fcron \
+    oniguruma-dev || true
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd
 
