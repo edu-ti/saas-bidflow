@@ -1,59 +1,69 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import React, { useState } from 'react';
-import { Activity, Bell, Sun, Moon } from 'lucide-react';
+import React, { useState, Suspense, lazy } from 'react';
+import { Bell, Sun, Moon } from 'lucide-react';
 import type { Page } from './components/Sidebar';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
-import Leads from './components/leads/LeadsDashboard';
-import Clients from './components/Clients';
-import Products from './components/Products';
-import Agenda from './components/Agenda';
-import BiddingRadar from './components/BiddingRadar';
-import EmailMarketing from './components/EmailMarketing';
-import UsersManagement from './components/UsersManagement';
-import SalesFunnel from './components/SalesFunnel';
-import Proposals from './components/Proposals';
-import AIGenerator from './components/AIGenerator';
-import BiddingMonitoring from './components/BiddingMonitoring';
-import BiddingCapture from './components/BiddingCapture';
-import BiddingFunnel from './components/BiddingFunnel';
-import BiddingHub from './components/BiddingHub';
-import BiddingSearch from './components/BiddingSearch';
-import BiddingBulletin from './components/BiddingBulletin';
-import ManageBiddings from './components/ManageBiddings';
-import ManageDocuments from './components/ManageDocuments';
-import LegalConsultant from './components/LegalConsultant';
-import BidAnalyst from './components/BidAnalyst';
-import ChatMonitor from './components/ChatMonitor';
-import ChatMonitorSettings from './components/ChatMonitorSettings';
-import MarketAnalysis from './components/MarketAnalysis';
-import CompetitorAnalysis from './components/CompetitorAnalysis';
-import AuctionDetails from './components/AuctionDetails';
-import Licenses from './components/Licenses';
-import Consignment from './components/Consignment';
-import Contracts from './components/contracts/ContractsDashboard';
-import Inventory from './components/inventory/InventoryDashboard';
-import Campaigns from './components/Campaigns';
-import Tasks from './components/Tasks';
-import ReportsBIPage from './components/ReportsBIPage';
-import AccountsPayableReceivable from './components/AccountsPayableReceivable';
-import Finance from './components/financial/FinanceDashboard';
-import Admin from './components/Admin';
-import Company from './components/Company';
-import ChatbotBuilder from './components/ChatbotBuilder';
-import Conversations from './components/Conversations';
-import Settings from './components/Settings';
-import MasterLayout from './layouts/MasterLayout';
-import MasterDashboard from './components/master/MasterDashboard';
-import TenantList from './components/master/TenantList';
-import PlansManagement from './components/master/PlansManagement';
-import SystemHealth from './components/master/SystemHealth';
 import LandingPage from './pages/LandingPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import MasterGuard from './guards/MasterGuard';
 import TenantGuard from './guards/TenantGuard';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+
+// Lazy loading para reduzir bundle inicial
+const Leads = lazy(() => import('./components/leads/LeadsDashboard'));
+const Clients = lazy(() => import('./components/Clients'));
+const Products = lazy(() => import('./components/Products'));
+const Agenda = lazy(() => import('./components/Agenda'));
+const BiddingRadar = lazy(() => import('./components/BiddingRadar'));
+const EmailMarketing = lazy(() => import('./components/EmailMarketing'));
+const UsersManagement = lazy(() => import('./components/UsersManagement'));
+const SalesFunnel = lazy(() => import('./components/SalesFunnel'));
+const Proposals = lazy(() => import('./components/Proposals'));
+const AIGenerator = lazy(() => import('./components/AIGenerator'));
+const BiddingMonitoring = lazy(() => import('./components/BiddingMonitoring'));
+const BiddingCapture = lazy(() => import('./components/BiddingCapture'));
+const BiddingFunnel = lazy(() => import('./components/BiddingFunnel'));
+const BiddingHub = lazy(() => import('./components/BiddingHub'));
+const BiddingSearch = lazy(() => import('./components/BiddingSearch'));
+const BiddingBulletin = lazy(() => import('./components/BiddingBulletin'));
+const ManageBiddings = lazy(() => import('./components/ManageBiddings'));
+const ManageDocuments = lazy(() => import('./components/ManageDocuments'));
+const LegalConsultant = lazy(() => import('./components/LegalConsultant'));
+const BidAnalyst = lazy(() => import('./components/BidAnalyst'));
+const ChatMonitor = lazy(() => import('./components/ChatMonitor'));
+const ChatMonitorSettings = lazy(() => import('./components/ChatMonitorSettings'));
+const MarketAnalysis = lazy(() => import('./components/MarketAnalysis'));
+const CompetitorAnalysis = lazy(() => import('./components/CompetitorAnalysis'));
+const AuctionDetails = lazy(() => import('./components/AuctionDetails'));
+const Licenses = lazy(() => import('./components/Licenses'));
+const Consignment = lazy(() => import('./components/Consignment'));
+const Contracts = lazy(() => import('./components/contracts/ContractsDashboard'));
+const Inventory = lazy(() => import('./components/inventory/InventoryDashboard'));
+const Campaigns = lazy(() => import('./components/Campaigns'));
+const Tasks = lazy(() => import('./components/Tasks'));
+const ReportsBIPage = lazy(() => import('./components/ReportsBIPage'));
+const AccountsPayableReceivable = lazy(() => import('./components/AccountsPayableReceivable'));
+const Finance = lazy(() => import('./components/financial/FinanceDashboard'));
+const Admin = lazy(() => import('./components/Admin'));
+const Company = lazy(() => import('./components/Company'));
+const ChatbotBuilder = lazy(() => import('./components/ChatbotBuilder'));
+const Conversations = lazy(() => import('./components/Conversations'));
+const Settings = lazy(() => import('./components/Settings'));
+const TaxCompliancePage = lazy(() => import('./components/TaxCompliancePage'));
+const MasterLayout = lazy(() => import('./layouts/MasterLayout'));
+const MasterDashboard = lazy(() => import('./components/master/MasterDashboard'));
+const TenantList = lazy(() => import('./components/master/TenantList'));
+const PlansManagement = lazy(() => import('./components/master/PlansManagement'));
+const SystemHealth = lazy(() => import('./components/master/SystemHealth'));
+
+// Loading fallback
+const PageLoader = () => (
+  <div className="flex-1 flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Componente para rotas protegidas
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -91,10 +101,23 @@ const hasPermission = (module?: string, page?: string, action: string = 'view') 
   
   try {
     const user = JSON.parse(storedUser);
+    if (!module) return false;
+
+    // 1. Restrição de plano: verificar se o módulo está no plano (aplica a TODOS exceto superadmin)
+    const allowedModules = user.allowed_modules || [];
+    if (!user.is_superadmin && allowedModules.length > 0 && !allowedModules.includes(module)) {
+      return false;
+    }
+
+    // 2. SuperAdmin ou Admin da empresa têm acesso a todos os módulos do plano
     if (user.is_superadmin || user.is_admin) return true;
-    if (!user.permissions || !module || !page) return false; 
+
+    // 3. Se não há permissões detalhadas, permite se o módulo está no plano
+    if (!user.permissions || !page) {
+      return allowedModules.includes(module);
+    }
     
-    // Suporte ao formato antigo (fallback) se necessário, mas focado no novo
+    // 4. Suporte ao formato antigo (fallback) se necessário, mas focado no novo
     if (typeof user.permissions[module] === 'object') {
        return user.permissions[module]?.[page]?.[action] === true;
     }
@@ -166,6 +189,7 @@ function Topbar({ title }: { title?: string }) {
       '/campaigns': 'Campanhas',
       '/tasks': 'Tarefas',
       '/finance': 'Financeiro',
+      '/tax-compliance': 'Compliance Fiscal',
       '/accounts-payable-receivable': 'Contas',
       '/chatbot': 'Chatbot',
       '/conversations': 'Conversas',
@@ -213,11 +237,12 @@ function Topbar({ title }: { title?: string }) {
     }
   }, []);
 
+  // Buscar notificações só quando abre o menu, não fica fazendo polling
   React.useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+    if (showNotifications && notifications.length === 0) {
+      fetchNotifications();
+    }
+  }, [showNotifications, fetchNotifications]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -419,6 +444,25 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { theme } = useTheme();
 
+  React.useEffect(() => {
+    const refreshUser = async () => {
+      try {
+        const res = await api.get('/api/user');
+        const fresh = res.data;
+        const storedStr = localStorage.getItem('user');
+        const stored = storedStr ? JSON.parse(storedStr) : {};
+        const freshModules = (fresh.allowed_modules || []).sort().join(',');
+        const storedModules = (stored.allowed_modules || []).sort().join(',');
+
+        if (freshModules !== storedModules) {
+          localStorage.setItem('user', JSON.stringify(fresh));
+          window.location.reload();
+        }
+      } catch {}
+    };
+    refreshUser();
+  }, [location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('api_token');
     localStorage.removeItem('user');
@@ -462,6 +506,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     if (path === '/products') return 'products';
     if (path === '/accounts-payable-receivable') return 'accounts-payable-receivable';
     if (path === '/finance') return 'finance';
+    if (path === '/tax-compliance') return 'tax-compliance';
     if (path === '/admin') return 'admin';
     if (path === '/chatbot') return 'chatbot';
     if (path === '/conversations') return 'conversations';
@@ -554,7 +599,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="management" page="company">
               <AuthenticatedLayout>
-                <Company />
+                <Suspense fallback={<PageLoader />}><Company /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -564,7 +609,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="management" page="users-management">
               <AuthenticatedLayout>
-                <UsersManagement />
+                <Suspense fallback={<PageLoader />}><UsersManagement /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -574,7 +619,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="management" page="reports-dashboard">
               <AuthenticatedLayout>
-                <ReportsBIPage />
+                <Suspense fallback={<PageLoader />}><ReportsBIPage /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -585,7 +630,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="sales-funnel">
               <AuthenticatedLayout>
-                <SalesFunnel />
+                <Suspense fallback={<PageLoader />}><SalesFunnel /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -595,7 +640,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="leads">
               <AuthenticatedLayout>
-                <Leads />
+                <Suspense fallback={<PageLoader />}><Leads /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -605,7 +650,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="contacts-pf">
               <AuthenticatedLayout>
-                <Clients />
+                <Suspense fallback={<PageLoader />}><Clients /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -615,7 +660,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="proposals">
               <AuthenticatedLayout>
-                <Proposals />
+                <Suspense fallback={<PageLoader />}><Proposals /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -625,7 +670,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="email-marketing">
               <AuthenticatedLayout>
-                <EmailMarketing />
+                <Suspense fallback={<PageLoader />}><EmailMarketing /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -635,7 +680,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="agenda">
               <AuthenticatedLayout>
-                <Agenda />
+                <Suspense fallback={<PageLoader />}><Agenda /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -646,7 +691,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="bidding-manager">
               <AuthenticatedLayout>
-                <BiddingHub />
+                <Suspense fallback={<PageLoader />}><BiddingHub /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -656,7 +701,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="search-bids">
               <AuthenticatedLayout>
-                <BiddingSearch />
+                <Suspense fallback={<PageLoader />}><BiddingSearch /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -666,7 +711,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="bulletins">
               <AuthenticatedLayout>
-                <BiddingBulletin />
+                <Suspense fallback={<PageLoader />}><BiddingBulletin /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -676,7 +721,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="manage-bids">
               <AuthenticatedLayout>
-                <ManageBiddings />
+                <Suspense fallback={<PageLoader />}><ManageBiddings /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -686,7 +731,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="documents">
               <AuthenticatedLayout>
-                <ManageDocuments />
+                <Suspense fallback={<PageLoader />}><ManageDocuments /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -696,7 +741,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="legal-consultant">
               <AuthenticatedLayout>
-                <LegalConsultant />
+                <Suspense fallback={<PageLoader />}><LegalConsultant /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -706,7 +751,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="bid-analyst">
               <AuthenticatedLayout>
-                <BidAnalyst />
+                <Suspense fallback={<PageLoader />}><BidAnalyst /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -716,7 +761,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="chat-monitor">
               <AuthenticatedLayout>
-                <ChatMonitor />
+                <Suspense fallback={<PageLoader />}><ChatMonitor /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -726,7 +771,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="chat-monitor">
               <AuthenticatedLayout>
-                <ChatMonitorSettings />
+                <Suspense fallback={<PageLoader />}><ChatMonitorSettings /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -736,7 +781,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="market-analysis">
               <AuthenticatedLayout>
-                <MarketAnalysis />
+                <Suspense fallback={<PageLoader />}><MarketAnalysis /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -746,7 +791,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="competitors">
               <AuthenticatedLayout>
-                <CompetitorAnalysis />
+                <Suspense fallback={<PageLoader />}><CompetitorAnalysis /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -756,7 +801,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="radar">
               <AuthenticatedLayout>
-                <BiddingRadar />
+                <Suspense fallback={<PageLoader />}><BiddingRadar /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -766,7 +811,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="monitoring">
               <AuthenticatedLayout>
-                <BiddingMonitoring />
+                <Suspense fallback={<PageLoader />}><BiddingMonitoring /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -776,7 +821,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="bidding-funnel">
               <AuthenticatedLayout>
-                <BiddingFunnel />
+                <Suspense fallback={<PageLoader />}><BiddingFunnel /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -786,7 +831,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="capture">
               <AuthenticatedLayout>
-                <BiddingCapture />
+                <Suspense fallback={<PageLoader />}><BiddingCapture /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -796,7 +841,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="auction-details">
               <AuthenticatedLayout>
-                <AuctionDetails />
+                <Suspense fallback={<PageLoader />}><AuctionDetails /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -806,7 +851,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="bidding" page="ai-generator">
               <AuthenticatedLayout>
-                <AIGenerator />
+                <Suspense fallback={<PageLoader />}><AIGenerator /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -817,7 +862,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="management" page="licenses">
               <AuthenticatedLayout>
-                <Licenses />
+                <Suspense fallback={<PageLoader />}><Licenses /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -827,7 +872,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="inventory" page="consignments">
               <AuthenticatedLayout>
-                <Consignment />
+                <Suspense fallback={<PageLoader />}><Consignment /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -837,7 +882,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="financial" page="contracts">
               <AuthenticatedLayout>
-                <Contracts />
+                <Suspense fallback={<PageLoader />}><Contracts /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -848,7 +893,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="commercial" page="products">
               <AuthenticatedLayout>
-                <Products />
+                <Suspense fallback={<PageLoader />}><Products /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -858,7 +903,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="inventory" page="inventory-page">
               <AuthenticatedLayout>
-                <Inventory />
+                <Suspense fallback={<PageLoader />}><Inventory /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -868,7 +913,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="campaigns">
               <AuthenticatedLayout>
-                <Campaigns />
+                <Suspense fallback={<PageLoader />}><Campaigns /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -878,7 +923,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="tasks">
               <AuthenticatedLayout>
-                <Tasks />
+                <Suspense fallback={<PageLoader />}><Tasks /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -889,7 +934,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="financial" page="accounts-payable">
               <AuthenticatedLayout>
-                <AccountsPayableReceivable />
+                <Suspense fallback={<PageLoader />}><AccountsPayableReceivable /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -899,7 +944,17 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="financial" page="financial-manager">
               <AuthenticatedLayout>
-                <Finance />
+                <Suspense fallback={<PageLoader />}><Finance /></Suspense>
+              </AuthenticatedLayout>
+            </PermissionRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/tax-compliance" element={
+          <ProtectedRoute>
+            <PermissionRoute module="financial" page="tax-settings">
+              <AuthenticatedLayout>
+                <Suspense fallback={<PageLoader />}><TaxCompliancePage /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -910,7 +965,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="settings-admin">
               <AuthenticatedLayout>
-                <Admin />
+                <Suspense fallback={<PageLoader />}><Admin /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -920,7 +975,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="chatbot">
               <AuthenticatedLayout>
-                <ChatbotBuilder />
+                <Suspense fallback={<PageLoader />}><ChatbotBuilder /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -930,7 +985,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="conversations">
               <AuthenticatedLayout>
-                <Conversations />
+                <Suspense fallback={<PageLoader />}><Conversations /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -940,7 +995,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="support-center">
               <AuthenticatedLayout>
-                <Conversations />
+                <Suspense fallback={<PageLoader />}><Conversations /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -950,7 +1005,7 @@ function AppContent() {
           <ProtectedRoute>
             <PermissionRoute module="modules" page="settings">
               <AuthenticatedLayout>
-                <Settings />
+                <Suspense fallback={<PageLoader />}><Settings /></Suspense>
               </AuthenticatedLayout>
             </PermissionRoute>
           </ProtectedRoute>
@@ -959,13 +1014,13 @@ function AppContent() {
         {/* Master Routes (Super Admin) */}
         <Route path="/master" element={
           <MasterGuard>
-            <MasterLayout />
+            <Suspense fallback={<PageLoader />}><MasterLayout /></Suspense>
           </MasterGuard>
         }>
-          <Route path="dashboard" element={<MasterDashboard />} />
-          <Route path="tenants" element={<TenantList />} />
-          <Route path="plans" element={<PlansManagement />} />
-          <Route path="system-health" element={<SystemHealth />} />
+          <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><MasterDashboard /></Suspense>} />
+          <Route path="tenants" element={<Suspense fallback={<PageLoader />}><TenantList /></Suspense>} />
+          <Route path="plans" element={<Suspense fallback={<PageLoader />}><PlansManagement /></Suspense>} />
+          <Route path="system-health" element={<Suspense fallback={<PageLoader />}><SystemHealth /></Suspense>} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
 

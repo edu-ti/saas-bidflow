@@ -14,7 +14,6 @@ import {
   Check,
   Loader2,
   Building,
-  Landmark,
   Users,
   ShieldCheck,
   Zap,
@@ -34,7 +33,7 @@ import toast from "react-hot-toast";
 import ConfirmModal, { type ConfirmModalType } from "./ConfirmModal";
 import CompanySettings from "./CompanySettings";
 import UsersManagement from "./UsersManagement";
-import TaxSettings from "./TaxSettings";
+
 
 const Settings = () => {
   const storedUser = localStorage.getItem('user');
@@ -161,7 +160,6 @@ const Settings = () => {
   const adminItems = [
     { id: 'company', label: 'Core Business', icon: Building },
     { id: 'users', label: 'Níveis de Acesso', icon: Users },
-    { id: 'tax', label: 'Compliance Fiscal', icon: Landmark },
   ];
 
   return (
@@ -515,7 +513,6 @@ const Settings = () => {
           <div className="max-w-4xl">
             {activeTab === "company" && isAdmin && <CompanySettings />}
             {activeTab === "users" && isAdmin && <UsersManagement />}
-            {activeTab === "tax" && isAdmin && <TaxSettings />}
           </div>
         </main>
       </div>

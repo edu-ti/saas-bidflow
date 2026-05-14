@@ -15,7 +15,7 @@ class SettingsController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone,
-            'role' => $user->role,
+            'role' => $user->role?->name ?? ($user->is_admin ? 'Administrador' : 'Usuário'),
             'position' => $user->position,
             'avatar' => $user->avatar,
             'department' => $user->department,
@@ -28,7 +28,7 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'role' => 'nullable|string|max:100',
+            // 'role' => 'nullable|string|max:100', // Removido por segurança: papel é controlado via role_id
             'position' => 'nullable|string|max:100',
             'department' => 'nullable|string|max:100',
             'avatar' => 'nullable|string|max:500',

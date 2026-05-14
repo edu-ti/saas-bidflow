@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckTenantStatus
@@ -22,9 +23,16 @@ class CheckTenantStatus
             return $next($request);
         }
 
-        if ($user && $user->company) {
-            $status = $user->company->status;
-            if (in_array($status, ['past_due', 'suspended', 'cancelled'])) {
+        if ($user) {
+            $cached = Cache::get("user_permissions:{$user->id}");
+            $companyStatus = $cached['company_status'] ?? null;
+
+            if ($companyStatus === null) {
+                $company = $user->company;
+                $companyStatus = $company?->status ?? 'active';
+            }
+
+            if (in_array($companyStatus, ['past_due', 'suspended', 'cancelled'])) {
                 return response()->json([
                     'message' => 'O acesso da sua empresa está bloqueado.',
                     'code' => 'TENANT_SUSPENDED'

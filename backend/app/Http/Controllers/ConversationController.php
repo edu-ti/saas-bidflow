@@ -58,13 +58,15 @@ class ConversationController extends Controller
 
     public function show($id)
     {
-        $conversation = Conversation::with(['messages.sender', 'assignedUser', 'flow'])->findOrFail($id);
+        $conversation = Conversation::with(['messages.sender', 'assignedUser', 'flow'])
+            ->where('company_id', Auth::user()->company_id)
+            ->findOrFail($id);
         return response()->json($conversation);
     }
 
     public function update(Request $request, $id)
     {
-        $conversation = Conversation::findOrFail($id);
+        $conversation = Conversation::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'contact_name' => 'sometimes|string|max:255',
@@ -84,7 +86,7 @@ class ConversationController extends Controller
 
     public function destroy($id)
     {
-        $conversation = Conversation::findOrFail($id);
+        $conversation = Conversation::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $conversation->delete();
 
         return response()->json(['message' => 'Conversa deletada com sucesso']);
@@ -92,6 +94,9 @@ class ConversationController extends Controller
 
     public function messages(Request $request, $conversationId)
     {
+        // Garantir que a conversa pertence à empresa do usuário
+        Conversation::where('company_id', Auth::user()->company_id)->findOrFail($conversationId);
+
         $messages = Message::where('conversation_id', $conversationId)
             ->orderBy('created_at', 'asc')
             ->paginate(50);
@@ -106,7 +111,7 @@ class ConversationController extends Controller
             'message_type' => 'nullable|in:text,image,file,audio,video',
         ]);
 
-        $conversation = Conversation::findOrFail($conversationId);
+        $conversation = Conversation::where('company_id', Auth::user()->company_id)->findOrFail($conversationId);
 
         $message = Message::create([
             'conversation_id' => $conversationId,
@@ -127,7 +132,7 @@ class ConversationController extends Controller
 
     public function markRead(Request $request, $conversationId)
     {
-        $conversation = Conversation::findOrFail($conversationId);
+        Conversation::where('company_id', Auth::user()->company_id)->findOrFail($conversationId);
 
         Message::where('conversation_id', $conversationId)
             ->whereNull('read_at')

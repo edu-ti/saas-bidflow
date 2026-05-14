@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\CheckUserPermission::class,
             'master.panel' => \App\Http\Middleware\MasterPanelMiddleware::class,
             'tenant' => \App\Http\Middleware\TenantMiddleware::class,
+            'ensure.tenant' => \App\Http\Middleware\EnsureTenant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

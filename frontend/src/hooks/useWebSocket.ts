@@ -20,13 +20,37 @@ export function useWebSocket(
 ) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 3;
 
   useEffect(() => {
+    // Se não houver URL válida, não tenta conectar
+    if (!url || url === 'ws://localhost:8080' || url === 'wss://localhost:8080') {
+      console.log('[WebSocket] No valid URL provided, skipping connection');
+      return;
+    }
+
     const connect = () => {
+      if (reconnectAttempts.current >= maxReconnectAttempts) {
+        console.log('[WebSocket] Max reconnect attempts reached, giving up');
+        return;
+      }
+
+      reconnectAttempts.current++;
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
+      // Timeout de conexão: 5 segundos
+      const connectionTimeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          console.log('[WebSocket] Connection timeout');
+          ws.close();
+        }
+      }, 5000);
+
       ws.onopen = () => {
+        clearTimeout(connectionTimeout);
+        reconnectAttempts.current = 0;
         console.log('[WebSocket] Connected');
         onConnect?.();
       };
@@ -41,16 +65,19 @@ export function useWebSocket(
       };
 
       ws.onerror = (error) => {
+        clearTimeout(connectionTimeout);
         console.error('[WebSocket] Error:', error);
         onError?.(error);
       };
 
       ws.onclose = (event) => {
+        clearTimeout(connectionTimeout);
         console.log('[WebSocket] Disconnected:', event.reason);
         
-        if (autoReconnect && !event.wasClean) {
-          console.log(`[WebSocket] Reconnecting in ${reconnectInterval / 1000}s...`);
-          reconnectTimeoutRef.current = setTimeout(connect, reconnectInterval);
+        if (autoReconnect && !event.wasClean && reconnectAttempts.current < maxReconnectAttempts) {
+          const delay = reconnectInterval * Math.pow(2, reconnectAttempts.current - 1); // Backoff exponencial
+          console.log(`[WebSocket] Reconnecting in ${delay / 1000}s... (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
+          reconnectTimeoutRef.current = setTimeout(connect, delay);
         }
       };
     };

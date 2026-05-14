@@ -19,7 +19,17 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [],
+    'allowed_origins' => [
+        'http://localhost',
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://app.localhost',
+        'http://app.localhost:5173',
+        'http://app.localhost:3000',
+        'http://master.localhost',
+        'http://master.localhost:5173',
+        'http://master.localhost:3000',
+    ],
 
     'allowed_origins_patterns' => [
         '#^http://localhost(:\d+)?$#',

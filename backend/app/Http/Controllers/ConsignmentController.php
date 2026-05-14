@@ -7,6 +7,7 @@ use App\Models\InventoryProduct;
 use App\Services\ConsignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class ConsignmentController extends Controller
 {
@@ -21,7 +22,9 @@ class ConsignmentController extends Controller
     {
         $this->authorize('viewAny', Consignment::class);
 
-        $query = Consignment::with(['consignee', 'user', 'items.product'])->latest();
+        $query = Consignment::with(['consignee', 'user', 'items.product'])
+            ->where('company_id', Auth::user()->company_id)
+            ->latest();
 
         if ($request->filled('status'))       $query->where('status', $request->status);
         if ($request->filled('consignee_id')) $query->where('consignee_id', $request->consignee_id);
@@ -50,6 +53,7 @@ class ConsignmentController extends Controller
             'items.*.agreed_unit_price' => 'required|numeric|min:0',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $consignment = $this->service->createConsignment($validated);
 
         return response()->json(['data' => $consignment], 201);
@@ -58,8 +62,9 @@ class ConsignmentController extends Controller
     /**
      * Detalhes
      */
-    public function show(Consignment $consignment)
+    public function show($id)
     {
+        $consignment = Consignment::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $consignment);
         $consignment->load('consignee', 'user', 'items.product');
 
@@ -100,6 +105,7 @@ class ConsignmentController extends Controller
     public function products()
     {
         $products = InventoryProduct::with('product')
+            ->where('company_id', Auth::user()->company_id)
             ->where('on_hand_qty', '>', 0)
             ->get()
             ->map(function ($ip) {
@@ -120,9 +126,10 @@ class ConsignmentController extends Controller
      */
     public function dashboardStats()
     {
-        $totalActive = Consignment::where('status', 'active')->sum('total_value');
-        $pendingReconcile = Consignment::where('status', 'active')->count();
-        $totalClosed = Consignment::where('status', 'closed')->count();
+        $companyId = Auth::user()->company_id;
+        $totalActive = Consignment::where('company_id', $companyId)->where('status', 'active')->sum('total_value');
+        $pendingReconcile = Consignment::where('company_id', $companyId)->where('status', 'active')->count();
+        $totalClosed = Consignment::where('company_id', $companyId)->where('status', 'closed')->count();
 
         return response()->json([
             'data' => [

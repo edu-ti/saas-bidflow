@@ -8,6 +8,7 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { Select } from './ui/Select';
+import { ConfirmDialog } from './ui/Modal';
 import { usePermissions } from '../hooks/usePermissions';
 
 interface Campaign {
@@ -41,16 +42,19 @@ export default function Campaigns() {
  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
  const [isProcessing, setIsProcessing] = useState(false);
  
- const [formData, setFormData] = useState({
- name: '',
- subject: '',
- image_url: '',
- body: '',
- target_audience: 'all_leads' as 'all_leads' | 'all_clients' | 'manual',
- recipient_emails: [] as string[],
- });
+  const [formData, setFormData] = useState({
+  name: '',
+  subject: '',
+  image_url: '',
+  body: '',
+  target_audience: 'all_leads' as 'all_leads' | 'all_clients' | 'manual',
+  recipient_emails: [] as string[],
+  });
 
- const { hasPermission } = usePermissions();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+
+  const { hasPermission } = usePermissions();
  const canCreate = hasPermission('modules', 'campaigns', 'create');
  const canEdit = hasPermission('modules', 'campaigns', 'update');
  const canDelete = hasPermission('modules', 'campaigns', 'delete');
@@ -133,17 +137,24 @@ export default function Campaigns() {
  }
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Excluir esta estratégia de campanha?')) return;
+  const openDeleteConfirm = (id: number) => {
+    setConfirmId(id);
+    setConfirmOpen(true);
+  };
 
- try {
- await api.delete(`/api/email-campaigns/${id}`);
- toast.success('Campanha removida.');
- fetchCampaigns();
- } catch (err) {
- toast.error('Erro ao excluir');
- }
- };
+  const handleDelete = async () => {
+    if (!confirmId) return;
+    try {
+      await api.delete(`/api/email-campaigns/${confirmId}`);
+      toast.success('Campanha removida.');
+      fetchCampaigns();
+    } catch (err) {
+      toast.error('Erro ao excluir');
+    } finally {
+      setConfirmId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  return (
  <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
@@ -249,9 +260,9 @@ export default function Campaigns() {
  {canEdit && (
  <button onClick={() => handleOpenModal(campaign)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl hover:bg-primary/10 text-text-muted transition-all"><Settings size={18} /></button>
  )}
- {canDelete && (
- <button onClick={() => handleDelete(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 transition-all"><Trash2 size={18} /></button>
- )}
+              {canDelete && (
+                <button onClick={() => openDeleteConfirm(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl hover:bg-red-500/20 text-red-500/60 transition-all"><Trash2 size={18} /></button>
+              )}
  </div>
  </td>
  </tr>
@@ -382,6 +393,16 @@ export default function Campaigns() {
  </div>
  </div>
  )}
- </div>
- );
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Campanha"
+        message="Excluir esta estratégia de campanha?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+    </div>
+  );
 }

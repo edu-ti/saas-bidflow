@@ -20,15 +20,7 @@ class OpportunityPolicy
      */
     public function view(User $user, Opportunity $opportunity): bool
     {
-        if ($user->company_id !== $opportunity->company_id) {
-            return false;
-        }
-
-        if (in_array($user->role, ['Admin', 'Manager'])) {
-            return true;
-        }
-
-        return $user->id === $opportunity->user_id;
+        return $user->company_id === $opportunity->company_id;
     }
 
     /**
@@ -36,15 +28,7 @@ class OpportunityPolicy
      */
     public function update(User $user, Opportunity $opportunity): bool
     {
-        if ($user->company_id !== $opportunity->company_id) {
-            return false;
-        }
-
-        if (in_array($user->role, ['Admin', 'Manager'])) {
-            return true;
-        }
-
-        return $user->id === $opportunity->user_id;
+        return $user->company_id === $opportunity->company_id;
     }
 
     /**
@@ -56,6 +40,6 @@ class OpportunityPolicy
             return false;
         }
 
-        return in_array($user->role, ['Admin', 'Manager']);
+        return $user->isAdmin() || in_array($user->role?->name, ['Admin', 'Manager']);
     }
 }

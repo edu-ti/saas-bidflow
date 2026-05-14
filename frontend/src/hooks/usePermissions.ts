@@ -26,14 +26,23 @@ export const usePermissions = () => {
   const hasPermission = useCallback((module: string, page: string, action: string = 'view') => {
     if (!user) return false;
 
-    // Super Admin e Admin Principal (sem role_id ou is_admin=true) têm acesso total
-    if (user.is_superadmin || user.is_admin || !user.role_id) {
+    // 1. Restrição de plano: verificar se o módulo está no plano (aplica a TODOS exceto superadmin)
+    const allowedModules = user.allowed_modules || [];
+    if (!user.is_superadmin && allowedModules.length > 0 && !allowedModules.includes(module)) {
+      return false;
+    }
+
+    // 2. SuperAdmin ou Admin da empresa têm acesso a todos os módulos do plano
+    if (user.is_superadmin || user.is_admin) {
       return true;
     }
 
-    if (!user.permissions) return false;
+    // 3. Se não há permissões detalhadas, permite se o módulo está no plano
+    if (!user.permissions || Object.keys(user.permissions).length === 0) {
+      return allowedModules.includes(module);
+    }
 
-    // Verifica hierarquia: Módulo > Página > Ação
+    // 4. Verifica hierarquia: Módulo > Página > Ação
     return user.permissions[module]?.[page]?.[action] === true;
   }, [user]);
 

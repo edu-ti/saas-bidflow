@@ -14,12 +14,14 @@ use App\Models\InventoryMovement;
 use App\Models\InventoryMovementCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = InventoryProduct::with(['brand', 'category', 'unit', 'status', 'depot']);
+        $query = InventoryProduct::with(['brand', 'category', 'unit', 'status', 'depot'])
+            ->where('company_id', Auth::user()->company_id);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -90,14 +92,14 @@ class InventoryController extends Controller
     {
         $product = InventoryProduct::with([
             'brand', 'category', 'unit', 'size', 'status', 'depot', 'product'
-        ])->findOrFail($id);
+        ])->where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         return response()->json($product);
     }
 
     public function update(Request $request, $id)
     {
-        $product = InventoryProduct::findOrFail($id);
+        $product = InventoryProduct::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'product_id' => 'nullable|exists:products,id',
@@ -134,7 +136,7 @@ class InventoryController extends Controller
 
     public function destroy($id)
     {
-        $product = InventoryProduct::findOrFail($id);
+        $product = InventoryProduct::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $product->delete();
 
         return response()->json(['message' => 'Produto excluído']);
@@ -240,14 +242,20 @@ class InventoryController extends Controller
         $validated['company_id'] = $companyId;
         $validated['total_value'] = ($validated['quantity'] ?? 0) * ($validated['unit_cost'] ?? 0);
 
+        // Verificar se o produto pertence à empresa
+        $productExists = InventoryProduct::where('company_id', $companyId)->where('id', $validated['product_id'])->exists();
+        if (!$productExists) {
+            return response()->json(['message' => 'Produto não encontrado ou não pertence à sua empresa.'], 404);
+        }
+
         $movement = InventoryMovement::create($validated);
 
         if ($movement->type === 'Entrada') {
-            DB::statement("UPDATE inventory_products SET on_hand_qty = on_hand_qty + ? WHERE id = ?", 
-                [$validated['quantity'], $validated['product_id']]);
+            DB::statement("UPDATE inventory_products SET on_hand_qty = on_hand_qty + ? WHERE id = ? AND company_id = ?", 
+                [$validated['quantity'], $validated['product_id'], $companyId]);
         } else {
-            DB::statement("UPDATE inventory_products SET on_hand_qty = GREATEST(0, on_hand_qty - ?) WHERE id = ?", 
-                [$validated['quantity'], $validated['product_id']]);
+            DB::statement("UPDATE inventory_products SET on_hand_qty = GREATEST(0, on_hand_qty - ?) WHERE id = ? AND company_id = ?", 
+                [$validated['quantity'], $validated['product_id'], $companyId]);
         }
 
         return response()->json([

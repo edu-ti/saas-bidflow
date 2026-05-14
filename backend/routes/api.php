@@ -1,16 +1,15 @@
 <?php
 
+use App\Http\Controllers\AlertController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyManagementController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FunnelController;
+use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AlertController;
-use App\Http\Controllers\ProposalController;
-use App\Http\Controllers\OpportunityController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\FunnelController;
-use App\Http\Controllers\CompanyManagementController;
-use App\Http\Controllers\SupplierController;
 
 // Public routes (no auth needed)
 Route::post('/login', [AuthController::class, 'login']);
@@ -26,7 +25,7 @@ Route::post('/webhook/rpa/bids', [\App\Http\Controllers\RpaController::class, 'h
 Route::post('/webhook/payments', [\App\Http\Controllers\SubscriptionWebhookController::class, 'handle']);
 Route::post('/webhook/asaas', [\App\Http\Controllers\AsaasWebhookController::class, 'handle']);
 
-Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->group(function () {
+Route::middleware(['auth:sanctum', 'ensure.tenant', 'throttle:api', 'tenant', 'tenant.status'])->group(function () {
 
     Route::get('/user', function (Request $request) {
         $user = $request->user()->load('role');
@@ -36,6 +35,16 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
         $features = $plan && is_array($plan->features) ? $plan->features : [];
         $addons = $company && is_array($company->addons) ? $company->addons : [];
         $allowed_modules = array_values(array_unique(array_merge($features, $addons)));
+
+        \Illuminate\Support\Facades\Log::info('[API /user]', [
+            'user_id' => $user->id,
+            'company_id' => $company?->id,
+            'plan_id' => $plan?->id,
+            'plan_name' => $plan?->name,
+            'features' => $features,
+            'addons' => $addons,
+            'allowed_modules' => $allowed_modules,
+        ]);
 
         return response()->json([
             'id'              => $user->id,
@@ -193,43 +202,47 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
     Route::get('/companies/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'companyShow']);
     Route::put('/companies/{id}', [\App\Http\Controllers\CompanyManagementController::class, 'companyUpdate']);
 
-    // CLM - Contract Lifecycle Management
-    Route::apiResource('contracts', \App\Http\Controllers\ContractController::class);
-    Route::patch('/contracts/{id}/status', [\App\Http\Controllers\ContractController::class, 'changeStatus']);
-    Route::post('/contracts/{id}/request-approval', [\App\Http\Controllers\ContractController::class, 'requestApproval']);
-    Route::post('/contracts/{id}/addendum', [\App\Http\Controllers\ContractController::class, 'addAddendum']);
-    Route::get('/contracts/expiring', [\App\Http\Controllers\ContractController::class, 'getExpiring']);
-    Route::get('/contracts/expired', [\App\Http\Controllers\ContractController::class, 'getExpired']);
+    Route::middleware('feature:financial')->group(function () {
+        // CLM - Contract Lifecycle Management
+        Route::apiResource('contracts', \App\Http\Controllers\ContractController::class);
+        Route::patch('/contracts/{id}/status', [\App\Http\Controllers\ContractController::class, 'changeStatus']);
+        Route::post('/contracts/{id}/request-approval', [\App\Http\Controllers\ContractController::class, 'requestApproval']);
+        Route::post('/contracts/{id}/addendum', [\App\Http\Controllers\ContractController::class, 'addAddendum']);
+        Route::get('/contracts/expiring', [\App\Http\Controllers\ContractController::class, 'getExpiring']);
+        Route::get('/contracts/expired', [\App\Http\Controllers\ContractController::class, 'getExpired']);
 
-    Route::apiResource('contract-templates', \App\Http\Controllers\ContractTemplateController::class);
-    Route::get('/contract-templates/placeholders', [\App\Http\Controllers\ContractTemplateController::class, 'getPlaceholders']);
+        Route::apiResource('contract-templates', \App\Http\Controllers\ContractTemplateController::class);
+        Route::get('/contract-templates/placeholders', [\App\Http\Controllers\ContractTemplateController::class, 'getPlaceholders']);
 
-    Route::post('/contract-approvals/{approvalId}/process', [\App\Http\Controllers\ContractController::class, 'processApproval']);
+        Route::post('/contract-approvals/{approvalId}/process', [\App\Http\Controllers\ContractController::class, 'processApproval']);
+    });
 
-    // Inventory / Estoque
-    Route::get('/inventory/dashboard', [\App\Http\Controllers\InventoryController::class, 'dashboard']);
-    Route::get('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'index']);
-    Route::post('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'store']);
-    Route::get('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'show']);
-    Route::put('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'update']);
-    Route::delete('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'destroy']);
+    Route::middleware('feature:inventory')->group(function () {
+        // Inventory / Estoque
+        Route::get('/inventory/dashboard', [\App\Http\Controllers\InventoryController::class, 'dashboard']);
+        Route::get('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'index']);
+        Route::post('/inventory/products', [\App\Http\Controllers\InventoryController::class, 'store']);
+        Route::get('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'show']);
+        Route::put('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'update']);
+        Route::delete('/inventory/products/{id}', [\App\Http\Controllers\InventoryController::class, 'destroy']);
 
-    Route::get('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'brands']);
-    Route::post('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'createBrand']);
-    Route::get('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'categories']);
-    Route::post('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'createCategory']);
-    Route::get('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'units']);
-    Route::post('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'createUnit']);
-    Route::get('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'sizes']);
-    Route::post('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'createSize']);
-    Route::get('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'statuses']);
-    Route::post('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'createStatus']);
-    Route::get('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'labels']);
-    Route::post('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'createLabel']);
-    Route::get('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'depots']);
-    Route::post('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'createDepot']);
-    Route::get('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'movements']);
-    Route::post('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'createMovement']);
+        Route::get('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'brands']);
+        Route::post('/inventory/brands', [\App\Http\Controllers\InventoryController::class, 'createBrand']);
+        Route::get('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'categories']);
+        Route::post('/inventory/categories', [\App\Http\Controllers\InventoryController::class, 'createCategory']);
+        Route::get('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'units']);
+        Route::post('/inventory/units', [\App\Http\Controllers\InventoryController::class, 'createUnit']);
+        Route::get('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'sizes']);
+        Route::post('/inventory/sizes', [\App\Http\Controllers\InventoryController::class, 'createSize']);
+        Route::get('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'statuses']);
+        Route::post('/inventory/statuses', [\App\Http\Controllers\InventoryController::class, 'createStatus']);
+        Route::get('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'labels']);
+        Route::post('/inventory/labels', [\App\Http\Controllers\InventoryController::class, 'createLabel']);
+        Route::get('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'depots']);
+        Route::post('/inventory/depots', [\App\Http\Controllers\InventoryController::class, 'createDepot']);
+        Route::get('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'movements']);
+        Route::post('/inventory/movements', [\App\Http\Controllers\InventoryController::class, 'createMovement']);
+    });
 
     Route::middleware('feature:marketing')->group(function () {
         // Campanhas
@@ -271,14 +284,16 @@ Route::middleware(['auth:sanctum', 'throttle:api', 'tenant', 'tenant.status'])->
     });
 
     // Settings / Configurações do Usuário
-    Route::get('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'profile']);
-    Route::put('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'updateProfile']);
-    Route::get('/settings/security', [\App\Http\Controllers\SettingsController::class, 'security']);
-    Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'changePassword']);
-    Route::get('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'notifications']);
-    Route::put('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'updateNotifications']);
-    Route::get('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'whatsapp']);
-    Route::put('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'updateWhatsapp']);
+    Route::middleware('feature:modules')->group(function () {
+        Route::get('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'profile']);
+        Route::put('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'updateProfile']);
+        Route::get('/settings/security', [\App\Http\Controllers\SettingsController::class, 'security']);
+        Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'changePassword']);
+        Route::get('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'notifications']);
+        Route::put('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'updateNotifications']);
+        Route::get('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'whatsapp']);
+        Route::put('/settings/whatsapp', [\App\Http\Controllers\SettingsController::class, 'updateWhatsapp']);
+    });
 
     Route::middleware('feature:chatbot')->group(function () {
         // Conversas
@@ -310,13 +325,11 @@ Route::middleware(['auth:sanctum', 'throttle:api', \App\Http\Middleware\SuperAdm
 Route::middleware(['auth:sanctum', 'master.panel'])->prefix('master')->name('master.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Master\MasterDashboardController::class, 'index']);
     Route::get('/companies', [\App\Http\Controllers\Master\MasterCompanyController::class, 'index']);
-    Route::get('/plans', [\App\Http\Controllers\Master\MasterPlanController::class, 'index']);
     Route::get('/users', [\App\Http\Controllers\Master\MasterUserController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'master.panel'])->prefix('admin/master')->name('admin.master.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Master\MasterDashboardController::class, 'index']);
     Route::get('/companies', [\App\Http\Controllers\Master\MasterCompanyController::class, 'index']);
-    Route::get('/plans', [\App\Http\Controllers\Master\MasterPlanController::class, 'index']);
     Route::get('/users', [\App\Http\Controllers\Master\MasterUserController::class, 'index']);
 });

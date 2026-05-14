@@ -16,7 +16,14 @@ RUN apk add --no-cache icu-data-full\
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd
 
+# Instalar extensão PHP Redis para cache, sessions e queues
+RUN apk add --no-cache autoconf gcc g++ make linux-headers \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del autoconf gcc g++ make linux-headers
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY docker/php/opcache-production.ini /usr/local/etc/php/conf.d/opcache-production.ini
 
 RUN mkdir -p /var/www/html/storage && \
     mkdir -p /var/www/html/bootstrap/cache && \

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\IndividualClient;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class IndividualClientController extends Controller
 {
@@ -13,7 +14,7 @@ class IndividualClientController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', IndividualClient::class);
-        $clients = IndividualClient::latest()->get();
+        $clients = IndividualClient::latest()->where('company_id', Auth::user()->company_id)->get();
         return response()->json(['data' => $clients]);
     }
 
@@ -31,18 +32,21 @@ class IndividualClientController extends Controller
             'position' => 'nullable|string|max:100',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $client = IndividualClient::create($validated);
         return response()->json(['data' => $client], 201);
     }
 
-    public function show(IndividualClient $individualClient)
+    public function show($id)
     {
+        $individualClient = IndividualClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $individualClient);
         return response()->json(['data' => $individualClient]);
     }
 
-    public function update(Request $request, IndividualClient $individualClient)
+    public function update(Request $request, $id)
     {
+        $individualClient = IndividualClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $individualClient);
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -59,8 +63,9 @@ class IndividualClientController extends Controller
         return response()->json(['data' => $individualClient]);
     }
 
-    public function destroy(IndividualClient $individualClient)
+    public function destroy($id)
     {
+        $individualClient = IndividualClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $individualClient);
         $individualClient->delete();
         return response()->noContent();

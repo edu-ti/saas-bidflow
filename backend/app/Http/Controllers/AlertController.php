@@ -17,7 +17,7 @@ class AlertController extends Controller
      */
     public function index(Request $request)
     {
-        $query = BiddingAlert::query();
+        $query = BiddingAlert::where('company_id', Auth::user()->company_id);
 
         if ($request->boolean('unread')) {
             $query->where('is_read', false);
@@ -40,16 +40,14 @@ class AlertController extends Controller
             'alert_date' => 'nullable|date',
         ]);
 
-        $opportunity = Opportunity::find($validated['opportunity_id']);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)
+            ->find($validated['opportunity_id']);
 
         if (! $opportunity) {
             return response()->json(['message' => 'Opportunity not found or does not belong to your company.'], 404);
         }
 
-        if ($opportunity->company_id !== Auth::user()->company_id) {
-            return response()->json(['message' => 'Unauthorized opportunity.'], 403);
-        }
-
+        $validated['company_id'] = Auth::user()->company_id;
         $alert = BiddingAlert::create($validated);
 
         // Telegram Notification Logic
@@ -81,7 +79,9 @@ class AlertController extends Controller
      */
     public function markAllRead()
     {
-        BiddingAlert::where('is_read', false)->update(['is_read' => true]);
+        BiddingAlert::where('company_id', Auth::user()->company_id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
 
         return response()->json(['message' => 'Todas as notificações foram marcadas como lidas.']);
     }

@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
-import Modal from './ui/Modal';
+import Modal, { ConfirmDialog } from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
 import { format } from 'date-fns';
@@ -29,9 +29,11 @@ export default function Tasks() {
  const [searchTerm, setSearchTerm] = useState('');
  const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, overdue: 0, due_today: 0 });
 
- const [showModal, setShowModal] = useState(false);
- const [editingTask, setEditingTask] = useState<Task | null>(null);
- const [formData, setFormData] = useState({
+  const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
  title: '',
  description: '',
  due_date: '',
@@ -126,17 +128,25 @@ export default function Tasks() {
  }
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Eliminar esta tarefa do pipeline estratégico?')) return;
- try {
- await api.delete(`/api/tasks/${id}`);
- toast.success('Registro removido.');
- fetchTasks();
- fetchStats();
- } catch (err) {
- toast.error('Erro ao excluir registro.');
- }
- };
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/api/tasks/${deleteId}`);
+      toast.success('Registro removido.');
+      fetchTasks();
+      fetchStats();
+    } catch (err) {
+      toast.error('Erro ao excluir registro.');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  return (
  <div className="p-8 w-full min-h-screen bg-background space-y-10 text-text-primary animate-in fade-in duration-700">
@@ -284,11 +294,11 @@ export default function Tasks() {
  <Edit2 size={18} />
  </button>
  )}
- {canDelete && (
- <button onClick={() => handleDelete(task.id)} className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-500/60 hover:text-red-500 hover:scale-110 transition-all ">
- <Trash2 size={18} />
- </button>
- )}
+              {canDelete && (
+                <button onClick={() => openDeleteConfirm(task.id)} className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-500/60 hover:text-red-500 hover:scale-110 transition-all ">
+                  <Trash2 size={18} />
+                </button>
+              )}
  </div>
  </div>
  ))
@@ -373,7 +383,18 @@ export default function Tasks() {
  </button>
  </div>
  </form>
- </Modal>
- </div>
- );
+  </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Tarefa"
+        message="Eliminar esta tarefa do pipeline estratégico?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }

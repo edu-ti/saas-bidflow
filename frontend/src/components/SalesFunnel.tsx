@@ -10,6 +10,7 @@ import { usePermissions } from '../hooks/usePermissions';
 // Modals
 import StageModal from './ui/StageModal';
 import OpportunityModal from './ui/OpportunityModal';
+import { ConfirmDialog } from './ui/Modal';
 
 type Opportunity = {
  id: number;
@@ -35,12 +36,14 @@ export default function SalesFunnel() {
  const [draggingId, setDraggingId] = useState<number | null>(null);
  const [usePollingFallback, setUsePollingFallback] = useState(true);
 
- // Modal States
- const [isStageModalOpen, setIsStageModalOpen] = useState(false);
- const [isOppModalOpen, setIsOppModalOpen] = useState(false);
- const [stageToEdit, setStageToEdit] = useState<FunnelStage | null>(null);
- const [initialStageForOpp, setInitialStageForOpp] = useState<number | null>(null);
-  const [oppToEdit, setOppToEdit] = useState<Opportunity | null>(null);
+  // Modal States
+  const [isStageModalOpen, setIsStageModalOpen] = useState(false);
+  const [isOppModalOpen, setIsOppModalOpen] = useState(false);
+  const [stageToEdit, setStageToEdit] = useState<FunnelStage | null>(null);
+  const [initialStageForOpp, setInitialStageForOpp] = useState<number | null>(null);
+   const [oppToEdit, setOppToEdit] = useState<Opportunity | null>(null);
+   const [confirmOpen, setConfirmOpen] = useState(false);
+   const [deleteStageId, setDeleteStageId] = useState<number | null>(null);
 
   const { hasPermission } = usePermissions();
   const canDeleteStage = hasPermission('commercial', 'sales-funnel', 'delete');
@@ -143,16 +146,24 @@ export default function SalesFunnel() {
  }
  };
 
- const handleDeleteStage = async (id: number) => {
- if (!window.confirm('Excluir esta etapa estratégica?')) return;
- try {
- await api.delete(`/api/funnel-stages/${id}`);
- toast.success('Fase removida.');
- fetchStages();
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Erro ao remover fase.');
- }
- };
+  const openDeleteConfirm = (id: number) => {
+    setDeleteStageId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDeleteStage = async () => {
+    if (!deleteStageId) return;
+    try {
+      await api.delete(`/api/funnel-stages/${deleteStageId}`);
+      toast.success('Fase removida.');
+      fetchStages();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Erro ao remover fase.');
+    } finally {
+      setDeleteStageId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  const handleEditStage = (stage: FunnelStage) => {
  setStageToEdit(stage);
@@ -236,11 +247,11 @@ export default function SalesFunnel() {
   <button onClick={() => handleEditStage(stage)} className="text-text-muted hover:text-primary p-1 hover:bg-bg-tertiary rounded transition-colors" title="Editar">
   <Edit2 size={12} />
   </button>
-  {canDeleteStage && (
-  <button onClick={() => handleDeleteStage(stage.id)} className="text-text-muted hover:text-danger p-1 hover:bg-danger/10 rounded transition-colors" title="Excluir">
-  <Trash2 size={12} />
-  </button>
-  )}
+                  {canDeleteStage && (
+                  <button onClick={() => openDeleteConfirm(stage.id)} className="text-text-muted hover:text-danger p-1 hover:bg-danger/10 rounded transition-colors" title="Excluir">
+                  <Trash2 size={12} />
+                  </button>
+                  )}
   </div>
  </div>
  </div>
@@ -326,16 +337,27 @@ export default function SalesFunnel() {
  stageToEdit={stageToEdit}
  />
 
- <OpportunityModal
- isOpen={isOppModalOpen}
- onClose={() => {
- setIsOppModalOpen(false);
- setOppToEdit(null);
- }}
- onSaved={fetchOpportunities}
- initialStageId={initialStageForOpp}
- opportunityToEdit={oppToEdit}
- />
- </div>
- );
+  <OpportunityModal
+      isOpen={isOppModalOpen}
+      onClose={() => {
+      setIsOppModalOpen(false);
+      setOppToEdit(null);
+      }}
+      onSaved={fetchOpportunities}
+      initialStageId={initialStageForOpp}
+      opportunityToEdit={oppToEdit}
+  />
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDeleteStage}
+        title="Excluir Etapa"
+        message="Excluir esta etapa estratégica?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }

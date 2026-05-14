@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Upload, Save, X, Search, Loader2, Lock, User, Building2, Mail, Phone, MapPin, Hash, ShieldCheck, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
-import Modal from './ui/Modal';
+import Modal, { ConfirmDialog } from './ui/Modal';
 import { usePermissions } from '../hooks/usePermissions';
 
 interface ClientPF {
@@ -39,6 +39,8 @@ export default function Clients() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [searchingCNPJ, setSearchingCNPJ] = useState(false);
   const [searchingCEP, setSearchingCEP] = useState(false);
 
@@ -244,16 +246,23 @@ export default function Clients() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    const endpoint = activeTab === 'pf' ? 'individual-clients' : activeTab === 'pj' ? 'company-clients' : 'suppliers';
-    if (!confirm(`Confirmar exclusão definitiva deste registro?`)) return;
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
 
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const endpoint = activeTab === 'pf' ? 'individual-clients' : activeTab === 'pj' ? 'company-clients' : 'suppliers';
     try {
-      await api.delete(`/${endpoint}/${id}`);
+      await api.delete(`/api/${endpoint}/${deleteId}`);
       toast.success('Registro removido.');
       fetchData();
     } catch (error) {
       toast.error('Erro ao excluir');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
     }
   };
 
@@ -267,7 +276,7 @@ export default function Clients() {
 
     try {
       toast.loading('Processando base de dados...', { duration: 1500 });
-      await api.post(`/${endpoint}`, formDataImport, {
+      await api.post(`/api/${endpoint}`, formDataImport, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Importação concluída!');
@@ -472,38 +481,7 @@ export default function Clients() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {canEdit && <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
-                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : activeTab === 'pj' ? (
-                  clientsPJ.length === 0 ? (
-                    <tr><td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum registro PJ localizado</td></tr>
-                  ) :                   clientsPJ.map(client => (
-                    <tr key={client.id} className="hover:bg-bg-tertiary transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-text-primary group-hover:text-primary transition-colors">{client.name}</div>
-                        <div className="text-xs text-text-muted mt-0.5">{client.position || 'Cliente PF'}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-text-secondary flex items-center gap-1.5"><Hash size={14} className="text-text-muted" /> {client.cpf || '-'}</div>
-                        <div className="text-xs text-text-muted mt-1">RG: {client.rg || '-'}</div>
-                      </td>
-                      <td className="px-6 py-4 space-y-1.5">
-                        <div className="flex items-center gap-2 text-sm text-text-primary"><Mail size={14} className="text-text-muted" /> {client.email || '-'}</div>
-                        <div className="flex items-center gap-2 text-sm text-text-secondary"><Phone size={14} className="text-text-muted" /> {client.phone || '-'}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-start gap-2 max-w-xs">
-                          <MapPin size={14} className="text-text-muted mt-0.5 shrink-0" />
-                          <span className="text-sm text-text-secondary truncate">{client.address || '-'}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {canEdit && <button onClick={() => handleEditPF(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
-                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
+                          {canDelete && <button onClick={() => openDeleteConfirm(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -534,7 +512,7 @@ export default function Clients() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {canEdit && <button onClick={() => handleEditPJ(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
-                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
+                          {canDelete && <button onClick={() => openDeleteConfirm(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -565,7 +543,7 @@ export default function Clients() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {canEdit && <button onClick={() => handleEditFornecedor(client)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-lg"><Pencil size={16} /></button>}
-                          {canDelete && <button onClick={() => handleDelete(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
+                          {canDelete && <button onClick={() => openDeleteConfirm(client.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 transition-colors rounded-lg"><Trash2 size={16} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -762,6 +740,17 @@ export default function Clients() {
           </form>
         )}
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Registro"
+        message="Confirmar exclusão definitiva deste registro?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

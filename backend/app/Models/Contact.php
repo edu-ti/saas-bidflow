@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['lead_id', 'organization_id', 'supplier_id', 'name', 'email', 'phone', 'position'])]
+#[Fillable(['company_id', 'lead_id', 'organization_id', 'supplier_id', 'name', 'email', 'phone', 'position'])]
 class Contact extends Model
 {
     use SoftDeletes, BelongsToTenant;

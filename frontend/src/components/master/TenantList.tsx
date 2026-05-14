@@ -306,85 +306,85 @@ export default function TenantList() {
  </div>
  </div>
 
- <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingTenant ? 'REFINAR INSTÂNCIA CORPORATIVA' : 'PROVISIONAR NOVO TENANT '} size="lg">
- <form onSubmit={handleSaveTenant} className="p-10 space-y-12">
+  <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingTenant ? 'Editar Tenant' : 'Novo Tenant'} size="lg">
+  <form onSubmit={handleSaveTenant} className="p-6 space-y-6">
  
- <div className="space-y-10">
- <div className="flex items-center gap-4 border-b border-border/30 pb-6">
- <Activity size={20} className="text-primary" />
- <h3 className="text-xs font-semibold text-text-primary uppercase ">Arquitetura de Malha Corporativa</h3>
- </div>
- 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
- <div className="col-span-2 group">
- <label className="text-xs font-semibold text-text-secondary uppercase px-4 group-focus-within:text-primary transition-colors">Razão Social / Nome de Operação *</label>
- <div className="relative mt-3">
- <Building2 className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6 group-focus-within:opacity-100 transition-opacity" />
- <input
- type="text"
- required
- value={companyName}
- onChange={(e) => setCompanyName(e.target.value)}
- className="w-full bg-background/50 border border-border rounded-xl pl-20 pr-8 py-6 text-base font-semibold text-text-primary outline-none focus:border-primary/40 transition-all uppercase tracking-tight"
- placeholder="EX: BIDFLOW GLOBAL SOLUTIONS S/A"
- />
- </div>
- </div>
- 
- <div className="group">
- <label className="text-xs font-semibold text-text-secondary uppercase px-4 group-focus-within:text-primary transition-colors">CNPJ Digital de Auditoria</label>
- <div className="relative mt-3">
- <ShieldCheck className="absolute left-8 top-1/2 -translate-y-1/2 text-text-secondary opacity-60 w-6 h-6 group-focus-within:text-primary group-focus-within:opacity-100 transition-all" />
- <input
- type="text"
- required
- value={companyCnpj}
- onChange={(e) => setCompanyCnpj(e.target.value)}
- className="w-full bg-background/50 border border-border rounded-xl pl-20 pr-8 py-6 text-sm font-semibold text-text-primary outline-none focus:border-primary/40 transition-all tracking-wider"
- placeholder="00.000.000/0000-00"
- />
- </div>
- </div>
+  <div className="space-y-4">
+  <div className="flex items-center gap-3 border-b border-border/30 pb-3">
+  <Activity size={16} className="text-primary" />
+  <h3 className="text-xs font-semibold text-text-primary uppercase">Dados da Empresa</h3>
+  </div>
 
- <div className="group">
- <label className="text-xs font-semibold text-text-secondary uppercase px-4 group-focus-within:text-primary transition-colors">Power Tier de Assinatura</label>
- <div className="relative mt-3">
- <Zap className="absolute left-8 top-1/2 -translate-y-1/2 text-primary opacity-60 w-6 h-6" />
- <select
- required
- value={planId}
- onChange={(e) => setPlanId(e.target.value)}
- className="w-full bg-background/50 border border-border rounded-xl pl-20 pr-12 py-6 text-sm font-semibold uppercase tracking-widest text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer "
- >
- <option value="" className="bg-bg-secondary">SELECIONAR TIER...</option>
- {plans.map(plan => (
- <option key={plan.id} value={plan.id} className="bg-bg-secondary">{plan.name.toUpperCase()} · BRL {Number(plan.monthly_price).toFixed(0)}</option>
- ))}
- </select>
- <ChevronRight size={14} className="absolute right-8 top-1/2 -translate-y-1/2 rotate-90 text-text-secondary opacity-60" />
- </div>
- </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div className="col-span-2 group">
+  <label className="text-xs font-medium text-text-secondary mb-1.5 block">Razão Social / Nome *</label>
+  <div className="relative">
+  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+  <input
+  type="text"
+  required
+  value={companyName}
+  onChange={(e) => setCompanyName(e.target.value)}
+  className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-text-primary outline-none focus:border-primary/40 transition-all"
+  placeholder="Ex: BidFlow Global Solutions S/A"
+  />
+  </div>
+  </div>
 
- <div className="group">
- <label className="text-xs font-semibold text-text-secondary uppercase px-4 group-focus-within:text-primary transition-colors">Status do Cluster Multi-Tenant</label>
- <div className="relative mt-3">
- <Layout className="absolute left-8 top-1/2 -translate-y-1/2 text-text-secondary opacity-60 w-6 h-6 group-focus-within:text-primary transition-all" />
- <select
- required
- value={status}
- onChange={(e) => setStatus(e.target.value)}
- className="w-full bg-background/50 border border-border rounded-xl pl-20 pr-12 py-6 text-sm font-semibold uppercase tracking-widest text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer "
- >
- <option value="active" className="bg-bg-secondary">OPERACIONAL (NOMINAL)</option>
- <option value="past_due" className="bg-bg-secondary">PENDÊNCIA FINANCEIRA (ALERTA)</option>
- <option value="suspended" className="bg-bg-secondary">SUSPENSO (OFFLINE)</option>
- <option value="cancelled" className="bg-bg-secondary">CANCELADO / PURGED</option>
- </select>
- <ChevronRight size={14} className="absolute right-8 top-1/2 -translate-y-1/2 rotate-90 text-text-secondary opacity-60" />
- </div>
- </div>
- </div>
- </div>
+  <div className="group">
+  <label className="text-xs font-medium text-text-secondary mb-1.5 block">CNPJ</label>
+  <div className="relative">
+  <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+  <input
+  type="text"
+  required
+  value={companyCnpj}
+  onChange={(e) => setCompanyCnpj(e.target.value)}
+  className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-text-primary outline-none focus:border-primary/40 transition-all"
+  placeholder="00.000.000/0000-00"
+  />
+  </div>
+  </div>
+
+  <div className="group">
+  <label className="text-xs font-medium text-text-secondary mb-1.5 block">Plano</label>
+  <div className="relative">
+  <Zap className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+  <select
+  required
+  value={planId}
+  onChange={(e) => setPlanId(e.target.value)}
+  className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-8 py-2.5 text-sm font-medium text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer"
+  >
+  <option value="">Selecionar plano...</option>
+  {plans.map(plan => (
+  <option key={plan.id} value={plan.id}>{plan.name} · R$ {Number(plan.monthly_price).toFixed(0)}</option>
+  ))}
+  </select>
+  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-muted" />
+  </div>
+  </div>
+
+  <div className="group">
+  <label className="text-xs font-medium text-text-secondary mb-1.5 block">Status</label>
+  <div className="relative">
+  <Layout className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+  <select
+  required
+  value={status}
+  onChange={(e) => setStatus(e.target.value)}
+  className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-8 py-2.5 text-sm font-medium text-text-primary outline-none focus:border-primary/40 transition-all appearance-none cursor-pointer"
+  >
+  <option value="active">Ativo</option>
+  <option value="past_due">Inadimplente</option>
+  <option value="suspended">Suspenso</option>
+  <option value="cancelled">Cancelado</option>
+  </select>
+  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-muted" />
+  </div>
+  </div>
+  </div>
+  </div>
 
  <div className="space-y-10">
  <div className="flex items-center gap-4 border-b border-border/30 pb-6">

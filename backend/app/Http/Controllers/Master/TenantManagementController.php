@@ -39,6 +39,7 @@ class TenantManagementController extends Controller
                 'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
                 'role' => 'Admin',
                 'status' => 'Active',
+                'is_admin' => true,
                 'is_superadmin' => false,
             ]);
 

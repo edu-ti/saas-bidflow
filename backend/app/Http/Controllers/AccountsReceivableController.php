@@ -6,6 +6,7 @@ use App\Models\AccountsReceivable;
 use Illuminate\Http\Request;
 use App\Http\Resources\AccountsReceivableResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class AccountsReceivableController extends Controller
 {
@@ -14,7 +15,7 @@ class AccountsReceivableController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', AccountsReceivable::class);
-        $accounts = AccountsReceivable::latest()->get();
+        $accounts = AccountsReceivable::latest()->where('company_id', Auth::user()->company_id)->get();
         return AccountsReceivableResource::collection($accounts);
     }
 
@@ -33,18 +34,21 @@ class AccountsReceivableController extends Controller
             'status' => 'nullable|in:Pending,Paid,Overdue,Cancelled',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $account = AccountsReceivable::create($validated);
         return new AccountsReceivableResource($account);
     }
 
-    public function show(AccountsReceivable $accountsReceivable)
+    public function show($id)
     {
+        $accountsReceivable = AccountsReceivable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $accountsReceivable);
         return new AccountsReceivableResource($accountsReceivable);
     }
 
-    public function update(Request $request, AccountsReceivable $accountsReceivable)
+    public function update(Request $request, $id)
     {
+        $accountsReceivable = AccountsReceivable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $accountsReceivable);
         $validated = $request->validate([
             'reference_title' => 'sometimes|required|string|max:255',
@@ -62,8 +66,9 @@ class AccountsReceivableController extends Controller
         return new AccountsReceivableResource($accountsReceivable);
     }
 
-    public function destroy(AccountsReceivable $accountsReceivable)
+    public function destroy($id)
     {
+        $accountsReceivable = AccountsReceivable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $accountsReceivable);
         $accountsReceivable->delete();
         return response()->noContent();

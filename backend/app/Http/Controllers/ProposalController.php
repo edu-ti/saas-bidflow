@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Attachment;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ProposalController extends Controller
 {
@@ -92,8 +93,9 @@ class ProposalController extends Controller
                 'instalacao' => $validated['instalacao'] ?? null,
                 'assistencia_tecnica' => $validated['assistencia_tecnica'] ?? null,
                 'frete_tipo' => $validated['frete_tipo'] ?? 'CIF',
-                'frete_valor' => $freteValor,
-            ]);
+            'company_id' => Auth::user()->company_id,
+            'frete_valor' => $freteValor,
+        ]);
 
             foreach ($validated['items'] as $itemData) {
                 $meses = (int) ($itemData['meses_locacao'] ?? 12);

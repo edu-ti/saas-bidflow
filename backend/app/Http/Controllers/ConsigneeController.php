@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Consignee;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class ConsigneeController extends Controller
 {
@@ -14,7 +15,7 @@ class ConsigneeController extends Controller
     {
         $this->authorize('viewAny', Consignee::class);
 
-        $query = Consignee::latest();
+        $query = Consignee::latest()->where('company_id', Auth::user()->company_id);
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -44,18 +45,21 @@ class ConsigneeController extends Controller
             'active'          => 'boolean',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $consignee = Consignee::create($validated);
         return response()->json(['data' => $consignee], 201);
     }
 
-    public function show(Consignee $consignee)
+    public function show($id)
     {
+        $consignee = Consignee::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $consignee);
         return response()->json(['data' => $consignee]);
     }
 
-    public function update(Request $request, Consignee $consignee)
+    public function update(Request $request, $id)
     {
+        $consignee = Consignee::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $consignee);
 
         $validated = $request->validate([
@@ -71,8 +75,9 @@ class ConsigneeController extends Controller
         return response()->json(['data' => $consignee]);
     }
 
-    public function destroy(Consignee $consignee)
+    public function destroy($id)
     {
+        $consignee = Consignee::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $consignee);
         $consignee->delete();
         return response()->noContent();

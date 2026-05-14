@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Upload, Save, X, User, ShieldCheck, Mail, Phone, Fingerprint, Activity, Globe, Database, Target, Search, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
+import { ConfirmDialog } from './ui/Modal';
 import { usePermissions } from '../hooks/usePermissions';
 
 interface IndividualClient {
@@ -16,11 +17,13 @@ interface IndividualClient {
 export default function IndividualClients() {
  const [clients, setClients] = useState<IndividualClient[]>([]);
  const [loading, setLoading] = useState(true);
- const [isModalOpen, setIsModalOpen] = useState(false);
- const [isEditing, setIsEditing] = useState(false);
- const [editingId, setEditingId] = useState<number | null>(null);
- const [searchTerm, setSearchTerm] = useState('');
- const [formData, setFormData] = useState({
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState({
  name: '',
  cpf: '',
  rg: '',
@@ -83,17 +86,24 @@ export default function IndividualClients() {
  setIsModalOpen(true);
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Autorizar exclusão definitiva deste registro estratégico?')) return;
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
 
- try {
- await api.delete(`/api/individual-clients/${id}`);
- toast.success('Registro removido do CRM.');
- fetchClients();
- } catch (error) {
- toast.error('Erro na deleção');
- }
- };
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/api/individual-clients/${deleteId}`);
+      toast.success('Registro removido do CRM.');
+      fetchClients();
+    } catch (error) {
+      toast.error('Erro na deleção');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
  const file = e.target.files?.[0];
@@ -236,9 +246,9 @@ export default function IndividualClients() {
  {canEdit && (
  <button onClick={() => handleEdit(client)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Pencil size={18} /></button>
  )}
- {canDelete && (
- <button onClick={() => handleDelete(client.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Excluir"><Trash2 size={18} /></button>
- )}
+              {canDelete && (
+                <button onClick={() => openDeleteConfirm(client.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Excluir"><Trash2 size={18} /></button>
+              )}
  </div>
  </td>
  </tr>
@@ -361,7 +371,18 @@ export default function IndividualClients() {
  </form>
  </div>
  </div>
- )}
- </div>
- );
+  )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Cliente PF"
+        message="Autorizar exclusão definitiva deste registro estratégico?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }

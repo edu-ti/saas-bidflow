@@ -6,6 +6,7 @@ use App\Models\Contact;
 use Illuminate\Http\Request;
 use App\Http\Resources\ContactResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class ContactController extends Controller
 {
@@ -14,7 +15,7 @@ class ContactController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Contact::class);
-        $contacts = Contact::latest()->get();
+        $contacts = Contact::latest()->where('company_id', Auth::user()->company_id)->get();
         return ContactResource::collection($contacts);
     }
 
@@ -31,18 +32,21 @@ class ContactController extends Controller
             'position' => 'nullable|string|max:255',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $contact = Contact::create($validated);
         return new ContactResource($contact);
     }
 
-    public function show(Contact $contact)
+    public function show($id)
     {
+        $contact = Contact::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $contact);
         return new ContactResource($contact);
     }
 
-    public function update(Request $request, Contact $contact)
+    public function update(Request $request, $id)
     {
+        $contact = Contact::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $contact);
         $validated = $request->validate([
             'lead_id' => 'nullable|exists:leads,id',
@@ -58,8 +62,9 @@ class ContactController extends Controller
         return new ContactResource($contact);
     }
 
-    public function destroy(Contact $contact)
+    public function destroy($id)
     {
+        $contact = Contact::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $contact);
         $contact->delete();
         return response()->noContent();

@@ -27,7 +27,7 @@ class FinancialEngineController extends Controller
     // ── FINANCIAL STATEMENTS CRUD ───────────────
     public function statementsIndex(Request $request)
     {
-        $query = FinancialStatement::latest();
+        $query = FinancialStatement::where('company_id', Auth::user()->company_id)->latest();
         if ($request->filled('type'))   $query->where('type', $request->type);
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('category')) $query->where('category', $request->category);
@@ -53,7 +53,7 @@ class FinancialEngineController extends Controller
         // If paid immediately and has bank account, update balance
         if ($statement->status === 'paid' && $statement->bank_account_id) {
             $amount = $statement->type === 'entry' ? $statement->amount : -$statement->amount;
-            $bank = BankAccount::find($statement->bank_account_id);
+            $bank = BankAccount::where('company_id', Auth::user()->company_id)->find($statement->bank_account_id);
             if ($bank) $this->service->logBalanceChange($bank, $amount, $statement->description ?? 'Lançamento manual');
         }
 
@@ -63,7 +63,7 @@ class FinancialEngineController extends Controller
     // ── INVOICES CRUD ───────────────────────────
     public function invoicesIndex(Request $request)
     {
-        $query = Invoice::latest();
+        $query = Invoice::where('company_id', Auth::user()->company_id)->latest();
         if ($request->filled('type'))   $query->where('type', $request->type);
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('search')) {
@@ -94,8 +94,9 @@ class FinancialEngineController extends Controller
         return response()->json(['data' => $invoice], 201);
     }
 
-    public function invoicesShow(Invoice $invoice)
+    public function invoicesShow($id)
     {
+        $invoice = Invoice::where('company_id', Auth::user()->company_id)->findOrFail($id);
         return response()->json(['data' => $invoice]);
     }
 
@@ -127,7 +128,7 @@ class FinancialEngineController extends Controller
     // ── BANK ACCOUNTS CRUD ──────────────────────
     public function bankAccountsIndex()
     {
-        return response()->json(['data' => BankAccount::latest()->get()]);
+        return response()->json(['data' => BankAccount::where('company_id', Auth::user()->company_id)->latest()->get()]);
     }
 
     public function bankAccountsStore(Request $request)
@@ -142,8 +143,9 @@ class FinancialEngineController extends Controller
         return response()->json(['data' => BankAccount::create($validated)], 201);
     }
 
-    public function bankAccountsUpdate(Request $request, BankAccount $bankAccount)
+    public function bankAccountsUpdate(Request $request, $id)
     {
+        $bankAccount = BankAccount::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $validated = $request->validate([
             'bank_name' => 'sometimes|string|max:255',
             'agency'    => 'nullable|string|max:20',
@@ -199,12 +201,9 @@ class FinancialEngineController extends Controller
             'receivable_id' => 'nullable|exists:accounts_receivables,id',
         ]);
 
-        $item = BankReconciliationItem::findOrFail($validated['item_id']);
-
-        // Must be same company
-        if ($item->reconciliation->company_id !== Auth::user()->company_id) {
-            abort(403);
-        }
+        $item = BankReconciliationItem::whereHas('reconciliation', function ($q) {
+            $q->where('company_id', Auth::user()->company_id);
+        })->findOrFail($validated['item_id']);
 
         $item = $this->service->reconcileItem(
             $item, 
@@ -218,7 +217,7 @@ class FinancialEngineController extends Controller
     // ── TAX CONFIGURATION ───────────────────────
     public function taxConfigShow()
     {
-        $config = TaxConfiguration::first();
+        $config = TaxConfiguration::where('company_id', Auth::user()->company_id)->first();
         return response()->json(['data' => $config]);
     }
 

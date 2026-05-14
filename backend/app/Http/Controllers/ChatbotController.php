@@ -10,7 +10,7 @@ class ChatbotController extends Controller
 {
     public function index()
     {
-        return ChatbotFlow::orderBy('created_at', 'desc')->get();
+        return ChatbotFlow::where('company_id', Auth::user()->company_id)->orderBy('created_at', 'desc')->get();
     }
 
     public function store(Request $request)
@@ -22,6 +22,7 @@ class ChatbotController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $flow = ChatbotFlow::create($validated);
 
         return response()->json($flow, 201);
@@ -29,12 +30,12 @@ class ChatbotController extends Controller
 
     public function show($id)
     {
-        return ChatbotFlow::findOrFail($id);
+        return ChatbotFlow::where('company_id', Auth::user()->company_id)->findOrFail($id);
     }
 
     public function update(Request $request, $id)
     {
-        $flow = ChatbotFlow::findOrFail($id);
+        $flow = ChatbotFlow::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -50,7 +51,7 @@ class ChatbotController extends Controller
 
     public function destroy($id)
     {
-        $flow = ChatbotFlow::findOrFail($id);
+        $flow = ChatbotFlow::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $flow->delete();
 
         return response()->json(null, 204);
@@ -58,7 +59,9 @@ class ChatbotController extends Controller
 
     public function active()
     {
-        return ChatbotFlow::where('is_active', true)->first();
+        return ChatbotFlow::where('company_id', Auth::user()->company_id)
+            ->where('is_active', true)
+            ->first();
     }
 
     public function setActive($id)
@@ -67,7 +70,7 @@ class ChatbotController extends Controller
         ChatbotFlow::where('company_id', Auth::user()->company_id)
             ->update(['is_active' => false]);
 
-        $flow = ChatbotFlow::findOrFail($id);
+        $flow = ChatbotFlow::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $flow->update(['is_active' => true]);
 
         return $flow;

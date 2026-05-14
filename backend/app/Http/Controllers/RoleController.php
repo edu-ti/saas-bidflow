@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class RoleController extends Controller
 {
@@ -45,6 +46,9 @@ class RoleController extends Controller
 
         $role->update($validated);
 
+        // Invalidar cache de todos os usuários com esta role
+        $this->clearRoleCache($role->id);
+
         return response()->json($role);
     }
 
@@ -60,5 +64,13 @@ class RoleController extends Controller
         $role->delete();
 
         return response()->json(null, 204);
+    }
+
+    private function clearRoleCache(int $roleId): void
+    {
+        $userIds = \App\Models\User::where('role_id', $roleId)->pluck('id');
+        foreach ($userIds as $userId) {
+            Cache::forget("user_permissions:{$userId}");
+        }
     }
 }

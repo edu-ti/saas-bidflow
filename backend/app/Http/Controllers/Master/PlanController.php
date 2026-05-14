@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class PlanController extends Controller
 {
@@ -59,7 +62,22 @@ class PlanController extends Controller
                 'features.*' => 'string',
             ]);
 
+            Log::info('[PlanController] Before update', [
+                'plan_id' => $plan->id,
+                'old_features' => $plan->features,
+                'new_features' => $validated['features'] ?? null,
+            ]);
+
             $plan->update($validated);
+            $plan->refresh();
+
+            Log::info('[PlanController] After update', [
+                'plan_id' => $plan->id,
+                'features' => $plan->features,
+            ]);
+
+            $this->flushPermissionsCacheForPlan($plan);
+
             return response()->json($plan);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -75,7 +93,21 @@ class PlanController extends Controller
 
     public function destroy(Plan $plan)
     {
+        $this->flushPermissionsCacheForPlan($plan);
         $plan->delete();
         return response()->json(['message' => 'Plano removido com sucesso']);
+    }
+
+    protected function flushPermissionsCacheForPlan(Plan $plan): void
+    {
+        $companyIds = $plan->companies()->pluck('id');
+        Log::info('[PlanController] Flushing cache', [
+            'plan_id' => $plan->id,
+            'company_ids' => $companyIds->toArray(),
+        ]);
+        User::whereIn('company_id', $companyIds)->each(function ($user) {
+            Log::info('[PlanController] Cache forget', ['user_id' => $user->id]);
+            Cache::forget("user_permissions:{$user->id}");
+        });
     }
 }

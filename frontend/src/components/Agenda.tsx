@@ -7,7 +7,7 @@ import { ptBR } from 'date-fns/locale';
 import { Plus, Trash2, Loader2, Save, Calendar as CalendarIcon, MapPin, AlignLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
-import Modal from './ui/Modal';
+import Modal, { ConfirmDialog } from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
 import { usePermissions } from '../hooks/usePermissions';
@@ -45,6 +45,8 @@ export default function Agenda() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     start_date: '',
@@ -68,6 +70,8 @@ export default function Agenda() {
         start: new Date(ev.start_date),
         end: ev.end_date ? new Date(ev.end_date) : new Date(ev.start_date),
         resource: ev.type,
+        description: ev.description,
+        location: ev.location,
       }));
       setEvents(formattedEvents);
     } catch (error) {
@@ -100,8 +104,8 @@ export default function Agenda() {
       title: String(event.title),
       start_date: format(event.start as Date, 'yyyy-MM-dd\'T\'HH:mm'),
       end_date: event.end ? format(event.end as Date, 'yyyy-MM-dd\'T\'HH:mm') : '',
-      description: '',
-      location: '',
+      description: (event as any).description || '',
+      location: (event as any).location || '',
       type: (event.resource as 'event' | 'opportunity') || 'event',
     });
     setEditingId(Number(event.id));
@@ -109,14 +113,22 @@ export default function Agenda() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Remover este evento?')) return;
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
     try {
-      await api.delete(`/api/events/${id}`);
+      await api.delete(`/api/events/${deleteId}`);
       toast.success('Evento removido.');
       fetchEvents();
     } catch (error) {
       toast.error('Erro ao excluir');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
     }
   };
 
@@ -295,7 +307,7 @@ export default function Agenda() {
             {isEditing && canDelete && (
               <button
                 type="button"
-                onClick={() => handleDelete(editingId!)}
+                onClick={() => openDeleteConfirm(editingId!)}
                 className="btn btn-ghost text-red-500 hover:bg-red-500/10"
               >
                 <Trash2 size={14} />
@@ -320,6 +332,17 @@ export default function Agenda() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Evento"
+        message="Tem certeza que deseja remover este evento?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

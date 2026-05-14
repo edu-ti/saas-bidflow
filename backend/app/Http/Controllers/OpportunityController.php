@@ -26,15 +26,10 @@ class OpportunityController extends Controller
             'funnel_stage_id' => 'required|integer',
         ]);
 
-        $opportunity = Opportunity::find($id);
+        $opportunity = Opportunity::where('company_id', $request->user()->company_id)->find($id);
 
         if (! $opportunity) {
             return response()->json(['message' => 'Opportunity not found'], 404);
-        }
-
-        // Apply Policy to ensure they can update it
-        if ($request->user()->cannot('update', $opportunity)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $oldStageId = $opportunity->funnel_stage_id;
@@ -103,7 +98,7 @@ class OpportunityController extends Controller
 
     public function uploadAttachment(Request $request, $id)
     {
-        $opportunity = Opportunity::find($id);
+        $opportunity = Opportunity::where('company_id', $request->user()->company_id)->find($id);
         if (! $opportunity) {
             return response()->json(['message' => 'Not found'], 404);
         }
@@ -209,13 +204,13 @@ class OpportunityController extends Controller
 
     public function show($id)
     {
-        $opportunity = Opportunity::with('items')->findOrFail($id);
+        $opportunity = Opportunity::with('items')->where('company_id', Auth::user()->company_id)->findOrFail($id);
         return response()->json($opportunity);
     }
 
     public function update(Request $request, $id)
     {
-        $opportunity = Opportunity::findOrFail($id);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -284,7 +279,7 @@ class OpportunityController extends Controller
 
     public function destroy($id)
     {
-        $opportunity = Opportunity::findOrFail($id);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $opportunity->delete();
         return response()->json(['message' => 'Opportunity deleted successfully']);
     }
@@ -297,11 +292,7 @@ class OpportunityController extends Controller
             'insights' => 'required|array',
         ]);
 
-        $opportunity = Opportunity::findOrFail($id);
-
-        if ($opportunity->company_id !== Auth::user()->company_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $this->aiService->updateInsights($opportunity, $validated['insights'], Auth::id());
 
@@ -313,7 +304,7 @@ class OpportunityController extends Controller
 
     public function predict($id)
     {
-        $opportunity = Opportunity::findOrFail($id);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $opportunity);
 
         $this->aiService->predict($opportunity);
@@ -326,7 +317,7 @@ class OpportunityController extends Controller
 
     public function parseNotice($id)
     {
-        $opportunity = Opportunity::findOrFail($id);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $opportunity);
 
         $this->aiService->parseNotice($opportunity);
@@ -339,7 +330,7 @@ class OpportunityController extends Controller
 
     public function generateDraftPdf($id)
     {
-        $opportunity = Opportunity::findOrFail($id);
+        $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $opportunity);
 
         try {
@@ -355,12 +346,7 @@ class OpportunityController extends Controller
      */
     public function qualify(Request $request, $id)
     {
-        $alert = \App\Models\BiddingAlert::findOrFail($id);
-        
-        // Autorização básica
-        if ($alert->company_id !== Auth::user()->company_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $alert = \App\Models\BiddingAlert::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $rawData = $alert->raw_data;
         

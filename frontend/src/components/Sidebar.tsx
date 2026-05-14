@@ -7,7 +7,7 @@ import {
     MessageSquare, Bot, Link2, Wallet, Box, CreditCard, Wrench,
     LogOut, Sun, Moon, Star, Bell, Zap, Menu, ShieldCheck, Map,
     Radar, Activity, List, Sparkles, Briefcase, Send, MessageCircle,
-    Mail, UserSquare, Lock
+    Mail, UserSquare, Lock, Landmark
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -19,7 +19,7 @@ export type Page = 'dashboard' | 'company' | 'users' | 'reports' |
     'competitor-analysis' | 'bidding-radar' | 'bidding-monitoring' |
     'bidding-funnel' | 'bidding-capture' | 'auction-details' | 'ai-generator' |
     'licenses' | 'consignment' | 'contracts' | 'inventory' | 'campaigns' |
-    'tasks' | 'accounts-payable-receivable' | 'finance' | 'admin' |
+    'tasks' | 'accounts-payable-receivable' | 'finance' | 'tax-compliance' | 'admin' |
     'chatbot' | 'conversations' | 'settings' | 'support';
 
 interface SidebarProps {
@@ -58,6 +58,7 @@ const pagePermissionMap: Record<Page, { module: string; page: string }> = {
     'auction-details': { module: 'bidding', page: 'auction-details' },
     'ai-generator': { module: 'bidding', page: 'ai-generator' },
     'finance': { module: 'financial', page: 'financial-manager' },
+    'tax-compliance': { module: 'financial', page: 'tax-settings' },
     'accounts-payable-receivable': { module: 'financial', page: 'accounts-payable' },
     'contracts': { module: 'financial', page: 'contracts' },
     'inventory': { module: 'inventory', page: 'inventory-page' },
@@ -77,15 +78,24 @@ const hasPagePermission = (page: Page, user: any): boolean => {
 
     if (!user) return false;
 
-    if (user.is_superadmin || user.is_admin) return true;
-
-    if (!user.permissions || Object.keys(user.permissions).length === 0) {
-        return false;
-    }
-
     const permConfig = pagePermissionMap[page];
     if (!permConfig) return false;
 
+    // 1. Restrição de plano: verificar se o módulo está no plano (aplica a TODOS exceto superadmin)
+    const allowedModules = user.allowed_modules || [];
+    if (!user.is_superadmin && allowedModules.length > 0 && !allowedModules.includes(permConfig.module)) {
+        return false;
+    }
+
+    // 2. SuperAdmin ou Admin da empresa têm acesso a todos os módulos do plano
+    if (user.is_superadmin || user.is_admin) return true;
+
+    // 3. Se não há permissões detalhadas, permite se o módulo está no plano
+    if (!user.permissions || Object.keys(user.permissions).length === 0) {
+        return allowedModules.includes(permConfig.module);
+    }
+
+    // 4. Verificar permissões detalhadas (Module > Page > Action)
     const { module, page: pageId } = permConfig;
 
     const modulePerms = user.permissions[module];
@@ -136,6 +146,7 @@ const navGroups = [
             { id: 'finance' as Page, icon: Wallet, label: 'Gestor Financeiro' },
             { id: 'accounts-payable-receivable' as Page, icon: CreditCard, label: 'Contas Pagar/Receber' },
             { id: 'contracts' as Page, icon: Briefcase, label: 'Contratos (CLM)' },
+            { id: 'tax-compliance' as Page, icon: Landmark, label: 'Compliance Fiscal' },
         ]
     },
     {

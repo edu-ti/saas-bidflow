@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Image as ImageIcon, BookOpen, List, Settings, Save, Loader2, Sparkles, ShieldCheck, Zap, Activity, Check, AlignLeft } from 'lucide-react';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
-import { Modal } from './Modal';
+import { Modal, ConfirmDialog } from './Modal';
 import { Select } from './Select';
 
 type Parameter = {
@@ -50,6 +50,7 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -189,10 +190,12 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
     }
   };
 
+  const openDeleteConfirm = () => {
+    setConfirmOpen(true);
+  };
+
   const handleDelete = async () => {
     if (!opportunityToEdit) return;
-    if (!window.confirm('Autorizar encerramento definitivo desta oportunidade?')) return;
-    
     setLoading(true);
     try {
       await api.delete(`/api/opportunities/${opportunityToEdit.id}`);
@@ -204,6 +207,7 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
       toast.error('Erro na deleção do registro.');
     } finally {
       setLoading(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -505,7 +509,7 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
         <div className="flex justify-between items-center pt-4 border-t border-border">
           <div>
             {opportunityToEdit && (
-              <button type="button" onClick={handleDelete} disabled={loading} className="btn btn-ghost text-red-500 hover:bg-red-500/10">
+              <button type="button" onClick={openDeleteConfirm} disabled={loading} className="btn btn-ghost text-red-500 hover:bg-red-500/10">
                 <Trash2 size={16} />
                 Excluir Oportunidade
               </button>
@@ -522,6 +526,16 @@ export default function OpportunityModal({ isOpen, onClose, onSaved, initialStag
           </div>
         </div>
       </form>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Oportunidade"
+        message="Autorizar encerramento definitivo desta oportunidade?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </Modal>
   );
 }

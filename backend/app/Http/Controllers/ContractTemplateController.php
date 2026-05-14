@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ContractTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ContractTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ContractTemplate::query();
+        $query = ContractTemplate::where('company_id', Auth::user()->company_id);
 
         if ($request->has('active')) {
             $query->where('active', $request->boolean('active'));
@@ -34,13 +35,8 @@ class ContractTemplateController extends Controller
             'active' => 'nullable|boolean',
         ]);
 
-        $template = ContractTemplate::create([
-            'company_id' => $request->user()->company_id,
-            'name' => $validated['name'],
-            'type' => $validated['type'],
-            'content' => $validated['content'],
-            'active' => $validated['active'] ?? true,
-        ]);
+        $validated['company_id'] = Auth::user()->company_id;
+        $template = ContractTemplate::create($validated);
 
         return response()->json([
             'message' => 'Template criado com sucesso',
@@ -50,13 +46,13 @@ class ContractTemplateController extends Controller
 
     public function show($id)
     {
-        $template = ContractTemplate::findOrFail($id);
+        $template = ContractTemplate::where('company_id', Auth::user()->company_id)->findOrFail($id);
         return response()->json($template);
     }
 
     public function update(Request $request, $id)
     {
-        $template = ContractTemplate::findOrFail($id);
+        $template = ContractTemplate::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -75,7 +71,7 @@ class ContractTemplateController extends Controller
 
     public function destroy($id)
     {
-        $template = ContractTemplate::findOrFail($id);
+        $template = ContractTemplate::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $activeContracts = $template->contracts()->count();
 

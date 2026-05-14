@@ -4,6 +4,7 @@ import {
  FileText, Loader2, Users 
 } from 'lucide-react';
 import { Select } from '../ui/Select';
+import { ConfirmDialog } from '../ui/Modal';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 
@@ -62,8 +63,10 @@ export default function GoalsAndCommissions() {
 
  const [loadingConfig, setLoadingConfig] = useState(false);
  const [supplierList, setSupplierList] = useState<string[]>([]);
- const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
- const [newSupplierName, setNewSupplierName] = useState('');
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [removeForn, setRemoveForn] = useState('');
 
  const formatCurrency = (value: number) => {
  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -301,11 +304,18 @@ export default function GoalsAndCommissions() {
  }
  };
 
- const removeSupplier = (forn: string) => {
- if (confirm(`Remover fornecedor "${forn}"?`)) {
- setSupplierList(supplierList.filter(f => f !== forn));
- }
- };
+  const openRemoveConfirm = (forn: string) => {
+    setRemoveForn(forn);
+    setConfirmOpen(true);
+  };
+
+  const removeSupplier = () => {
+    if (removeForn) {
+      setSupplierList(supplierList.filter(f => f !== removeForn));
+    }
+    setRemoveForn('');
+    setConfirmOpen(false);
+  };
 
  const calculateTotals = () => {
  let grandMeta = 0, grandVendas = 0, grandFixo = 0, grandComissao = 0, grandDif = 0, grandTotal = 0;
@@ -624,11 +634,11 @@ export default function GoalsAndCommissions() {
  <span className="text-xs text-text-muted font-mono">
  Total: <strong className="text-emerald-600">{totalAnual > 0 ? formatCurrency(totalAnual) : 'R$ 0,00'}</strong>
  </span>
- <button
- onClick={() => removeSupplier(forn)}
- className="text-gray-400 hover:text-red-500 transition-colors"
- title="Remover fornecedor"
- >
+              <button
+                onClick={() => openRemoveConfirm(forn)}
+                className="text-gray-400 hover:text-red-500 transition-colors"
+                title="Remover fornecedor"
+              >
  <Trash2 size={14} />
  </button>
  </div>
@@ -743,6 +753,16 @@ export default function GoalsAndCommissions() {
  )}
  </div>
  )}
- </div>
- );
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={removeSupplier}
+        title="Remover Fornecedor"
+        message={`Remover fornecedor "${removeForn}"?`}
+        confirmText="Remover"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+    </div>
+  );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Upload, Save, X, User, Briefcase, Mail, Phone, ShieldCheck, Search, Loader2, Target, Globe, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
+import { ConfirmDialog } from './ui/Modal';
 import { usePermissions } from '../hooks/usePermissions';
 
 interface Contact {
@@ -15,11 +16,13 @@ interface Contact {
 export default function Contacts() {
  const [contacts, setContacts] = useState<Contact[]>([]);
  const [loading, setLoading] = useState(true);
- const [isModalOpen, setIsModalOpen] = useState(false);
- const [isEditing, setIsEditing] = useState(false);
- const [editingId, setEditingId] = useState<number | null>(null);
- const [searchTerm, setSearchTerm] = useState('');
- const [formData, setFormData] = useState({
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState({
  name: '',
  email: '',
  phone: '',
@@ -80,17 +83,24 @@ export default function Contacts() {
  setIsModalOpen(true);
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Autorizar remoção definitiva deste contato do CRM?')) return;
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
 
- try {
- await api.delete(`/api/contacts/${id}`);
- toast.success('Registro removido com sucesso.');
- fetchContacts();
- } catch (error) {
- toast.error('Erro na deleção');
- }
- };
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/api/contacts/${deleteId}`);
+      toast.success('Registro removido com sucesso.');
+      fetchContacts();
+    } catch (error) {
+      toast.error('Erro na deleção');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
  const file = e.target.files?.[0];
@@ -232,9 +242,9 @@ export default function Contacts() {
  {canEdit && (
  <button onClick={() => handleEdit(contact)} className="p-3 bg-bg-tertiary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Pencil size={18} /></button>
  )}
- {canDelete && (
- <button onClick={() => handleDelete(contact.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Excluir"><Trash2 size={18} /></button>
- )}
+              {canDelete && (
+                <button onClick={() => openDeleteConfirm(contact.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Excluir"><Trash2 size={18} /></button>
+              )}
  </div>
  </td>
  </tr>
@@ -341,7 +351,18 @@ export default function Contacts() {
  </form>
  </div>
  </div>
- )}
- </div>
- );
+  )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Contato"
+        message="Autorizar remoção definitiva deste contato do CRM?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }

@@ -6,6 +6,7 @@ use App\Models\AccountsPayable;
 use Illuminate\Http\Request;
 use App\Http\Resources\AccountsPayableResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class AccountsPayableController extends Controller
 {
@@ -14,7 +15,7 @@ class AccountsPayableController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', AccountsPayable::class);
-        $accounts = AccountsPayable::latest()->get();
+        $accounts = AccountsPayable::latest()->where('company_id', Auth::user()->company_id)->get();
         return AccountsPayableResource::collection($accounts);
     }
 
@@ -31,18 +32,21 @@ class AccountsPayableController extends Controller
             'status' => 'nullable|in:Pending,Paid,Overdue,Cancelled',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $account = AccountsPayable::create($validated);
         return new AccountsPayableResource($account);
     }
 
-    public function show(AccountsPayable $accountsPayable)
+    public function show($id)
     {
+        $accountsPayable = AccountsPayable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $accountsPayable);
         return new AccountsPayableResource($accountsPayable);
     }
 
-    public function update(Request $request, AccountsPayable $accountsPayable)
+    public function update(Request $request, $id)
     {
+        $accountsPayable = AccountsPayable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $accountsPayable);
         $validated = $request->validate([
             'reference_title' => 'sometimes|required|string|max:255',
@@ -58,8 +62,9 @@ class AccountsPayableController extends Controller
         return new AccountsPayableResource($accountsPayable);
     }
 
-    public function destroy(AccountsPayable $accountsPayable)
+    public function destroy($id)
     {
+        $accountsPayable = AccountsPayable::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $accountsPayable);
         $accountsPayable->delete();
         return response()->noContent();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
@@ -67,13 +68,13 @@ class TaskController extends Controller
 
     public function show($id)
     {
-        $task = Task::with(['subtasks', 'user'])->findOrFail($id);
+        $task = Task::with(['subtasks', 'user'])->where('company_id', Auth::user()->company_id)->findOrFail($id);
         return response()->json($task);
     }
 
     public function update(Request $request, $id)
     {
-        $task = Task::findOrFail($id);
+        $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -94,7 +95,7 @@ class TaskController extends Controller
 
     public function destroy($id)
     {
-        $task = Task::findOrFail($id);
+        $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $task->delete();
 
         return response()->json(['message' => 'Tarefa excluída']);
@@ -102,7 +103,7 @@ class TaskController extends Controller
 
     public function toggleStatus(Request $request, $id)
     {
-        $task = Task::findOrFail($id);
+        $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $newStatus = $task->status === 'pending' ? 'completed' : 'pending';
         $task->update(['status' => $newStatus]);
@@ -117,32 +118,33 @@ class TaskController extends Controller
     {
         $companyId = $request->user()->company_id;
         $userId = $request->user()->id;
+        $userName = $request->user()->name;
+        $today = now()->toDateString();
 
         $query = Task::where('company_id', $companyId);
 
         if (!$request->user()->isAdmin()) {
-            $query->where(function ($q) use ($userId, $request) {
+            $query->where(function ($q) use ($userId, $userName) {
                 $q->where('user_id', $userId)
-                    ->orWhere('assignee', $request->user()->name);
+                    ->orWhere('assignee', $userName);
             });
         }
 
-        $total = $query->count();
-        $pending = $query->where('status', 'pending')->count();
-        $completed = $query->where('status', 'completed')->count();
-        $overdue = $query->where('status', 'pending')
-            ->where('due_date', '<', now()->toDateString())
-            ->count();
-        $dueToday = $query->where('status', 'pending')
-            ->where('due_date', now()->toDateString())
-            ->count();
+        // Uma única query com CASE para contar tudo de uma vez
+        $stats = $query->selectRaw('
+            COUNT(*) as total,
+            COUNT(CASE WHEN status = \'pending\' THEN 1 END) as pending,
+            COUNT(CASE WHEN status = \'completed\' THEN 1 END) as completed,
+            COUNT(CASE WHEN status = \'pending\' AND due_date < ? THEN 1 END) as overdue,
+            COUNT(CASE WHEN status = \'pending\' AND due_date = ? THEN 1 END) as due_today
+        ', [$today, $today])->first();
 
         return response()->json([
-            'total' => $total,
-            'pending' => $pending,
-            'completed' => $completed,
-            'overdue' => $overdue,
-            'due_today' => $dueToday,
+            'total' => (int) $stats->total,
+            'pending' => (int) $stats->pending,
+            'completed' => (int) $stats->completed,
+            'overdue' => (int) $stats->overdue,
+            'due_today' => (int) $stats->due_today,
         ]);
     }
 }

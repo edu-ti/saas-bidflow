@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Company;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class TenantMiddleware
@@ -24,9 +25,13 @@ class TenantMiddleware
             return abort(404, 'Tenant não encontrado.');
         }
 
-        $company = Company::withoutGlobalScopes()
-            ->where('subdomain', $subdomain)
-            ->first();
+        // Cache do tenant por 1 hora (evita query no banco a cada request)
+        $cacheKey = "tenant:{$subdomain}";
+        $company = Cache::remember($cacheKey, 3600, function () use ($subdomain) {
+            return Company::withoutGlobalScopes()
+                ->where('subdomain', $subdomain)
+                ->first();
+        });
 
         if (!$company) {
             return abort(404, 'Tenant não encontrado.');

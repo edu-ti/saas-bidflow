@@ -6,6 +6,7 @@ import {
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { Select } from './ui/Select';
+import { ConfirmDialog } from './ui/Modal';
 import { usePermissions } from '../hooks/usePermissions';
 
 interface EmailCampaign {
@@ -60,12 +61,16 @@ export default function EmailMarketing() {
  recipient_lead_ids: [] as number[],
  });
 
- const [searchLeadTerm, setSearchLeadTerm] = useState('');
- const [leadResults, setLeadResults] = useState<Lead[]>([]);
- const [selectedLeads, setSelectedLeads] = useState<Lead[]>([]);
- const [loadingLeads, setLoadingLeads] = useState(false);
+  const [searchLeadTerm, setSearchLeadTerm] = useState('');
+  const [leadResults, setLeadResults] = useState<Lead[]>([]);
+  const [selectedLeads, setSelectedLeads] = useState<Lead[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
 
- const { hasPermission } = usePermissions();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'send' | 'delete' | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+
+  const { hasPermission } = usePermissions();
  const canCreate = hasPermission('modules', 'email-marketing', 'create');
  const canEdit = hasPermission('modules', 'email-marketing', 'update');
  const canDelete = hasPermission('modules', 'email-marketing', 'delete');
@@ -151,30 +156,39 @@ export default function EmailMarketing() {
  }
  };
 
- const handleSendCampaign = async (id: number) => {
- if (!confirm('Autorizar disparo imediato para toda a base selecionada?')) return;
- setLoading(true);
- try {
- await api.post(`/api/email-campaigns/${id}/send`);
- toast.success('Transmissão iniciada.');
- fetchCampaigns();
- } catch (err: any) {
- toast.error('Erro no gateway de envio');
- } finally {
- setLoading(false);
- }
- };
+  const openSendConfirm = (id: number) => {
+    setConfirmId(id);
+    setConfirmAction('send');
+    setConfirmOpen(true);
+  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Remover campanha do histórico estratégico?')) return;
- try {
- await api.delete(`/api/email-campaigns/${id}`);
- toast.success('Campanha removida.');
- fetchCampaigns();
- } catch (err) {
- toast.error('Erro na exclusão');
- }
- };
+  const openDeleteConfirm = (id: number) => {
+    setConfirmId(id);
+    setConfirmAction('delete');
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmId || !confirmAction) return;
+    setLoading(true);
+    try {
+      if (confirmAction === 'send') {
+        await api.post(`/api/email-campaigns/${confirmId}/send`);
+        toast.success('Transmissão iniciada.');
+      } else {
+        await api.delete(`/api/email-campaigns/${confirmId}`);
+        toast.success('Campanha removida.');
+      }
+      fetchCampaigns();
+    } catch (err: any) {
+      toast.error(confirmAction === 'send' ? 'Erro no gateway de envio' : 'Erro na exclusão');
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+      setConfirmId(null);
+      setConfirmAction(null);
+    }
+  };
 
  const toggleLeadSelection = (lead: Lead) => {
  const exists = selectedLeads.find(l => l.id === lead.id);
@@ -288,12 +302,12 @@ export default function EmailMarketing() {
  {canEdit && (
  <button onClick={() => handleOpenCompose(campaign)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit2 size={18} /></button>
  )}
- {(campaign.status === 'draft' || campaign.status === 'scheduled') && canSend && (
- <button onClick={() => handleSendCampaign(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl text-primary hover:bg-primary hover:text-white transition-all " title="Disparar"><Send size={18} /></button>
- )}
- {canDelete && (
- <button onClick={() => handleDelete(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
- )}
+              {(campaign.status === 'draft' || campaign.status === 'scheduled') && canSend && (
+                <button onClick={() => openSendConfirm(campaign.id)} className="p-3 bg-primary/10 border border-primary/20 rounded-xl text-primary hover:bg-primary hover:text-white transition-all " title="Disparar"><Send size={18} /></button>
+              )}
+              {canDelete && (
+                <button onClick={() => openDeleteConfirm(campaign.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
+              )}
  </div>
  </td>
  </tr>
@@ -446,6 +460,16 @@ export default function EmailMarketing() {
  </div>
  </div>
  )}
- </div>
- );
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={confirmAction === 'send' ? 'Disparar Campanha' : 'Excluir Campanha'}
+        message={confirmAction === 'send' ? 'Autorizar disparo imediato para toda a base selecionada?' : 'Remover campanha do histórico estratégico?'}
+        confirmText={confirmAction === 'send' ? 'Disparar' : 'Excluir'}
+        cancelText="Cancelar"
+        variant={confirmAction === 'send' ? 'warning' : 'danger'}
+      />
+    </div>
+  );
 }

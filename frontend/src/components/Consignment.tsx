@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import api from '../lib/axios';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
+import { ConfirmDialog } from './ui/Modal';
 import type { ConsignmentRecord } from './consignment/types';
 import ConsignmentDashboard from './consignment/ConsignmentDashboard';
 import ConsignmentWizard from './consignment/ConsignmentWizard';
@@ -29,6 +30,10 @@ export default function Consignment() {
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const [reconcileTarget, setReconcileTarget] = useState<ConsignmentRecord | null>(null);
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'send' | 'close' | 'delete' | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<ConsignmentRecord | null>(null);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -46,45 +51,35 @@ export default function Consignment() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSend = async (c: ConsignmentRecord) => {
-    if (!canSend) return;
-    if (!confirm(`Enviar remessa #${c.id}? O estoque será deduzido.`)) return;
+  const openConfirm = (c: ConsignmentRecord, action: 'send' | 'close' | 'delete') => {
+    setConfirmTarget(c);
+    setConfirmAction(action);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmTarget || !confirmAction) return;
     try {
-      await api.post(`/api/consignments/${c.id}/send`);
-      toast.success('Remessa enviada com sucesso!');
+      if (confirmAction === 'send') {
+        await api.post(`/api/consignments/${confirmTarget.id}/send`);
+        toast.success('Remessa enviada com sucesso!');
+      } else if (confirmAction === 'close') {
+        await api.post(`/api/consignments/${confirmTarget.id}/close`);
+        toast.success('Consignação fechada! Contas a receber gerado.');
+      } else if (confirmAction === 'delete') {
+        await api.delete(`/api/consignments/${confirmTarget.id}`);
+        toast.success('Rascunho excluído!');
+      }
       fetchData();
     } catch (e: any) {
       const msg = e?.response?.data?.errors
         ? Object.values(e.response.data.errors).flat().join(', ')
-        : e?.response?.data?.message || 'Erro ao enviar';
+        : e?.response?.data?.message || 'Erro na operação';
       toast.error(msg);
-    }
-  };
-
-  const handleClose = async (c: ConsignmentRecord) => {
-    if (!canClose) return;
-    if (!confirm(`Fechar consignação #${c.id}? Itens pendentes serão devolvidos ao estoque e o financeiro será gerado.`)) return;
-    try {
-      await api.post(`/api/consignments/${c.id}/close`);
-      toast.success('Consignação fechada! Contas a receber gerado.');
-      fetchData();
-    } catch (e: any) {
-      const msg = e?.response?.data?.errors
-        ? Object.values(e.response.data.errors).flat().join(', ')
-        : e?.response?.data?.message || 'Erro ao fechar';
-      toast.error(msg);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!canDelete) return;
-    if (!confirm('Excluir este rascunho?')) return;
-    try {
-      await api.delete(`/api/consignments/${id}`);
-      toast.success('Rascunho excluído!');
-      fetchData();
-    } catch {
-      toast.error('Erro ao excluir');
+    } finally {
+      setConfirmOpen(false);
+      setConfirmTarget(null);
+      setConfirmAction(null);
     }
   };
 
@@ -104,9 +99,9 @@ export default function Consignment() {
         onFilterChange={setFilterStatus}
         onOpenWizard={() => setWizardOpen(true)}
         onOpenReconcile={openReconcile}
-        onSend={handleSend}
-        onClose={handleClose}
-        onDelete={handleDelete}
+        onSend={(c) => openConfirm(c, 'send')}
+        onClose={(c) => openConfirm(c, 'close')}
+        onDelete={(id) => openConfirm({ id } as ConsignmentRecord, 'delete')}
         canCreate={canCreate}
         canSend={canSend}
         canClose={canClose}
@@ -124,6 +119,24 @@ export default function Consignment() {
         consignment={reconcileTarget}
         onClose={() => { setReconcileOpen(false); setReconcileTarget(null); }}
         onSuccess={fetchData}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={
+          confirmAction === 'send' ? 'Enviar Remessa' :
+          confirmAction === 'close' ? 'Fechar Consignação' : 'Excluir Rascunho'
+        }
+        message={
+          confirmAction === 'send' ? `Enviar remessa #${confirmTarget?.id}? O estoque será deduzido.` :
+          confirmAction === 'close' ? `Fechar consignação #${confirmTarget?.id}? Itens pendentes serão devolvidos ao estoque e o financeiro será gerado.` :
+          'Excluir este rascunho?'
+        }
+        confirmText={confirmAction === 'send' ? 'Enviar' : confirmAction === 'close' ? 'Fechar' : 'Excluir'}
+        cancelText="Cancelar"
+        variant={confirmAction === 'delete' ? 'danger' : 'warning'}
       />
     </div>
   );

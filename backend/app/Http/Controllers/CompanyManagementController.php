@@ -9,6 +9,7 @@ use App\Http\Resources\OrganizationResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CompanyManagementController extends Controller
 {
@@ -81,6 +82,9 @@ class CompanyManagementController extends Controller
         $targetUser->update($validated);
         $targetUser->load('role');
 
+        // Invalidar cache de permissões do usuário
+        Cache::forget("user_permissions:{$targetUser->id}");
+
         return response()->json(['data' => $targetUser, 'message' => 'Utilizador atualizado com sucesso']);
     }
 
@@ -97,6 +101,7 @@ class CompanyManagementController extends Controller
             return response()->json(['message' => 'Não pode eliminar o próprio utilizador'], 422);
         }
 
+        Cache::forget("user_permissions:{$targetUser->id}");
         $targetUser->delete();
 
         return response()->json(['message' => 'Utilizador eliminado com sucesso']);
@@ -104,7 +109,8 @@ class CompanyManagementController extends Controller
 
     public function companyShow(Request $request, $id)
     {
-        $company = Company::findOrFail($id);
+        $authUser = Auth::user();
+        $company = Company::where('id', $authUser->company_id)->findOrFail($id);
         return response()->json($company);
     }
 
@@ -115,7 +121,7 @@ class CompanyManagementController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $company = Company::findOrFail($id);
+        $company = Company::where('id', $authUser->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',

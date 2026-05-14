@@ -4,7 +4,7 @@ import type { DropResult } from '@hello-pangea/dnd';
 import { Plus, Pencil, Trash2, X, Save, Loader2, FileText, Calendar, Target, Filter, Sparkles, AlertCircle, Lock, ShieldCheck, Zap, TrendingUp, DollarSign, Building2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
-import Modal from './ui/Modal';
+import Modal, { ConfirmDialog } from './ui/Modal';
 import { DatePicker } from './ui/DatePicker';
 import { Select } from './ui/Select';
 import { format } from 'date-fns';
@@ -56,10 +56,12 @@ export default function BiddingFunnel() {
  const [biddings, setBiddings] = useState<Bidding[]>([]);
  const [stages, setStages] = useState<FunnelStage[]>(defaultStages);
  const [loading, setLoading] = useState(true);
- const [isModalOpen, setIsModalOpen] = useState(false);
- const [isEditing, setIsEditing] = useState(false);
- const [editingId, setEditingId] = useState<number | null>(null);
- const [formData, setFormData] = useState({
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
  title: '',
  process_number: '',
  agency: '',
@@ -121,16 +123,24 @@ export default function BiddingFunnel() {
  setIsModalOpen(true);
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Confirmar exclusão definitiva do processo?')) return;
- try {
- await api.delete(`/api/opportunities/${id}`);
- toast.success('Oportunidade removida.');
- fetchData();
- } catch (error) {
- toast.error('Falha na exclusão');
- }
- };
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/api/opportunities/${deleteId}`);
+      toast.success('Oportunidade removida.');
+      fetchData();
+    } catch (error) {
+      toast.error('Falha na exclusão');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  const resetForm = () => {
  setFormData({
@@ -240,9 +250,9 @@ export default function BiddingFunnel() {
   {canEdit && (
   <button onClick={() => handleEdit(bidding)} className="p-2.5 bg-bg-tertiary/40 border border-border text-text-muted hover:text-primary hover:scale-110 rounded-xl transition-all "><Pencil size={14} /></button>
   )}
-  {canDelete && (
-  <button onClick={() => handleDelete(bidding.id)} className="p-2.5 bg-red-500/5 border border-red-500/10 text-text-muted hover:text-red-500 hover:scale-110 rounded-xl transition-all "><Trash2 size={14} /></button>
-  )}
+                  {canDelete && (
+                  <button onClick={() => openDeleteConfirm(bidding.id)} className="p-2.5 bg-red-500/5 border border-red-500/10 text-text-muted hover:text-red-500 hover:scale-110 rounded-xl transition-all "><Trash2 size={14} /></button>
+                  )}
   </div>
  </div>
 
@@ -394,7 +404,18 @@ export default function BiddingFunnel() {
  </button>
  </div>
  </form>
- </Modal>
- </div>
- );
+  </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Licitação"
+        message="Confirmar exclusão definitiva do processo?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }

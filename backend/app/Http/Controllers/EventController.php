@@ -18,16 +18,24 @@ class EventController extends Controller
         $this->authorize('viewAny', Event::class);
         $user = Auth::user();
 
-        // Get standard events - ALL events from the same company
-        $events = Event::where('company_id', $user->company_id)->get();
-            
+        // Get events from the last 3 months to next 6 months (performance)
+        $startWindow = now()->subMonths(3)->startOfMonth();
+        $endWindow = now()->addMonths(6)->endOfMonth();
+
+        $events = Event::where('company_id', $user->company_id)
+            ->whereBetween('start_date', [$startWindow, $endWindow])
+            ->orderBy('start_date')
+            ->get();
+
         $eventsData = EventResource::collection($events)->resolve();
 
-        // Get opportunities to mix into calendar - ALL from same company
-        $opportunities = Opportunity::where('company_id', $user->company_id)->get();
-            
-        // Assuming we have a due date in bidding_metadata or we just use created_at for now
-        // A better approach is checking if 'bidding_metadata->due_date' exists, but let's map what we have.
+        // Get only opportunities with due dates in the window
+        $opportunities = Opportunity::where('company_id', $user->company_id)
+            ->whereNotNull('bidding_metadata')
+            ->whereRaw("(bidding_metadata->>'due_date')::date BETWEEN ? AND ?", [$startWindow, $endWindow])
+            ->limit(500)
+            ->get();
+
         foreach ($opportunities as $opp) {
             $dueDate = $opp->bidding_metadata['due_date'] ?? $opp->created_at->addDays(7)->format('Y-m-d H:i:s');
             $eventsData[] = [

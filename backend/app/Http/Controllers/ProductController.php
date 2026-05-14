@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -14,7 +15,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Product::class);
-        $products = Product::latest()->get();
+        $products = Product::latest()->where('company_id', Auth::user()->company_id)->get();
         return ProductResource::collection($products);
     }
 
@@ -29,18 +30,21 @@ class ProductController extends Controller
             'base_price' => 'nullable|numeric|min:0',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $product = Product::create($validated);
         return new ProductResource($product);
     }
 
-    public function show(Product $product)
+    public function show($id)
     {
+        $product = Product::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $product);
         return new ProductResource($product);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
+        $product = Product::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $product);
         $validated = $request->validate([
             'sku' => 'nullable|string|max:255',
@@ -54,8 +58,9 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    public function destroy(Product $product)
+    public function destroy($id)
     {
+        $product = Product::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $product);
         $product->delete();
         return response()->noContent();

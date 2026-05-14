@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CampaignController extends Controller
 {
@@ -57,13 +58,13 @@ class CampaignController extends Controller
 
     public function show($id)
     {
-        $campaign = Campaign::findOrFail($id);
+        $campaign = Campaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
         return response()->json($campaign);
     }
 
     public function update(Request $request, $id)
     {
-        $campaign = Campaign::findOrFail($id);
+        $campaign = Campaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -86,7 +87,7 @@ class CampaignController extends Controller
 
     public function destroy($id)
     {
-        $campaign = Campaign::findOrFail($id);
+        $campaign = Campaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $campaign->delete();
 
         return response()->json(['message' => 'Campanha excluída']);

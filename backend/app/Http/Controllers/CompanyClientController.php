@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CompanyClient;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyClientController extends Controller
 {
@@ -13,7 +14,7 @@ class CompanyClientController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', CompanyClient::class);
-        $clients = CompanyClient::latest()->get();
+        $clients = CompanyClient::latest()->where('company_id', Auth::user()->company_id)->get();
         return response()->json(['data' => $clients]);
     }
 
@@ -33,18 +34,21 @@ class CompanyClientController extends Controller
             'contact_phone' => 'nullable|string|max:20',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $client = CompanyClient::create($validated);
         return response()->json(['data' => $client], 201);
     }
 
-    public function show(CompanyClient $companyClient)
+    public function show($id)
     {
+        $companyClient = CompanyClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $companyClient);
         return response()->json(['data' => $companyClient]);
     }
 
-    public function update(Request $request, CompanyClient $companyClient)
+    public function update(Request $request, $id)
     {
+        $companyClient = CompanyClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $companyClient);
         $validated = $request->validate([
             'corporate_name' => 'sometimes|required|string|max:255',
@@ -63,8 +67,9 @@ class CompanyClientController extends Controller
         return response()->json(['data' => $companyClient]);
     }
 
-    public function destroy(CompanyClient $companyClient)
+    public function destroy($id)
     {
+        $companyClient = CompanyClient::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $companyClient);
         $companyClient->delete();
         return response()->noContent();

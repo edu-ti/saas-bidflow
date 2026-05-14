@@ -6,6 +6,7 @@ use App\Models\EmailCampaign;
 use Illuminate\Http\Request;
 use App\Http\Resources\EmailCampaignResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailCampaignMail;
 
@@ -16,7 +17,7 @@ class EmailCampaignController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', EmailCampaign::class);
-        $campaigns = EmailCampaign::latest()->get();
+        $campaigns = EmailCampaign::latest()->where('company_id', Auth::user()->company_id)->get();
         return EmailCampaignResource::collection($campaigns);
     }
 
@@ -31,18 +32,21 @@ class EmailCampaignController extends Controller
             'sent_at' => 'nullable|date',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $campaign = EmailCampaign::create($validated);
         return new EmailCampaignResource($campaign);
     }
 
-    public function show(EmailCampaign $emailCampaign)
+    public function show($id)
     {
+        $emailCampaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $emailCampaign);
         return new EmailCampaignResource($emailCampaign);
     }
 
-    public function update(Request $request, EmailCampaign $emailCampaign)
+    public function update(Request $request, $id)
     {
+        $emailCampaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $emailCampaign);
         $validated = $request->validate([
             'subject' => 'sometimes|required|string|max:255',
@@ -71,8 +75,9 @@ class EmailCampaignController extends Controller
         return new EmailCampaignResource($emailCampaign);
     }
 
-    public function destroy(EmailCampaign $emailCampaign)
+    public function destroy($id)
     {
+        $emailCampaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $emailCampaign);
         $emailCampaign->delete();
         return response()->noContent();

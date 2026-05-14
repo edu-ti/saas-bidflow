@@ -3,7 +3,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { FileText, Send, XCircle, Plus, Loader2, Search, Zap, ShieldCheck, ChevronRight, Layout, DollarSign, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
-import Modal from './ui/Modal';
+import Modal, { ConfirmDialog } from './ui/Modal';
 import { Select } from './ui/Select';
 
 interface Invoice {
@@ -42,6 +42,9 @@ export default function InvoiceManager() {
   const [filterType, setFilterType] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'transmit' | 'cancel' | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
   const [form, setForm] = useState({ type: 'output' as 'input'|'output', number: '', total_value: '', recipient_name: '', recipient_document: '', notes: '', items_json: '[]' });
 
   const fetchData = useCallback(async () => {
@@ -70,22 +73,29 @@ export default function InvoiceManager() {
     finally { setSaving(false); }
   };
 
-  const handleTransmit = async (id: number) => {
-    if (!confirm('Iniciar transmissão para SEFAZ?')) return;
-    try {
-      await api.post(`/api/financial/invoices/${id}/transmit`);
-      toast.success('Transmissão concluída com sucesso!');
-      fetchData();
-    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro crítico na transmissão'); }
+  const openConfirm = (id: number, action: 'transmit' | 'cancel') => {
+    setConfirmId(id);
+    setConfirmAction(action);
+    setConfirmOpen(true);
   };
 
-  const handleCancel = async (id: number) => {
-    if (!confirm('Solicitar cancelamento desta NF-e?')) return;
+  const handleConfirmAction = async () => {
+    if (!confirmId || !confirmAction) return;
     try {
-      await api.post(`/api/financial/invoices/${id}/cancel`);
-      toast.success('Nota cancelada no repositório fiscal.');
+      if (confirmAction === 'transmit') {
+        await api.post(`/api/financial/invoices/${confirmId}/transmit`);
+        toast.success('Transmissão concluída com sucesso!');
+      } else {
+        await api.post(`/api/financial/invoices/${confirmId}/cancel`);
+        toast.success('Nota cancelada no repositório fiscal.');
+      }
       fetchData();
-    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro ao processar cancelamento'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || 'Erro na operação'); }
+    finally {
+      setConfirmOpen(false);
+      setConfirmId(null);
+      setConfirmAction(null);
+    }
   };
 
   return (
@@ -181,12 +191,12 @@ export default function InvoiceManager() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {inv.status === 'draft' && canTransmit && (
-                          <button onClick={() => handleTransmit(inv.id)} className="btn btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5">
+                          <button onClick={() => openConfirm(inv.id, 'transmit')} className="btn btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5">
                             <Send className="w-3.5 h-3.5" /> Transmitir
                           </button>
                         )}
                         {['sent','authorized'].includes(inv.status) && canCancel && (
-                          <button onClick={() => handleCancel(inv.id)} className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors" title="Cancelar Nota">
+                          <button onClick={() => openConfirm(inv.id, 'cancel')} className="p-2 text-danger hover:bg-danger/10 rounded-lg transition-colors" title="Cancelar Nota">
                             <XCircle className="w-4 h-4" />
                           </button>
                         )}
@@ -261,6 +271,17 @@ export default function InvoiceManager() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={confirmAction === 'transmit' ? 'Transmitir NF-e' : 'Cancelar NF-e'}
+        message={confirmAction === 'transmit' ? 'Iniciar transmissão para SEFAZ?' : 'Solicitar cancelamento desta NF-e?'}
+        confirmText={confirmAction === 'transmit' ? 'Transmitir' : 'Cancelar'}
+        cancelText="Cancelar"
+        variant={confirmAction === 'cancel' ? 'danger' : 'warning'}
+      />
     </div>
   );
 }

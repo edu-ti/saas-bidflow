@@ -11,6 +11,7 @@ use App\Models\Organization;
 use App\Services\ContractManagerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class ContractController extends Controller
 {
@@ -23,7 +24,8 @@ class ContractController extends Controller
 
     public function index(Request $request)
     {
-        $query = Contract::with(['template', 'contractable', 'approvals', 'addendums']);
+        $query = Contract::with(['template', 'contractable', 'approvals', 'addendums'])
+            ->where('company_id', Auth::user()->company_id);
 
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
@@ -75,6 +77,7 @@ class ContractController extends Controller
             'renewal_type' => 'nullable|string|in:manual,automatic',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $user = $request->user();
 
         if (Gate::denies('create-contract', Contract::class)) {
@@ -116,14 +119,14 @@ class ContractController extends Controller
             'approvedBy',
             'receivables',
             'payables',
-        ])->findOrFail($id);
+        ])->where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         return response()->json($contract);
     }
 
     public function update(Request $request, $id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         if (!$contract->canBeEdited()) {
             return response()->json([
@@ -175,7 +178,7 @@ class ContractController extends Controller
 
     public function destroy($id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         if ($contract->status !== 'draft') {
             return response()->json([
@@ -190,7 +193,7 @@ class ContractController extends Controller
 
     public function changeStatus(Request $request, $id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'status' => 'required|string|in:draft,under_review,approved,sent_for_signature,active,finished,cancelled',
@@ -216,7 +219,7 @@ class ContractController extends Controller
 
     public function requestApproval(Request $request, $id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'role' => 'required|string|in:juridico,financeiro,diretor,gestor',
@@ -240,7 +243,7 @@ class ContractController extends Controller
 
     public function processApproval(Request $request, $approvalId)
     {
-        $approval = ContractApproval::findOrFail($approvalId);
+        $approval = ContractApproval::where('company_id', Auth::user()->company_id)->findOrFail($approvalId);
 
         $validated = $request->validate([
             'status' => 'required|string|in:approved,rejected',
@@ -262,7 +265,7 @@ class ContractController extends Controller
 
     public function addAddendum(Request $request, $id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -307,11 +310,12 @@ class ContractController extends Controller
 
     protected function resolveContractable(string $type, int $id)
     {
+        $companyId = Auth::user()->company_id;
         return match ($type) {
-            'individual_client' => IndividualClient::find($id),
-            'company_client' => CompanyClient::find($id),
-            'supplier' => Supplier::find($id),
-            'organization' => Organization::find($id),
+            'individual_client' => IndividualClient::where('company_id', $companyId)->find($id),
+            'company_client' => CompanyClient::where('company_id', $companyId)->find($id),
+            'supplier' => Supplier::where('company_id', $companyId)->find($id),
+            'organization' => Organization::where('company_id', $companyId)->find($id),
             default => null,
         };
     }

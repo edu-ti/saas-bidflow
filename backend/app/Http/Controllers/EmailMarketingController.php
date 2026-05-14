@@ -87,14 +87,14 @@ class EmailMarketingController extends Controller
     {
         $campaign = EmailCampaign::with(['recipients' => function ($q) {
             $q->limit(100);
-        }])->findOrFail($id);
+        }])->where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         return response()->json($campaign);
     }
 
     public function update(Request $request, $id)
     {
-        $campaign = EmailCampaign::findOrFail($id);
+        $campaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         if ($campaign->status !== 'draft') {
             return response()->json([
@@ -120,7 +120,7 @@ class EmailMarketingController extends Controller
 
     public function destroy($id)
     {
-        $campaign = EmailCampaign::findOrFail($id);
+        $campaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         if ($campaign->status === 'sending') {
             return response()->json([
@@ -135,7 +135,7 @@ class EmailMarketingController extends Controller
 
     public function send(Request $request, $id)
     {
-        $campaign = EmailCampaign::findOrFail($id);
+        $campaign = EmailCampaign::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         if ($campaign->status !== 'draft' && $campaign->status !== 'scheduled') {
             return response()->json([

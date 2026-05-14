@@ -185,6 +185,7 @@ const MODULES: { id: string; label: string; icon: any; pages: PermissionNode[] }
     pages: [
       { id: 'campaigns', label: 'Marketing/Campanhas' },
       { id: 'email-marketing', label: 'E-mail Marketing' },
+      { id: 'tasks', label: 'Tarefas' },
       { id: 'chatbot', label: 'Construtor de Chatbots' },
       { id: 'support-center', label: 'Central de Atendimento' },
       {

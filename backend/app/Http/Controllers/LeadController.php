@@ -6,6 +6,7 @@ use App\Models\Lead;
 use Illuminate\Http\Request;
 use App\Http\Resources\LeadResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class LeadController extends Controller
 {
@@ -14,7 +15,7 @@ class LeadController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Lead::class);
-        $leads = Lead::latest()->get();
+        $leads = Lead::latest()->where('company_id', Auth::user()->company_id)->get();
         return LeadResource::collection($leads);
     }
 
@@ -30,18 +31,21 @@ class LeadController extends Controller
             'temperature' => 'nullable|in:Frio,Morno,Quente',
         ]);
 
+        $validated['company_id'] = Auth::user()->company_id;
         $lead = Lead::create($validated);
         return new LeadResource($lead);
     }
 
-    public function show(Lead $lead)
+    public function show($id)
     {
+        $lead = Lead::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('view', $lead);
         return new LeadResource($lead);
     }
 
-    public function update(Request $request, Lead $lead)
+    public function update(Request $request, $id)
     {
+        $lead = Lead::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('update', $lead);
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -56,8 +60,9 @@ class LeadController extends Controller
         return new LeadResource($lead);
     }
 
-    public function destroy(Lead $lead)
+    public function destroy($id)
     {
+        $lead = Lead::where('company_id', Auth::user()->company_id)->findOrFail($id);
         $this->authorize('delete', $lead);
         $lead->delete();
         return response()->noContent();

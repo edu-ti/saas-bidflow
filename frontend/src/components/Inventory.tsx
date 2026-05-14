@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/axios';
 import { Select } from './ui/Select';
+import { ConfirmDialog } from './ui/Modal';
 import toast from 'react-hot-toast';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -109,6 +110,8 @@ export default function Inventory() {
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsModalType, setSettingsModalType] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
  const [settingsFormData, setSettingsFormData] = useState({
  name: '',
  code: '',
@@ -284,19 +287,26 @@ export default function Inventory() {
  }
  };
 
- const handleDelete = async (id: number) => {
- if (!confirm('Confirmar descarte definitivo deste ativo de estoque?')) return;
- 
- try {
- await api.delete(`/api/inventory/products/${id}`);
- toast.success('Ativo removido do inventário.');
- fetchProducts();
- fetchDashboard();
- } catch (err) {
- console.error(err);
- toast.error('Erro ao remover ativo');
- }
- };
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/api/inventory/products/${deleteId}`);
+      toast.success('Ativo removido do inventário.');
+      fetchProducts();
+      fetchDashboard();
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao remover ativo');
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
+  };
 
  const calculatePrice = (cost: number, markup: number) => {
  return cost * (1 + markup / 100);
@@ -496,9 +506,9 @@ export default function Inventory() {
               {canEdit && (
               <button onClick={() => handleOpenModal(product)} className="p-3 bg-bg-secondary/40 border border-border rounded-xl text-text-muted hover:text-primary transition-all " title="Refinar"><Edit2 size={18} /></button>
               )}
-              {canDelete && (
-              <button onClick={() => handleDelete(product.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
-              )}
+                              {canDelete && (
+                              <button onClick={() => openDeleteConfirm(product.id)} className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/60 hover:text-red-500 transition-all " title="Arquivar"><Trash2 size={18} /></button>
+                              )}
               </div>
  </td>
  </tr>
@@ -854,6 +864,16 @@ export default function Inventory() {
  </div>
  </div>
  )}
- </div>
- );
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Ativo"
+        message="Confirmar descarte definitivo deste ativo de estoque?"
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+  </div>
+  );
 }
