@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Company;
+use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
     {
         \App\Models\BankAccount::observe(\App\Observers\BankAccountObserver::class);
         \App\Models\User::observe(\App\Observers\UserObserver::class);
+        Company::observe(\App\Observers\CompanyObserver::class);
+        Plan::observe(\App\Observers\PlanObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
