@@ -15,11 +15,15 @@ use App\Models\InventoryMovementCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class InventoryController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request)
     {
+        $this->authorize('viewAny', InventoryProduct::class);
+
         $query = InventoryProduct::with(['brand', 'category', 'unit', 'status', 'depot'])
             ->where('company_id', Auth::user()->company_id);
 
@@ -51,6 +55,8 @@ class InventoryController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', InventoryProduct::class);
+
         $validated = $request->validate([
             'product_id' => 'nullable|exists:products,id',
             'sku' => 'nullable|string|max:50',
@@ -94,12 +100,15 @@ class InventoryController extends Controller
             'brand', 'category', 'unit', 'size', 'status', 'depot', 'product'
         ])->where('company_id', Auth::user()->company_id)->findOrFail($id);
 
+        $this->authorize('view', $product);
+
         return response()->json($product);
     }
 
     public function update(Request $request, $id)
     {
         $product = InventoryProduct::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $product);
 
         $validated = $request->validate([
             'product_id' => 'nullable|exists:products,id',
@@ -137,6 +146,7 @@ class InventoryController extends Controller
     public function destroy($id)
     {
         $product = InventoryProduct::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('delete', $product);
         $product->delete();
 
         return response()->json(['message' => 'Produto excluído']);
@@ -266,6 +276,8 @@ class InventoryController extends Controller
 
     public function dashboard(Request $request)
     {
+        $this->authorize('viewAny', InventoryProduct::class);
+
         $companyId = $request->user()->company_id;
 
         $totalProducts = InventoryProduct::where('company_id', $companyId)->count();

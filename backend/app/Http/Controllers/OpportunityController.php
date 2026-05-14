@@ -8,9 +8,12 @@ use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\OpportunityAIService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class OpportunityController extends Controller
 {
+    use AuthorizesRequests;
+
     protected $aiService;
 
     public function __construct(OpportunityAIService $aiService)
@@ -31,6 +34,8 @@ class OpportunityController extends Controller
         if (! $opportunity) {
             return response()->json(['message' => 'Opportunity not found'], 404);
         }
+
+        $this->authorize('update', $opportunity);
 
         $oldStageId = $opportunity->funnel_stage_id;
         $success = $opportunity->move_to_stage($validated['funnel_stage_id']);
@@ -84,15 +89,13 @@ class OpportunityController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Opportunity::class);
+
         $query = Opportunity::query();
-        
-        // Basic filtering based on user role handled by Policy natively?
-        // Actually, Policy only handles specific models, so if user is Sale, scope query here
+
         $user = $request->user();
-        // Filter by company - all users in same company see all opportunities
         $query->where('company_id', $user->company_id);
-        
-        // Basically no-op for mock
+
         return response()->json(['data' => $query->get()]);
     }
 
@@ -102,6 +105,8 @@ class OpportunityController extends Controller
         if (! $opportunity) {
             return response()->json(['message' => 'Not found'], 404);
         }
+
+        $this->authorize('update', $opportunity);
 
         if ($request->hasFile('file')) {
             $path = $request->file('file')->store('attachments', 'public');
@@ -117,6 +122,8 @@ class OpportunityController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Opportunity::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'organization_id' => 'nullable|integer|exists:organizations,id',
@@ -188,6 +195,7 @@ class OpportunityController extends Controller
         }
 
         \App\Models\AuditLog::create([
+            'company_id' => $user->company_id,
             'user_id' => $user->id,
             'auditable_type' => Opportunity::class,
             'auditable_id' => $opportunity->id,
@@ -205,12 +213,14 @@ class OpportunityController extends Controller
     public function show($id)
     {
         $opportunity = Opportunity::with('items')->where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('view', $opportunity);
         return response()->json($opportunity);
     }
 
     public function update(Request $request, $id)
     {
         $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $opportunity);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -280,11 +290,10 @@ class OpportunityController extends Controller
     public function destroy($id)
     {
         $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('delete', $opportunity);
         $opportunity->delete();
         return response()->json(['message' => 'Opportunity deleted successfully']);
     }
-
-    // AI Endpoints migrated from OpportunityAiController
 
     public function updateInsights(Request $request, $id)
     {
@@ -293,6 +302,7 @@ class OpportunityController extends Controller
         ]);
 
         $opportunity = Opportunity::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $opportunity);
 
         $this->aiService->updateInsights($opportunity, $validated['insights'], Auth::id());
 
@@ -346,6 +356,8 @@ class OpportunityController extends Controller
      */
     public function qualify(Request $request, $id)
     {
+        $this->authorize('create', Opportunity::class);
+
         $alert = \App\Models\BiddingAlert::where('company_id', Auth::user()->company_id)->findOrFail($id);
 
         $rawData = $alert->raw_data;

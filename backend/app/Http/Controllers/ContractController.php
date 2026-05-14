@@ -8,13 +8,16 @@ use App\Models\IndividualClient;
 use App\Models\CompanyClient;
 use App\Models\Supplier;
 use App\Models\Organization;
+use App\Models\ContractApproval;
 use App\Services\ContractManagerService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ContractController extends Controller
 {
+    use AuthorizesRequests;
+
     protected ContractManagerService $contractService;
 
     public function __construct(ContractManagerService $contractService)
@@ -24,6 +27,8 @@ class ContractController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Contract::class);
+
         $query = Contract::with(['template', 'contractable', 'approvals', 'addendums'])
             ->where('company_id', Auth::user()->company_id);
 
@@ -78,11 +83,8 @@ class ContractController extends Controller
         ]);
 
         $validated['company_id'] = Auth::user()->company_id;
-        $user = $request->user();
 
-        if (Gate::denies('create-contract', Contract::class)) {
-            return response()->json(['message' => 'Unauthorized - Permissão negada'], 403);
-        }
+        $this->authorize('create', Contract::class);
 
         $contractable = $this->resolveContractable(
             $validated['contractable_type'],
@@ -96,7 +98,7 @@ class ContractController extends Controller
         $template = ContractTemplate::findOrFail($validated['contract_template_id']);
 
         $contract = $this->contractService->createContract(
-            $user->company_id,
+            Auth::user()->company_id,
             $template,
             $contractable,
             $validated
@@ -121,12 +123,15 @@ class ContractController extends Controller
             'payables',
         ])->where('company_id', Auth::user()->company_id)->findOrFail($id);
 
+        $this->authorize('view', $contract);
+
         return response()->json($contract);
     }
 
     public function update(Request $request, $id)
     {
         $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $contract);
 
         if (!$contract->canBeEdited()) {
             return response()->json([
@@ -179,6 +184,7 @@ class ContractController extends Controller
     public function destroy($id)
     {
         $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('delete', $contract);
 
         if ($contract->status !== 'draft') {
             return response()->json([
@@ -194,6 +200,7 @@ class ContractController extends Controller
     public function changeStatus(Request $request, $id)
     {
         $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $contract);
 
         $validated = $request->validate([
             'status' => 'required|string|in:draft,under_review,approved,sent_for_signature,active,finished,cancelled',
@@ -220,6 +227,7 @@ class ContractController extends Controller
     public function requestApproval(Request $request, $id)
     {
         $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $contract);
 
         $validated = $request->validate([
             'role' => 'required|string|in:juridico,financeiro,diretor,gestor',
@@ -266,6 +274,7 @@ class ContractController extends Controller
     public function addAddendum(Request $request, $id)
     {
         $contract = Contract::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $contract);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -290,6 +299,8 @@ class ContractController extends Controller
 
     public function getExpiring(Request $request)
     {
+        $this->authorize('viewAny', Contract::class);
+
         $days = $request->get('days', 30);
         $contracts = $this->contractService->getExpiringContracts(
             $request->user()->company_id,
@@ -301,6 +312,8 @@ class ContractController extends Controller
 
     public function getExpired(Request $request)
     {
+        $this->authorize('viewAny', Contract::class);
+
         $contracts = $this->contractService->getExpiredContracts(
             $request->user()->company_id
         );

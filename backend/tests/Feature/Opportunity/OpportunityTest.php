@@ -22,11 +22,11 @@ class OpportunityTest extends TestCase
     public function test_listar_oportunidades_retorna_apenas_as_do_tenant_atual(): void
     {
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->create(['company_id' => $company->id, 'is_admin' => true]);
 
         app()->instance('current_tenant_id', $company->id);
 
-        Opportunity::factory()->count(5)->create(['company_id' => $company->id]);
+        Opportunity::factory()->count(5)->create(['company_id' => $company->id, 'user_id' => $user->id]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/opportunities');
@@ -38,7 +38,7 @@ class OpportunityTest extends TestCase
     public function test_criar_oportunidade_com_dados_validos_retorna_201(): void
     {
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->create(['company_id' => $company->id, 'is_admin' => true]);
 
         app()->instance('current_tenant_id', $company->id);
 
@@ -52,7 +52,8 @@ class OpportunityTest extends TestCase
 
         $response->assertStatus(201);
         $response->assertJsonStructure([
-            'data' => ['id', 'title', 'type', 'value', 'company_id'],
+            'message',
+            'opportunity' => ['id', 'title', 'type', 'value', 'company_id'],
         ]);
     }
 

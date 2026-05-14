@@ -24,18 +24,20 @@ class TenantIsolationTest extends TestCase
         $companyA = Company::factory()->create(['subdomain' => 'companya']);
         $companyB = Company::factory()->create(['subdomain' => 'companyb']);
 
-        $userA = User::factory()->create(['company_id' => $companyA->id]);
-        $userB = User::factory()->create(['company_id' => $companyB->id]);
+        $userA = User::factory()->create(['company_id' => $companyA->id, 'is_admin' => true]);
+        $userB = User::factory()->create(['company_id' => $companyB->id, 'is_admin' => true]);
 
         app()->instance('current_tenant_id', $companyA->id);
 
         Opportunity::factory()->count(3)->create([
             'company_id' => $companyA->id,
+            'user_id' => $userA->id,
             'title' => 'Oportunidade Tenant A',
         ]);
 
         Opportunity::factory()->count(2)->create([
             'company_id' => $companyB->id,
+            'user_id' => $userB->id,
             'title' => 'Oportunidade Tenant B',
         ]);
 
@@ -50,7 +52,7 @@ class TenantIsolationTest extends TestCase
     public function test_company_id_e_injetado_ao_criar_recurso(): void
     {
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->create(['company_id' => $company->id, 'is_admin' => true]);
 
         app()->instance('current_tenant_id', $company->id);
 
@@ -73,8 +75,11 @@ class TenantIsolationTest extends TestCase
         $companyA = Company::factory()->create();
         $companyB = Company::factory()->create();
 
-        Opportunity::factory()->count(3)->create(['company_id' => $companyA->id]);
-        Opportunity::factory()->count(2)->create(['company_id' => $companyB->id]);
+        $userA = User::factory()->create(['company_id' => $companyA->id]);
+        $userB = User::factory()->create(['company_id' => $companyB->id]);
+
+        Opportunity::factory()->count(3)->create(['company_id' => $companyA->id, 'user_id' => $userA->id]);
+        Opportunity::factory()->count(2)->create(['company_id' => $companyB->id, 'user_id' => $userB->id]);
 
         $opportunitiesWithoutTenant = Opportunity::withoutTenant()->get();
 

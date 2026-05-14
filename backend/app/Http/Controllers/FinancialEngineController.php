@@ -11,9 +11,11 @@ use App\Models\TaxConfiguration;
 use App\Services\FinancialEngineService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FinancialEngineController extends Controller
 {
+    use AuthorizesRequests;
     public function __construct(private FinancialEngineService $service) {}
 
     // ── CASH FLOW DASHBOARD ─────────────────────
@@ -63,6 +65,8 @@ class FinancialEngineController extends Controller
     // ── INVOICES CRUD ───────────────────────────
     public function invoicesIndex(Request $request)
     {
+        $this->authorize('viewAny', Invoice::class);
+
         $query = Invoice::where('company_id', Auth::user()->company_id)->latest();
         if ($request->filled('type'))   $query->where('type', $request->type);
         if ($request->filled('status')) $query->where('status', $request->status);
@@ -76,6 +80,8 @@ class FinancialEngineController extends Controller
 
     public function invoicesStore(Request $request)
     {
+        $this->authorize('create', Invoice::class);
+
         $validated = $request->validate([
             'type'               => 'required|in:input,output',
             'number'             => 'nullable|string',
@@ -97,11 +103,14 @@ class FinancialEngineController extends Controller
     public function invoicesShow($id)
     {
         $invoice = Invoice::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('view', $invoice);
         return response()->json(['data' => $invoice]);
     }
 
     public function invoicesTransmit(Invoice $invoice)
     {
+        $this->authorize('update', $invoice);
+
         if ($invoice->status !== 'draft') {
             return response()->json(['message' => 'Apenas notas em rascunho podem ser transmitidas.'], 422);
         }
@@ -118,6 +127,8 @@ class FinancialEngineController extends Controller
 
     public function invoicesCancel(Invoice $invoice)
     {
+        $this->authorize('update', $invoice);
+
         if (!in_array($invoice->status, ['sent', 'authorized'])) {
             return response()->json(['message' => 'Status não permite cancelamento.'], 422);
         }

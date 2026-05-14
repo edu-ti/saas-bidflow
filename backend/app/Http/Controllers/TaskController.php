@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TaskController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Task::class);
+
         $query = Task::where('company_id', $request->user()->company_id);
 
         if (!$request->user()->isAdmin()) {
@@ -43,6 +47,8 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Task::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -69,12 +75,14 @@ class TaskController extends Controller
     public function show($id)
     {
         $task = Task::with(['subtasks', 'user'])->where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('view', $task);
         return response()->json($task);
     }
 
     public function update(Request $request, $id)
     {
         $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $task);
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -96,6 +104,7 @@ class TaskController extends Controller
     public function destroy($id)
     {
         $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('delete', $task);
         $task->delete();
 
         return response()->json(['message' => 'Tarefa excluída']);
@@ -104,6 +113,7 @@ class TaskController extends Controller
     public function toggleStatus(Request $request, $id)
     {
         $task = Task::where('company_id', Auth::user()->company_id)->findOrFail($id);
+        $this->authorize('update', $task);
 
         $newStatus = $task->status === 'pending' ? 'completed' : 'pending';
         $task->update(['status' => $newStatus]);
@@ -116,6 +126,8 @@ class TaskController extends Controller
 
     public function stats(Request $request)
     {
+        $this->authorize('viewAny', Task::class);
+
         $companyId = $request->user()->company_id;
         $userId = $request->user()->id;
         $userName = $request->user()->name;

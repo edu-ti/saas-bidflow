@@ -5,41 +5,33 @@ namespace App\Policies;
 use App\Models\Opportunity;
 use App\Models\User;
 
-class OpportunityPolicy
+class OpportunityPolicy extends BasePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return true; // Filtered by TargetScope automatically
+        return $this->checkPermission($user, 'crm', 'opportunities', 'view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Opportunity $opportunity): bool
     {
-        return $user->company_id === $opportunity->company_id;
+        return $this->checkPermission($user, 'crm', 'opportunities', 'view')
+            && $opportunity->company_id === $user->company_id;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
+    public function create(User $user): bool
+    {
+        return $this->checkPermission($user, 'crm', 'opportunities', 'create');
+    }
+
     public function update(User $user, Opportunity $opportunity): bool
     {
-        return $user->company_id === $opportunity->company_id;
+        return $this->checkPermission($user, 'crm', 'opportunities', 'edit')
+            && $opportunity->company_id === $user->company_id;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Opportunity $opportunity): bool
     {
-        if ($user->company_id !== $opportunity->company_id) {
-            return false;
-        }
-
-        return $user->isAdmin() || in_array($user->role?->name, ['Admin', 'Manager']);
+        return $this->checkPermission($user, 'crm', 'opportunities', 'delete')
+            && $opportunity->company_id === $user->company_id;
     }
 }

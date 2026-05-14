@@ -11,14 +11,16 @@ use App\Models\Attachment;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProposalController extends Controller
 {
-    /**
-     * Store a newly created proposal and its items.
-     */
+    use AuthorizesRequests;
+
     public function store(Request $request)
     {
+        $this->authorize('create', Proposal::class);
+
         $validated = $request->validate([
             'opportunity_id' => 'nullable|exists:opportunities,id',
             'status' => 'nullable|in:Draft,Sent,Accepted,Rejected',
@@ -149,12 +151,7 @@ class ProposalController extends Controller
             return response()->json(['message' => 'Proposal not found'], 404);
         }
 
-        $opportunity = $proposal->opportunity;
-
-        // Ensure user has access
-        if ($proposal->company_id !== auth()->user()->company_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $proposal);
 
         $companyInfo = [
             'name' => $proposal->company->name ?? 'Empresa',

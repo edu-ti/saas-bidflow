@@ -22,19 +22,17 @@ class OpportunityFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => null, // Will be set by the test
+            'company_id' => null,
             'title' => fake()->sentence(3),
-            'type' => fake()->randomElement(['Pregão Eletrônico', 'Concorrência', 'Dispensa', 'Inexigibilidade']),
-            'user_id' => null, // Will be set by the test
+            'type' => 'Sale',
+            'user_id' => null,
             'organization_id' => null,
-            'description' => fake()->paragraph(),
-            'estimated_value' => fake()->randomFloat(2, 1000, 1000000),
-            'status' => fake()->randomElement(['captured', 'analysis', 'proposal', 'won', 'lost']),
-            'funnel_stage_id' => fake()->numberBetween(1, 5),
+            'value' => fake()->randomFloat(2, 1000, 1000000),
+            'funnel_stage_id' => null,
             'notes' => fake()->optional()->paragraph(),
             'bidding_metadata' => [
                 'risco_edital' => fake()->randomElement(['Baixo', 'Médio', 'Alto']),
-                'data_limite_impugnacao' => fake()->optional()->dateTimeBetween('now', '+30 days')->format('d/m/Y'),
+                'data_limite_impugnacao' => fake()->dateTimeBetween('now', '+30 days')->format('d/m/Y'),
             ],
         ];
     }

@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class SupplierController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
+        $this->authorize('viewAny', Supplier::class);
+
         $companyId = Auth::user()->company_id;
         $suppliers = Supplier::where('company_id', $companyId)->get();
         return response()->json(['data' => $suppliers]);
@@ -17,6 +21,8 @@ class SupplierController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Supplier::class);
+
         $companyId = Auth::user()->company_id;
         
         $supplier = Supplier::create([
@@ -40,6 +46,7 @@ class SupplierController extends Controller
     {
         $companyId = Auth::user()->company_id;
         $supplier = Supplier::where('company_id', $companyId)->findOrFail($id);
+        $this->authorize('update', $supplier);
 
         $supplier->update([
             'corporate_name' => $request->corporate_name,
@@ -61,6 +68,7 @@ class SupplierController extends Controller
     {
         $companyId = Auth::user()->company_id;
         $supplier = Supplier::where('company_id', $companyId)->findOrFail($id);
+        $this->authorize('delete', $supplier);
         $supplier->delete();
 
         return response()->json(['message' => 'Fornecedor removido com sucesso']);

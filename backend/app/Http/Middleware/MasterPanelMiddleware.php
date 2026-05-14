@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class MasterPanelMiddleware
@@ -20,12 +21,7 @@ class MasterPanelMiddleware
             abort(403, 'Acesso restrito ao painel master.');
         }
 
-        $user = $request->user();
-
-        $hasMasterRole = $user->role && in_array($user->role->name, ['master', 'super_admin']);
-        $hasSuperAdmin = $user->is_superadmin;
-
-        if (!$hasMasterRole && !$hasSuperAdmin) {
+        if (!Gate::allows('access-master-panel')) {
             abort(403);
         }
 

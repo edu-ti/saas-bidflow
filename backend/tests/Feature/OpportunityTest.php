@@ -31,6 +31,7 @@ class OpportunityTest extends TestCase
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
             'role' => 'Standard',
+            'is_admin' => true,
         ]);
     }
 
@@ -77,7 +78,7 @@ class OpportunityTest extends TestCase
                 ]);
 
         $response->assertStatus(201)
-            ->assertJson(['title' => 'New Opportunity']);
+            ->assertJson(['opportunity' => ['title' => 'New Opportunity']]);
 
         $this->assertDatabaseHas('opportunities', [
             'title' => 'New Opportunity',
@@ -128,7 +129,7 @@ class OpportunityTest extends TestCase
                 ]);
 
         $response->assertStatus(200)
-            ->assertJson(['title' => 'New Title']);
+            ->assertJson(['opportunity' => ['title' => 'New Title']]);
 
         $this->assertDatabaseHas('opportunities', [
             'id' => $opportunity->id,
@@ -170,6 +171,7 @@ class OpportunityTest extends TestCase
 
         $otherOpportunity = Opportunity::create([
             'company_id' => $otherCompany->id,
+            'user_id' => $this->user->id,
             'title' => 'Other Company Opp',
             'type' => 'Pregão Eletrônico',
             'estimated_value' => 40000.00,

@@ -21,10 +21,9 @@ class MasterPanelAccessTest extends TestCase
     public function test_requisicao_ao_painel_master_com_dominio_correto_retorna_200(): void
     {
         $company = Company::factory()->create(['subdomain' => 'test']);
-        $role = Role::factory()->create(['name' => 'master']);
         $user = User::factory()->create([
             'company_id' => $company->id,
-            'role_id' => $role->id,
+            'is_superadmin' => true,
         ]);
 
         $this->actingAs($user, 'sanctum');
@@ -37,10 +36,9 @@ class MasterPanelAccessTest extends TestCase
     public function test_requisicao_ao_painel_master_com_dominio_errado_retorna_403(): void
     {
         $company = Company::factory()->create(['subdomain' => 'test']);
-        $role = Role::factory()->create(['name' => 'master']);
         $user = User::factory()->create([
             'company_id' => $company->id,
-            'role_id' => $role->id,
+            'is_superadmin' => true,
         ]);
 
         $this->actingAs($user, 'sanctum');
@@ -53,10 +51,9 @@ class MasterPanelAccessTest extends TestCase
     public function test_usuario_sem_role_master_recebe_403_no_dominio_correto(): void
     {
         $company = Company::factory()->create(['subdomain' => 'test']);
-        $role = Role::factory()->create(['name' => 'user']);
         $user = User::factory()->create([
             'company_id' => $company->id,
-            'role_id' => $role->id,
+            'is_superadmin' => false,
         ]);
 
         $this->actingAs($user, 'sanctum');
@@ -69,11 +66,9 @@ class MasterPanelAccessTest extends TestCase
     public function test_usuario_com_role_master_no_dominio_correto_recebe_200(): void
     {
         $company = Company::factory()->create(['subdomain' => 'test']);
-        $role = Role::factory()->create(['name' => 'master']);
         $user = User::factory()->create([
             'company_id' => $company->id,
-            'role_id' => $role->id,
-            'is_superadmin' => false,
+            'is_superadmin' => true,
         ]);
 
         $this->actingAs($user, 'sanctum');
